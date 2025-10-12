@@ -515,61 +515,56 @@ case 'menu': {
 
     await socket.sendMessage(sender, { 
         react: { 
-            text: "👍",
+            text: "💫",
             key: msg.key 
         } 
     });
 
-    const title = 'ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ᴍᴇɴᴜ❤*';
+    const title = `✨ ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ✨`;
+    const footer = `❤️ ᴘᴏᴘᴋɪᴅ ᴛᴇᴄʜ | ꜱɪɴᴄᴇ 2024`;
 
-const text = 
-`┏━━━━━━━━━━━━━━━━━━┓
-┃       『 ꜱᴛᴀᴛᴜꜱ 』       
-┗━━━━━━━━━━━━━━━━━━┛
-   ⦁ *ʙᴏᴛ ɴᴀᴍᴇ*: ᴘᴏᴘᴋɪᴅ ᴍɪɴɪʙᴏᴛ
-   ⦁ *ʙᴏᴛ ᴏᴡɴᴇʀ*: ᴘᴏᴘᴋɪᴅ
-   ⦁ *ᴠᴇʀꜱɪᴏɴ*: ᴠ1 ʙᴇᴛᴀ
-   ⦁ *ᴘʟᴀᴛꜰᴏᴇᴍ*: ᴘᴏᴘᴋɪᴅ ᴘʀɪᴠᴀᴛᴇ ᴠᴘs | ᴜʙᴜɴᴛᴜ 22.04
-   ⦁ *ᴜᴘᴛɪᴍᴇ*: ${hours}h ${minutes}m ${seconds}s
-┏━━━━━━━━━━━━━━━━━━┓
-┃       『ʙʏ ᴘᴏᴘᴋɪᴅ 』       
-┗━━━━━━━━━━━━━━━━━━┛`;
+    const menuText = `
+╭━━━〔 *${title}* 〕━━━╮
+│ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* ᴘᴏᴘᴋɪᴅ ᴍɪɴɪʙᴏᴛ
+│ 👑 *ᴏᴡɴᴇʀ:* ᴘᴏᴘᴋɪᴅ
+│ ⚙️ *ᴠᴇʀꜱɪᴏɴ:* ᴠ1 ʙᴇᴛᴀ
+│ 💻 *ᴘʟᴀᴛꜰᴏʀᴍ:* ᴘᴏᴘᴋɪᴅ VPS (Ubuntu 22.04)
+│ 🕐 *ᴜᴘᴛɪᴍᴇ:* ${hours}h ${minutes}m ${seconds}s
+╰━━━━━━━━━━━━━━━━━━━━━╯
 
+🌐 *MAIN COMMANDS*
+┏━━━━━━━━━━━━┓
+┃ ⚡ .alive → show bot info
+┃ ⚙️ .system → system details
+┃ 📶 .ping → check bot latency
+┗━━━━━━━━━━━━┛
 
-   const sections = [
-    {
-        title: "ᴍᴀɪɴ ᴄᴏᴍᴍᴀɴᴅꜱ",
-        rows: [
-            { title: "ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ", description: "show bot information", rowId: `${config.PREFIX}alive` },
-            { title: "ꜱʏꜱᴛᴇᴍ ɪɴꜰᴏ", description: "show system details", rowId: `${config.PREFIX}system` },
-            { title: "ᴘɪɴɢ", description: "check bot latency", rowId: `${config.PREFIX}ping` }
-        ]
-    },
-    {
-        title: "ᴍᴇᴅɪᴀ ᴅᴏᴡɴʟᴏᴀᴅ",
-        rows: [
-            { title: "ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴏɴɢ", description: "download audio from youtube", rowId: `${config.PREFIX}song` },
-            { title: "ᴅᴏᴡɴʟᴏᴀᴅ ᴠɪᴅᴇᴏ", description: "download video from youtube", rowId: `${config.PREFIX}video` }
-        ]
-    },
-    {
-        title: "ᴏᴛʜᴇʀ ᴄᴏᴍᴍᴀɴᴅꜱ",
-        rows: [
-            { title: "ᴏᴡɴᴇʀ ɪɴꜰᴏ", description: "contact bot owner", rowId: `${config.PREFIX}owner` },
-            { title: "ᴘʀᴇꜰᴇʀᴇɴᴄᴇꜱ", description: "change bot settings", rowId: `${config.PREFIX}preferences` },
-            { title: "ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", description: "get our channel link", rowId: `${config.PREFIX}channel` }
-        ]
-    }
-];
+🎵 *MEDIA DOWNLOADS*
+┏━━━━━━━━━━━━┓
+┃ 🎧 .song → download audio
+┃ 🎬 .video → download video
+┗━━━━━━━━━━━━┛
+
+👤 *OTHER COMMANDS*
+┏━━━━━━━━━━━━┓
+┃ 🧑‍💻 .owner → contact owner
+┃ 🧩 .preferences → bot settings
+┃ 📢 .channel → join channel
+┗━━━━━━━━━━━━┛
+
+🪄 _Type any command with the prefix_
+*${config.PREFIX}commandname*  
+Example: *${config.PREFIX}song Alan Walker Faded*
+
+${footer}
+`;
 
     await socket.sendMessage(sender, {
         image: { url: config.BUTTON_IMAGES.MENU },
-        text: text,
-        footer: config.BOT_FOOTER,
-        title: title,
-        buttonText: "ꜱᴇʟᴇᴄᴛ ᴏᴘᴛɪᴏɴ ",
-        sections: sections
+        caption: menuText,
+        footer: footer
     });
+
     break;
 }
 //=======================================
