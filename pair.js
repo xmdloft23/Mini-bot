@@ -666,93 +666,88 @@ ${footer}
                 }
 
                 // SONG DOWNLOAD COMMAND WITH BUTTON
-                case 'song': {
-                    try {
-                        const text = (msg.message.conversation || msg.message.extendedTextMessage.text || '').trim();
-                        const q = text.split(" ").slice(1).join(" ").trim();
-                        if (!q) {
-                            await socket.sendMessage(sender, { 
-                                text: '*🚫 ᴘʟᴇᴀꜱᴇ ᴇɴᴛᴇʀ ᴀ sᴏɴɢ ɴᴀᴍᴇ ᴛᴏ sᴇᴀʀᴄʜ.*',
-                                buttons: [
-                                    { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: 'ᴍᴇɴᴜ' }, type: 1 }
-                                ]
-                            });
-                            return;
-                        }
+                 case 'song': {
+    try {
+        const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
+        const q = text.split(" ").slice(1).join(" ").trim();
 
-                        const searchResults = await yts(q);
-                        if (!searchResults.videos.length) {
-                            await socket.sendMessage(sender, { 
-                                text: '*🚩 Result Not Found*',
-                                buttons: [
-                                    { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: 'ᴍᴇɴᴜ' }, type: 1 }
-                                ]
-                            });    
-                            return;
-                        }
+        if (!q) {
+            await socket.sendMessage(sender, { 
+                text: `
+🚫 *Please enter a song name to search!*
 
-                        const video = searchResults.videos[0];
+Example:
+> ${config.PREFIX}song faded
+`
+            });
+            return;
+        }
 
-                        // API CALL
-                        const apiUrl = `${api}/download/ytmp3?url=${encodeURIComponent(video.url)}&apikey=${apikey}`;
-                        const response = await fetch(apiUrl);
-                        const data = await response.json();
+        await socket.sendMessage(sender, { text: `🔍 *Searching for:* _${q}_ ...` });
 
-                        if (!data.status || !data.data?.result) {
-                            await socket.sendMessage(sender, { 
-                                text: '*🚩 Download Error. Please try again later.*',
-                                buttons: [
-                                    { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: ' ᴍᴇɴᴜ' }, type: 1 }
-                                ]
-                            });
-                            return;
-                        }
+        // 🎧 Use DavidCyrilTech API
+        const apiUrl = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(q)}`;
+        const apiResponse = await fetch(apiUrl);
+        const data = await apiResponse.json();
 
-                        const { title, uploader, duration, quality, format, thumbnail, download } = data.data.result;
+        if (!data.status || !data.result?.url) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Song not found or failed to fetch data.*  
+Please try another song 💫`
+            });
+            return;
+        }
 
-                        const titleText = '*ᴀɴᴜᴡʜ ᴍᴅ ᴍɪɴɪ ꜱᴏɴɢ ᴅᴏᴡɴʟᴏᴀᴅ*';
-                        const content = `┏━━━━━━━━━━━━━━━━\n` +
-                            `┃📝 \`Title\` : ${video.title}\n` +
-                            `┃📈 \`Views\` : ${video.views}\n` +
-                            `┃🕛 \`Duration\` : ${video.timestamp}\n` +
-                            `┃🔗 \`URL\` : ${video.url}\n` +
-                            `┗━━━━━━━━━━━━━━━━`;
+        const { title, channel, duration, views, thumbnail, url } = data.result;
 
-                        const footer = config.BOT_FOOTER || '';
-                        const captionMessage = formatMessage(titleText, content, footer);
+        const infoMsg = `
+╭━━━━━ 🎧 *ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ* 🎧 ━━━╮
+│ 💽 *Title:* ${title}
+│ 📺 *Channel:* ${channel || 'Unknown'}
+│ ⏱️ *Duration:* ${duration || 'N/A'}
+│ 👁️ *Views:* ${views || 'N/A'}
+│ 🔗 *URL:* ${url}
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
-                        await socket.sendMessage(sender, {
-                            image: { url: config.BUTTON_IMAGES.SONG },
-                            caption: captionMessage,
-                            buttons: [
-                                { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: ' ᴍᴇɴᴜ' }, type: 1 },
-                                { buttonId: `${config.PREFIX}alive`, buttonText: { displayText: ' ʙᴏᴛ ɪɴғᴏ' }, type: 1 }
-                            ]
-                        });
+🎵 *Downloading your song...*  
+Please wait ⏳
+`;
 
-                        await socket.sendMessage(sender, {
-                            audio: { url: download },
-                            mimetype: 'audio/mpeg'
-                        });
+        await socket.sendMessage(sender, {
+            image: { url: thumbnail },
+            caption: infoMsg,
+            footer: config.BOT_FOOTER || '❤️ Powered by Popkid MiniBot'
+        });
 
-                        await socket.sendMessage(sender, {
-                            document: { url: download },
-                            mimetype: "audio/mpeg",
-                            fileName: `${video.title}.mp3`,
-                            caption: captionMessage
-                        });
+        // 🎶 Send audio
+        await socket.sendMessage(sender, {
+            audio: { url: data.result.url },
+            mimetype: 'audio/mpeg',
+            fileName: `${title}.mp3`
+        });
 
-                    } catch (err) {
-                        console.error(err);
-                        await socket.sendMessage(sender, { 
-                            text: '*❌ ɪɴᴛᴇʀɴᴀʟ ᴇʀʀᴏʀ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ.*',
-                            buttons: [
-                                { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: 'ᴍᴇɴᴜ' }, type: 1 }
-                            ]
-                        });
-                    }
-                    break;
-                }
+        await socket.sendMessage(sender, { 
+            text: `
+✅ *Download Complete!*  
+🎧 Now Playing: *${title}*
+
+Use *${config.PREFIX}menu* to explore more ✨
+`
+        });
+
+    } catch (err) {
+        console.error(err);
+        await socket.sendMessage(sender, { 
+            text: `
+❌ *Error fetching song.*  
+Please try again later 💔
+
+Use *${config.PREFIX}menu* to return to menu.
+`
+        });
+    }
+    break;
+                 }
                 
                 // NEWS COMMAND
                 case 'news': {
