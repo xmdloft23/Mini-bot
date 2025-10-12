@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ᴘᴏᴘᴋɪᴅꜱ ᴍᴅ ᴍɪɴɪ ᴠ2 ʙᴇᴛᴀ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <style>
+    /* ✨ Neon Animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+      20%, 40%, 60%, 80% { transform: translateX(2px); }
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.2; transform: scale(0.8); }
+    }
+
+    /* 🌌 Fonts & Glows */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #0b0014, #000);
+      background-size: cover;
+      overflow: hidden;
+    }
+
+    .neon-text {
+      text-shadow: 0 0 5px #fff,
+                   0 0 10px #fff,
+                   0 0 20px #00bfff,
+                   0 0 30px #00bfff,
+                   0 0 40px #00bfff;
+    }
+
+    .neon-border {
+      box-shadow: 0 0 10px #0073e6,
+                  0 0 20px #0073e6,
+                  inset 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .neon-button {
+      box-shadow: 0 0 10px #ff00de,
+                  0 0 20px #ff00de,
+                  0 0 30px #0073e6;
+    }
+
+    .neon-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #ff00de,
+                  0 0 40px #0073e6;
+    }
+
+    .shake-animation {
+      animation: shake 0.5s;
+    }
+
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #00d4ff, #ff00e6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Floating glow particles */
+    #stars-container div {
+      filter: drop-shadow(0 0 6px #fff);
+    }
+
+    /* Smooth transitions */
+    input, button {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Glowing box highlight */
+    .box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 1.5rem;
+      padding: 2px;
+      background: linear-gradient(90deg, #00f2ff, #ff00ff);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.5;
+      animation: twinkle 5s infinite;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-black overflow-hidden relative">
+  <!-- 🌟 Star Background -->
+  <div id="stars-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <!-- ✨ Main Section -->
+  <div class="container mx-auto px-4 relative z-10">
+    <div class="main">
+      <div class="box max-w-md mx-auto p-8 bg-black bg-opacity-60 rounded-3xl backdrop-blur-2xl border border-white border-opacity-20 shadow-2xl neon-border relative overflow-hidden">
+        <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl opacity-20 blur-xl"></div>
+
+        <div id="text" class="relative z-10">
+          <!-- 🧑 User Icon -->
+          <div class="flex justify-center mb-6">
+            <i class="fas fa-user text-6xl gradient-text animate-pulse"></i>
+          </div>
+
+          <h3 class="text-3xl font-extrabold text-center mb-4 gradient-text neon-text tracking-wider">
+            ʟɪɴᴋ ᴡɪᴛʜ ʏᴏᴜʀ ᴘʜᴏɴᴇ ɴᴜᴍʙᴇʀ
+          </h3>
+          <h4 class="text-blue-300 text-center mb-6 font-medium uppercase tracking-widest">
+            ᴘᴏᴘᴋɪᴅꜱ ᴍᴅ ᴍɪɴɪ ᴠ2 ʙᴇᴛᴀ
+          </h4>
+
+          <div class="relative flex items-center justify-center mb-8">
+            <div class="flex-grow border-t border-white border-opacity-20"></div>
+            <span class="mx-4 text-white text-opacity-50 text-xs tracking-widest">ꜱᴇᴄᴜʀᴇᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ</span>
+            <div class="flex-grow border-t border-white border-opacity-20"></div>
+          </div>
+
+          <!-- 📱 Input Box -->
+          <div class="input-container flex bg-white bg-opacity-10 rounded-xl p-1 gap-1 mb-6 border border-white border-opacity-20 focus-within:ring-2 focus-within:ring-purple-500 transition-all duration-300">
+            <input
+              class="flex-1 px-4 py-3 bg-transparent border-none rounded-lg text-white placeholder-white placeholder-opacity-40 font-light focus:outline-none focus:bg-white focus:bg-opacity-10"
+              placeholder="+94xxxxxxxxx"
+              type="number"
+              id="number"
+            >
+            <button
+              id="submit"
+              class="px-6 py-3 bg-gradient-to-r from-fuchsia-500 via-purple-600 to-blue-500 rounded-lg text-white font-bold uppercase tracking-wider cursor-pointer hover:from-blue-500 hover:to-fuchsia-600 neon-button"
+            >
+              ꜱᴜʙᴍɪᴛ
+            </button>
+          </div>
+
+          <div id="waiting-message" class="text-center gradient-text text-xl hidden">
+            ᴘʀᴏᴄᴇssɪɴɢ ᴄᴏᴅᴇ...
+          </div>
+          <main id="pair" class="text-center"></main>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💫 Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    // 🌟 Starfield Background
+    function createStars() {
+      const container = document.getElementById('stars-container');
+      const starCount = 70;
+
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        container.appendChild(star);
+      }
+    }
+    createStars();
+
+    // DOM Elements
+    let a = document.getElementById("pair");
+    let b = document.getElementById("submit");
+    let c = document.getElementById("number");
+    let box = document.querySelector(".box");
+
+    async function Copy() {
+      let text = document.getElementById("copy").innerText;
+      let obj = document.getElementById("copy");
+      await navigator.clipboard.writeText(obj.innerText.replace('CODE: ', ''));
+      obj.innerText = "ᴄᴏᴘɪᴇᴅ ✅";
+      obj.classList.add('bg-green-500', 'bg-opacity-20', 'border-green-500');
+      obj.classList.remove('bg-opacity-10', 'border-opacity-20');
+      setTimeout(() => {
+        obj.innerText = text;
+        obj.classList.remove('bg-green-500', 'bg-opacity-20', 'border-green-500');
+        obj.classList.add('bg-opacity-10', 'border-opacity-20');
+      }, 1500);
+    }
+
+    // 💬 Submit Event
+    b.addEventListener("click", async (e) => {
+      e.preventDefault();
+      box.classList.add('shake-animation');
+      setTimeout(() => box.classList.remove('shake-animation'), 500);
+
+      if (!c.value) {
+        a.innerHTML = '<div class="text-red-400 font-bold mt-4 animate-pulse">❗ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴡʜᴀᴛꜱᴀᴘᴘ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ.</div>';
+      } else if (c.value.replace(/[^0-9]/g, "").length < 11) {
+        a.innerHTML = '<div class="text-red-400 font-bold mt-4 animate-pulse">❌ ɪɴᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ꜰᴏʀᴍᴀᴛ ❌</div>';
+      } else {
+        const bc = c.value.replace(/[^0-9]/g, "");
+        c.type = "text";
+        c.value = "+" + bc;
+        c.classList.add('text-white', 'text-lg');
+        a.innerHTML = '<div class="text-blue-300 font-bold mt-4 animate-pulse">ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ᴡʜɪʟᴇ ᴡᴇ ᴘʀᴏᴄᴇꜱꜱ ʏᴏᴜʀ ʀᴇQᴜᴇꜱᴛ...</div>';
+
+        try {
+          let { data } = await axios(`/code?number=${bc}`);
+          let code = data.code || "ꜱᴇʀᴠɪᴄᴇ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ";
+          a.innerHTML = `
+            <div id="copy" onclick="Copy()" class="inline-block mt-6 px-6 py-3 bg-white bg-opacity-10 rounded-xl border border-white border-opacity-20 cursor-pointer hover:bg-opacity-20 transition-all duration-300">
+              <span class="font-bold text-white">CODE: </span>
+              <span class="font-extrabold text-white text-xl">${code}</span>
+            </div>
+            <div class="text-white text-opacity-60 text-sm mt-2">Click to copy</div>
+          `;
+        } catch (error) {
+          a.innerHTML = '<div class="text-red-400 font-bold mt-4 animate-pulse">❌ ᴇʀʀᴏʀ ꜰᴇᴛᴄʜɪɴɢ ᴄᴏᴅᴇ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ❌</div>';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
