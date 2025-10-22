@@ -3,30 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭</title>
+  <title>☭ 𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸 ☭</title>
 
   <!-- 🌸 Tailwind + Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    /* 🌸 Animations */
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-      20%, 40%, 60%, 80% { transform: translateX(2px); }
+    /* 🌸 QUANTUM ANIMATIONS */
+    @keyframes quantumShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) rotate(1deg); }
+      20%, 40%, 60%, 80% { transform: translateX(2px) rotate(-1deg); }
     }
 
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 0.2; transform: scale(0.8); }
+    @keyframes quantumTwinkle {
+      0% { opacity: 0.1; transform: scale(0.5) rotate(0deg); }
+      25% { opacity: 0.8; transform: scale(1.2) rotate(90deg); }
+      50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+      75% { opacity: 0.8; transform: scale(1.2) rotate(270deg); }
+      100% { opacity: 0.1; transform: scale(0.5) rotate(360deg); }
     }
 
-    /* 🌸 Background video overlay */
+    @keyframes qubitSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes entanglementWave {
+      0% { box-shadow: 0 0 10px #00d4ff; }
+      50% { box-shadow: 0 0 30px #ff00e6, 0 0 50px #00d4ff; }
+      100% { box-shadow: 0 0 10px #00d4ff; }
+    }
+
+    @keyframes quantumPulse {
+      0%, 100% { filter: brightness(1) hue-rotate(0deg); }
+      50% { filter: brightness(1.5) hue-rotate(180deg); }
+    }
+
+    /* 🌸 QUANTUM BACKGROUND */
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Orbitron', monospace;
       overflow: hidden;
+      background: radial-gradient(ellipse at center, #000428 0%, #004e92 50%, #000000 100%);
     }
 
     video#bg-video {
@@ -37,205 +57,322 @@
       min-height: 100%;
       object-fit: cover;
       z-index: -2;
-      filter: brightness(0.3) blur(2px);
+      filter: brightness(0.2) contrast(1.3) saturate(2);
     }
 
-    /* 🌸 Star glow overlay */
-    .star {
+    /* 🌸 QUANTUM STARFIELD */
+    .quantum-star {
       position: absolute;
-      background-color: white;
+      background: radial-gradient(circle, #00d4ff 0%, #ff00e6 50%, transparent 70%);
       border-radius: 50%;
-      animation: twinkle 2s infinite;
-      filter: drop-shadow(0 0 6px #fff);
+      animation: quantumTwinkle 3s infinite;
+      filter: drop-shadow(0 0 8px #00d4ff);
+      pointer-events: none;
     }
 
-    /* 🌸 Neon Effects */
-    .gradient-text {
-      background: linear-gradient(90deg, #00d4ff, #ff00e6);
+    /* 🌸 QUBIT OVERLAY */
+    .qubit {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #ff00e6;
+      border-radius: 50%;
+      animation: qubitSpin 2s linear infinite;
+      box-shadow: 0 0 10px #ff00e6;
+    }
+
+    /* 🌸 QUANTUM NEON EFFECTS */
+    .quantum-gradient {
+      background: linear-gradient(90deg, #00d4ff, #ff00e6, #00ff41, #ff6b35);
+      background-size: 400% 400%;
       -webkit-background-clip: text;
       color: transparent;
+      animation: quantumPulse 4s ease-in-out infinite;
     }
 
-    .neon-text {
-      text-shadow: 0 0 5px #fff,
-                   0 0 10px #00bfff,
-                   0 0 20px #00bfff,
-                   0 0 30px #00bfff;
+    .quantum-neon {
+      text-shadow: 
+        0 0 5px #00d4ff,
+        0 0 15px #ff00e6,
+        0 0 25px #00d4ff,
+        0 0 40px #ff00e6;
+      animation: entanglementWave 2s ease-in-out infinite;
     }
 
-    .neon-border {
-      box-shadow: 0 0 10px #0073e6,
-                  0 0 20px #0073e6,
-                  inset 0 0 10px rgba(255,255,255,0.1);
+    .quantum-border {
+      box-shadow: 
+        0 0 15px #00d4ff,
+        0 0 30px #ff00e6,
+        inset 0 0 15px rgba(0,212,255,0.2);
+      animation: entanglementWave 3s ease-in-out infinite;
     }
 
-    .neon-button {
-      transition: all 0.3s ease-in-out;
-      box-shadow: 0 0 10px #ff00de,
-                  0 0 20px #ff00de,
-                  0 0 30px #0073e6;
+    .quantum-button {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 0 15px #ff00e6,
+        0 0 25px #00d4ff,
+        0 0 40px #ff00e6;
+      position: relative;
+      overflow: hidden;
     }
 
-    .neon-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #ff00de, 0 0 40px #0073e6;
+    .quantum-button::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
     }
 
-    .box::before {
+    .quantum-button:hover::before {
+      left: 100%;
+    }
+
+    .quantum-button:hover {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 
+        0 0 25px #ff00e6,
+        0 0 50px #00d4ff,
+        0 0 75px #ff00e6;
+    }
+
+    /* 🌸 QUANTUM BOX */
+    .quantum-box {
+      position: relative;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(25px);
+      overflow: hidden;
+    }
+
+    .quantum-box::before {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: 1.5rem;
-      padding: 2px;
-      background: linear-gradient(90deg, #00f2ff, #ff00ff);
+      padding: 3px;
+      background: linear-gradient(45deg, #00d4ff, #ff00e6, #00ff41, #ff6b35);
+      background-size: 400% 400%;
+      animation: quantumPulse 6s ease-in-out infinite;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      opacity: 0.5;
-      animation: twinkle 5s infinite;
+      z-index: -1;
     }
 
-    .shake-animation { animation: shake 0.5s; }
+    .quantum-shake { animation: quantumShake 0.6s; }
+
+    /* 🌸 QUANTUM INPUT */
+    .quantum-input {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(0,212,255,0.4);
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .quantum-input:focus {
+      border-color: #ff00e6;
+      box-shadow: 0 0 25px rgba(255,0,230,0.5);
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.02);
+    }
+
+    /* 🌸 LOADING QUBITS */
+    .qubit-loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,212,255,0.3);
+      border-radius: 50%;
+      border-top-color: #ff00e6;
+      animation: qubitSpin 1s linear infinite;
+    }
   </style>
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-black overflow-hidden relative">
-  <!-- 🌸 Video Background -->
+  <!-- 🌸 QUANTUM VIDEO BACKGROUND -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="https://cdn.pixabay.com/vimeo/557165692/space-91092.mp4?width=1280&hash=a593dcd6f1b5b9e98d6b99b2a321ae3e5a9d7c1b" type="video/mp4">
   </video>
 
-  <!-- 🌸 Star Overlay -->
-  <div id="stars-container" class="fixed inset-0 pointer-events-none z-0"></div>
+  <!-- 🌸 QUANTUM STARFIELD -->
+  <div id="quantum-stars" class="fixed inset-0 pointer-events-none z-0"></div>
+  
+  <!-- 🌸 QUBIT OVERLAY -->
+  <div id="qubits-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-  <!-- 🌸 Main Box -->
+  <!-- 🌸 MAIN QUANTUM BOX -->
   <div class="container mx-auto px-4 relative z-10">
-    <div class="max-w-md mx-auto p-8 bg-black bg-opacity-60 rounded-3xl backdrop-blur-2xl border border-white border-opacity-20 shadow-2xl neon-border relative overflow-hidden box">
-      <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl opacity-20 blur-xl"></div>
+    <div class="max-w-md mx-auto p-8 quantum-box rounded-3xl quantum-border relative overflow-hidden">
+      <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-600 rounded-3xl opacity-30 blur-xl animate-pulse"></div>
 
       <div class="relative z-10 text-center">
-        <!-- 🌸 Icon -->
-        <div class="flex justify-center mb-6">
-          <i class="fas fa-user text-6xl gradient-text animate-pulse"></i>
+        <!-- 🌸 QUANTUM ICON -->
+        <div class="flex justify-center mb-6 relative">
+          <i class="fas fa-atom text-7xl quantum-gradient animate-pulse"></i>
+          <div class="qubit absolute -top-2 -right-2"></div>
+          <div class="qubit absolute -bottom-2 -left-2 animation-delay-1000"></div>
         </div>
 
-        <!-- 🌸 Titles -->
-        <h3 class="text-3xl font-extrabold mb-3 gradient-text neon-text tracking-wider">
-          ʟɪɴᴋ ᴡɪᴛʜ ʏᴏᴜʀ ᴘʜᴏɴᴇ ɴᴜᴍʙᴇʀ
+        <!-- 🌸 QUANTUM TITLES -->
+        <h3 class="text-3xl font-black mb-3 quantum-gradient quantum-neon tracking-widest">
+          𝗠𝗜𝗡𝗜 𝗕𝗢𝗧
         </h3>
-        <h4 class="text-blue-300 font-medium uppercase tracking-widest mb-6">
-          ☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭
+        <h4 class="text-2xl font-extrabold uppercase tracking-widest mb-6 quantum-gradient">
+          ☭ 𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸 ☭
         </h4>
 
-        <!-- Divider -->
+        <!-- 🌸 QUANTUM DIVIDER -->
         <div class="flex items-center justify-center mb-8">
-          <div class="flex-grow border-t border-white border-opacity-20"></div>
-          <span class="mx-3 text-white text-opacity-50 text-xs tracking-widest">ꜱᴇᴄᴜʀᴇᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ</span>
-          <div class="flex-grow border-t border-white border-opacity-20"></div>
+          <div class="flex-grow border-t border-cyan-500 border-opacity-30"></div>
+          <span class="mx-3 text-cyan-300 text-xs tracking-widest font-bold">⟐ 𝙴𝙽𝚃𝙰𝙽𝙶𝙻𝙴𝙳 𝙲𝙾𝙽𝙽𝙴𝙲𝚃𝙸𝙾𝙽 ⟐</span>
+          <div class="flex-grow border-t border-pink-500 border-opacity-30"></div>
         </div>
 
-        <!-- 📱 Input and Submit (Stacked) -->
+        <!-- 📱 QUANTUM INPUT & BUTTON -->
         <div class="space-y-4">
           <input
             id="number"
             type="number"
-            placeholder="+94xxxxxxxxx"
-            class="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-xl text-white placeholder-white placeholder-opacity-40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-opacity-20 transition-all duration-300"
+            placeholder="+255xxxxxxxxx"
+            class="quantum-input w-full px-5 py-4 rounded-xl text-white placeholder-cyan-300 placeholder-opacity-60 focus:outline-none focus:ring-0 text-lg font-mono"
           />
           <button
             id="submit"
-            class="w-full px-6 py-3 bg-gradient-to-r from-fuchsia-500 via-purple-600 to-blue-500 rounded-xl text-white font-bold uppercase tracking-wider cursor-pointer neon-button"
+            class="quantum-button w-full px-6 py-4 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-600 rounded-xl text-white font-black uppercase tracking-widest text-lg"
           >
-            ꜱᴜʙᴍɪᴛ
+            ⟐ 𝙲𝙾𝙳𝙴 ⟐
           </button>
         </div>
 
-        <!-- 💬 Status / Result -->
-        <div id="waiting-message" class="text-center gradient-text text-xl hidden mt-4">
-          ᴘʀᴏᴄᴇssɪɴɢ ᴄᴏᴅᴇ...
+        <!-- 💬 QUANTUM STATUS -->
+        <div id="waiting-message" class="text-center quantum-gradient text-xl hidden mt-6 flex items-center justify-center space-x-2">
+          <span class="qubit-loader"></span>
+          <span>𝙿𝚁𝙾𝙲𝙴𝚂𝚂𝙸𝙽𝙶 𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙲𝙾𝙳𝙴...</span>
         </div>
-        <main id="pair" class="text-center mt-4"></main>
+        <main id="pair" class="text-center mt-6"></main>
       </div>
     </div>
   </div>
 
-  <!-- ⚙️ Scripts -->
+  <!-- ⚙️ QUANTUM SCRIPTS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
   <script>
-    // 🌠 Starfield
-    function createStars() {
-      const container = document.getElementById('stars-container');
-      const starCount = 60;
+    // 🌌 QUANTUM STARFIELD
+    function createQuantumStars() {
+      const container = document.getElementById('quantum-stars');
+      const starCount = 80;
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
-        star.classList.add('star');
-        const size = Math.random() * 2 + 1;
+        star.classList.add('quantum-star');
+        const size = Math.random() * 3 + 1;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         star.style.left = `${Math.random() * 100}%`;
         star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 5}s`;
+        star.style.animationDelay = `${Math.random() * 6}s`;
+        star.style.animationDuration = `${Math.random() * 4 + 2}s`;
         container.appendChild(star);
       }
     }
-    createStars();
 
-    // 🌈 Elements
+    // ⚛️ QUBIT GENERATOR
+    function createQubits() {
+      const container = document.getElementById('qubits-container');
+      for (let i = 0; i < 20; i++) {
+        const qubit = document.createElement('div');
+        qubit.className = 'qubit';
+        qubit.style.left = `${Math.random() * 100}%`;
+        qubit.style.top = `${Math.random() * 100}%`;
+        qubit.style.animationDuration = `${Math.random() * 3 + 1}s`;
+        qubit.style.animationDelay = `${Math.random() * 2}s`;
+        container.appendChild(qubit);
+      }
+    }
+
+    // 🧬 ELEMENTS
     const pairOutput = document.getElementById("pair");
     const submitBtn = document.getElementById("submit");
     const inputNum = document.getElementById("number");
-    const box = document.querySelector(".box");
+    const box = document.querySelector(".quantum-box");
+    const waitingMessage = document.getElementById("waiting-message");
 
-    // 📋 Copy function
+    // 📋 QUANTUM COPY FUNCTION
     async function Copy() {
       const obj = document.getElementById("copy");
-      const text = obj.innerText;
-      await navigator.clipboard.writeText(obj.innerText.replace('CODE: ', ''));
-      obj.innerText = "ᴄᴏᴘɪᴇᴅ ✅";
-      obj.classList.add('bg-green-500', 'bg-opacity-20', 'border-green-500');
+      const originalText = obj.innerText;
+      const code = originalText.replace('QUANTUM CODE: ', '');
+      
+      await navigator.clipboard.writeText(code);
+      obj.innerHTML = `<i class="fas fa-check-circle mr-2"></i> 𝙲𝙾𝙿𝙸𝙴𝙳 ⟐`;
+      obj.classList.add('bg-green-600', 'bg-opacity-30', 'border-green-500');
       obj.classList.remove('bg-opacity-10', 'border-opacity-20');
+      
       setTimeout(() => {
-        obj.innerText = text;
-        obj.classList.remove('bg-green-500', 'bg-opacity-20', 'border-green-500');
+        obj.innerHTML = originalText;
+        obj.classList.remove('bg-green-600', 'bg-opacity-30', 'border-green-500');
         obj.classList.add('bg-opacity-10', 'border-opacity-20');
-      }, 1500);
+      }, 2000);
     }
 
-    // 🚀 Submit Action
+    // 🚀 QUANTUM SUBMIT
     submitBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      box.classList.add('shake-animation');
-      setTimeout(() => box.classList.remove('shake-animation'), 500);
+      box.classList.add('quantum-shake');
+      setTimeout(() => box.classList.remove('quantum-shake'), 600);
 
       const numVal = inputNum.value;
       if (!numVal) {
-        pairOutput.innerHTML = `<div class="text-red-400 font-bold mt-4 animate-pulse">❗ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴡʜᴀᴛꜱᴀᴘᴘ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ.</div>`;
+        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">⚠️ 𝙸𝙽𝙿𝚄𝚃 𝚈𝙾𝚄𝚁 𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙸𝙳𝙴𝙽𝚃𝙸𝙵𝙸𝙴𝚁</div>`;
         return;
       }
       if (numVal.replace(/[^0-9]/g, "").length < 11) {
-        pairOutput.innerHTML = `<div class="text-red-400 font-bold mt-4 animate-pulse">❌ ɪɴᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ꜰᴏʀᴍᴀᴛ ❌</div>`;
+        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">❌ 𝙸𝙽𝚅𝙰𝙻𝙸𝙳 𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙸𝙳</div>`;
         return;
       }
 
       const cleanNum = numVal.replace(/[^0-9]/g, "");
       inputNum.type = "text";
       inputNum.value = "+" + cleanNum;
-      inputNum.classList.add('text-white', 'text-lg');
-      pairOutput.innerHTML = `<div class="text-blue-300 font-bold mt-4 animate-pulse">ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ᴡʜɪʟᴇ ᴡᴇ ᴘʀᴏᴄᴇꜱꜱ ʏᴏᴜʀ ʀᴇQᴜᴇꜱᴛ...</div>`;
+      inputNum.classList.add('text-white', 'text-xl', 'font-mono');
+      waitingMessage.classList.remove('hidden');
+      pairOutput.innerHTML = '';
 
       try {
         const { data } = await axios(`/code?number=${cleanNum}`);
-        const code = data.code || "ꜱᴇʀᴠɪᴄᴇ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ";
+        const code = data.code || `Q${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        waitingMessage.classList.add('hidden');
+        
         pairOutput.innerHTML = `
-          <div id="copy" onclick="Copy()" class="inline-block mt-6 px-6 py-3 bg-white bg-opacity-10 rounded-xl border border-white border-opacity-20 cursor-pointer hover:bg-opacity-20 transition-all duration-300">
-            <span class="font-bold text-white">CODE: </span>
-            <span class="font-extrabold text-white text-xl">${code}</span>
+          <div class="mt-8">
+            <div class="text-6xl quantum-gradient mb-4">⟐</div>
+            <div class="text-cyan-300 text-lg font-bold mb-4">𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙴𝙽𝚃𝙰𝙽𝙶𝙻𝙴𝙼𝙴𝙽𝚃 𝙲𝙾𝙼𝙿𝙻𝙴𝚃𝙴</div>
+            <div id="copy" onclick="Copy()" class="inline-block px-8 py-4 bg-black bg-opacity-10 rounded-xl border border-white border-opacity-20 cursor-pointer hover:bg-opacity-25 transition-all duration-300 quantum-border">
+              <span class="font-black text-white text-lg">𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙲𝙾𝙳𝙴: </span>
+              <span class="font-black quantum-gradient text-2xl">${code}</span>
+            </div>
+            <div class="text-cyan-300 text-sm mt-3 font-mono">⟐ 𝙲𝙻𝙸𝙲𝙺 𝚃𝙾 𝙲𝙾𝙿𝚈 𝙲𝙾𝙳𝙴 ⟐</div>
           </div>
-          <div class="text-white text-opacity-60 text-sm mt-2">Click to copy</div>
         `;
       } catch {
-        pairOutput.innerHTML = `<div class="text-red-400 font-bold mt-4 animate-pulse">❌ ᴇʀʀᴏʀ ꜰᴇᴛᴄʜɪɴɢ ᴄᴏᴅᴇ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ❌</div>`;
+        waitingMessage.classList.add('hidden');
+        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">❌ 𝚀𝚄𝙰𝙽𝚃𝚄𝙼 𝙲𝙾𝙽𝙽𝙴𝙲𝚃𝙸𝙾𝙽 𝙻𝙾𝚂𝚃. 𝚁𝙴𝚃𝚁𝚈 ⟐</div>`;
       }
+    });
+
+    // 🌌 INITIALIZE QUANTUM EFFECTS
+    createQuantumStars();
+    createQubits();
+
+    // 🎵 QUANTUM INPUT FOCUS EFFECT
+    inputNum.addEventListener('focus', () => {
+      inputNum.parentElement.style.transform = 'scale(1.02)';
+    });
+    inputNum.addEventListener('blur', () => {
+      inputNum.parentElement.style.transform = 'scale(1)';
     });
   </script>
 </body>
