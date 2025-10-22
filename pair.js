@@ -40,7 +40,7 @@ const config = {
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/G3ChQEjwrdVBTBUQHWSNHF?mode=ems_copy_t',
     ADMIN_LIST_PATH: './admin.json',
-    IMAGE_PATH: 'https://files.catbox.moe/bupsfv.jpg',
+    IMAGE_PATH: 'https://files.catbox.moe/2x9ktu.png',
     NEWSLETTER_JID: '120363398106360290@newsletter',
     NEWSLETTER_MESSAGE_ID: '0088',
     OTP_EXPIRY: 300000,
@@ -52,11 +52,11 @@ const config = {
     BOT_FOOTER: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃',
     CHANNEL_LINK: 'https://whatsapp.com/channel/0029Vb6B9xFCxoAseuG1g610',
     BUTTON_IMAGES: {
-        ALIVE: 'https://files.catbox.moe/bupsfv.jpg',
-        MENU: 'https://files.catbox.moe/bupsfv.jpg',
-        OWNER: 'https://files.catbox.moe/bupsfv.jpg',
-        SONG: 'https://files.catbox.moe/bupsfv.jpg',
-        VIDEO: 'https://files.catbox.moe/bupsfv.jpg'
+        ALIVE: 'https://files.catbox.moe/prrvct.png',
+        MENU: 'https://files.catbox.moe/2x9ktu.png',
+        OWNER: 'https://files.catbox.moe/prrvct.png',
+        SONG: 'https://files.catbox.moe/2x9ktu.png',
+        VIDEO: 'https://files.catbox.moe/prrvct.png'
     }
 };
 
@@ -487,11 +487,11 @@ function setupCommandHandlers(socket, number) {
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-                    const title = '*ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ᴀᴄᴛɪᴠᴇ!!❤*';
-                    const content = `*ᴏᴡɴᴇʀ:ᴘᴏᴘᴋɪᴅ ᴋᴇ*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *ᴍʀ ᴘᴏᴘᴋɪᴅ*\n` +
-                                `*ʙᴏᴛ ɴᴀᴍᴇ :- ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ʙᴏᴛ*\n` +
+                    const title = '*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*';
+                    const content = `*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
+                                `*ʙᴏᴛ ɴᴀᴍᴇ :- 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n` +
                                    `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
-                                   `> *https://popkid-musicz.vercel.app*`;
+                                   `> *https*`;
                     const footer = config.BOT_FOOTER;
 
                     await socket.sendMessage(sender, {
@@ -520,8 +520,8 @@ case 'menu': {
         } 
     });
 
-    const title = `✨ ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ✨`;
-    const footer = `❤️ ᴘᴏᴘᴋɪᴅ ᴛᴇᴄʜ | ꜱɪɴᴄᴇ 2024`;
+    const title = `✨ 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 ✨`;
+    const footer = `❤️ 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 | ꜱɪɴᴄᴇ 2024`;
 
     const menuText = `
 ╭━━━〔 *${title}* 〕━━━╮
@@ -587,8 +587,8 @@ ${footer}
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
                         + 'VERSION:3.0\n' 
-                        + 'FN:JEPHTER TECH\n'
-                        + 'ORG:JEPHTER TECH\n'
+                        + 'FN:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
+                        + 'ORG:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
                         + 'TEL;type=CELL;type=VOICE;waid=255778018545:+255778018545\n'
                         + 'EMAIL: xmdloft745@gmail.com\n'
                         + 'END:VCARD';
