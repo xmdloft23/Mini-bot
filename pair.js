@@ -525,10 +525,10 @@ case 'menu': {
 
     const menuText = `
 ╭━━━〔 *${title}* 〕━━━╮
-│ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* ᴘᴏᴘᴋɪᴅ ᴍɪɴɪʙᴏᴛ
-│ 👑 *ᴏᴡɴᴇʀ:* ᴘᴏᴘᴋɪᴅ
+│ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽
+│ 👑 *ᴏᴡɴᴇʀ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖
 │ ⚙️ *ᴠᴇʀꜱɪᴏɴ:* ᴠ1 ʙᴇᴛᴀ
-│ 💻 *ᴘʟᴀᴛꜰᴏʀᴍ:* ᴘᴏᴘᴋɪᴅ VPS (Ubuntu 22.04)
+│ 💻 *ᴘʟᴀᴛꜰᴏʀᴍ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞m (Ubuntu 22.04)
 │ 🕐 *ᴜᴘᴛɪᴍᴇ:* ${hours}h ${minutes}m ${seconds}s
 ╰━━━━━━━━━━━━━━━━╯
 
@@ -570,7 +570,7 @@ ${footer}
 //=======================================
                 case 'ping': {     
                     var inital = new Date().getTime();
-                    let ping = await socket.sendMessage(sender, { text: '*_Pinging to Popkid Xmd..._* 🐥' });
+                    let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
                     var final = new Date().getTime();
                     await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
                     await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
@@ -589,17 +589,17 @@ ${footer}
                         + 'VERSION:3.0\n' 
                         + 'FN:JEPHTER TECH\n'
                         + 'ORG:JEPHTER TECH\n'
-                        + 'TEL;type=CELL;type=VOICE;waid=254732297194:+254111385747\n'
-                        + 'EMAIL: iantaracha@gmail.com\n'
+                        + 'TEL;type=CELL;type=VOICE;waid=255778018545:+255778018545\n'
+                        + 'EMAIL: xmdloft745@gmail.com\n'
                         + 'END:VCARD';
 
                     await socket.sendMessage(sender, {
                         contacts: {
-                            displayName: "HACKER popkid OWNER",
+                            displayName: "𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖",
                             contacts: [{ vcard }]
                         },
                         image: { url: config.BUTTON_IMAGES.OWNER },
-                        caption: '*ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ʙᴏᴛ ᴏᴡɴᴇʀ ᴅᴇᴛᴀɪʟꜱ*',
+                        caption: '*𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃*',
                         buttons: [
                             { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: ' ᴍᴇɴᴜ' }, type: 1 },
                             { buttonId: `${config.PREFIX}alive`, buttonText: { displayText: 'ᴮᴼᵀ ᴵᴺᶠᴼ' }, type: 1 }
@@ -616,7 +616,7 @@ ${footer}
     const minutes = Math.floor((uptime % 3600) / 60);
     const seconds = Math.floor(uptime % 60);
 
-    const title = '*ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ ꜱʏꜱᴛᴇᴍ*';
+    const title = '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼☭*';
     const content = `┏━━━━━━━━━━━━━━━━\n` +
         `┃🤖 \`ʙᴏᴛ ɴᴀᴍᴇ\` : ${config.BOT_NAME}\n` +
         `┃🔖 \`ᴠᴇʀsɪᴏɴ\` : ${config.BOT_VERSION}\n` +
@@ -701,7 +701,7 @@ Please try another song 💫`
         const { title, channel, duration, views, thumbnail, url } = data.result;
 
         const infoMsg = `
-╭━━━ 🎧 *ᴘᴏᴘᴋɪᴅ ᴍᴅ ᴍɪɴɪ* 🎧━╮
+╭━━━ 🎧 *𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞m* 🎧━╮
 │ 💽 *Title:* ${title}
 │ 📺 *Channel:* ${channel || 'Unknown'}
 │ ⏱️ *Duration:* ${duration || 'N/A'}
@@ -716,7 +716,7 @@ Please wait ⏳
         await socket.sendMessage(sender, {
             image: { url: thumbnail },
             caption: infoMsg,
-            footer: config.BOT_FOOTER || '❤️ Powered by Popkid MiniBot'
+            footer: config.BOT_FOOTER || '𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
         });
 
         // 🎶 Send audio
@@ -792,7 +792,7 @@ case 'video': {
       video: { url: down.url },
       mimetype: "video/mp4",
       fileName: `${down.title}.mp4`,
-      caption: `🎥 Powered by Popkid XMD Bot`
+      caption: `𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃`
     });
 
   } catch (e) {
