@@ -17,5 +17,5 @@ module.exports = {
     OWNER_NUMBER: '255778018545',
     BOT_VERSION: '2.0.0 ʙᴇᴛᴀ',
     BOT_FOOTER: '> © 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃',
-    CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBTlzoLtOjGXhhD4I2d'
+    CHANNEL_LINK: 'https://whatsapp.com/channel/0029Vb6B9xFCxoAseuG1g610'
 };
