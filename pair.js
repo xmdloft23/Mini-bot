@@ -531,28 +531,22 @@ case 'menu': {
 │ 💻 *ᴘʟᴀᴛꜰᴏʀᴍ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞m (Ubuntu 22.04)
 │ 🕐 *ᴜᴘᴛɪᴍᴇ:* ${hours}h ${minutes}m ${seconds}s
 ╰━━━━━━━━━━━━━━━━╯
-
-🌐 *MAIN COMMANDS*
+ *COMMANDS*
 ┏━━━━━━━━━━━━┓
 ┃ ⚡ .alive 
 ┃ ⚙️ .system
 ┃ 📶 .ping 
-┃  🌲 .jid 
-┃  👀 .vv
-┗━━━━━━━━━━━━┛
-
-🎵 *MEDIA DOWNLOADS*
-┏━━━━━━━━━━━━┓
+┃ 🌲 .jid 
+┃ 👀 .vv
+┃ 🍑 .pronhub
+┃ ☁️ .weather
+┃ 🌸 .tiktok
 ┃ 🎧 .song
 ┃ 🎬 .video 
-┗━━━━━━━━━━━━┛
-
-👤 *OTHER COMMANDS*
-┏━━━━━━━━━━━━┓
-┃ 🧑‍💻 .owner → contact owner
-┃ 🧩 .preferences → bot settings
-┃ 📢 .channel → join channel
-┗━━━━━━━━━━━━┛
+┃ 🧑‍💻 .owner 
+┃ 🧩 .preferences 
+┃ 📢 .channel 
+┗━━━━━━━━━━━━━┛
 
 🪄 _Type any command with the prefix_
 *${config.PREFIX}commandname*  
@@ -584,7 +578,72 @@ ${footer}
                         text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
                     break;
                 }
+                
+                 case 'tiktok': {
+    const axios = require('axios');
 
+    const q = msg.message?.conversation ||
+              msg.message?.extendedTextMessage?.text ||
+              msg.message?.imageMessage?.caption ||
+              msg.message?.videoMessage?.caption || '';
+
+    const link = q.replace(/^[.\/!]tiktok(dl)?|tt(dl)?\s*/i, '').trim();
+
+    if (!link) {
+        return await socket.sendMessage(sender, {
+            text: '📌 *Usage:* .tiktok <link>'
+        }, { quoted: msg });
+    }
+
+    if (!link.includes('tiktok.com')) {
+        return await socket.sendMessage(sender, {
+            text: '❌ *Invalid TikTok link.*'
+        }, { quoted: msg });
+    }
+
+    try {
+        await socket.sendMessage(sender, {
+            text: '⏳ Downloading video, please wait...'
+        }, { quoted: msg });
+
+        const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${encodeURIComponent(link)}`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data?.status || !data?.data) {
+            return await socket.sendMessage(sender, {
+                text: '❌ Failed to fetch TikTok video.'
+            }, { quoted: msg });
+        }
+
+        const { title, like, comment, share, author, meta } = data.data;
+        const video = meta.media.find(v => v.type === "video");
+
+        if (!video || !video.org) {
+            return await socket.sendMessage(sender, {
+                text: '❌ No downloadable video found.'
+            }, { quoted: msg });
+        }
+
+        const caption = `🎵 *TIKTOK DOWNLOADR*\n\n` +
+                        `👤 *User:* ${author.nickname} (@${author.username})\n` +
+                        `📖 *Title:* ${title}\n` +
+                        `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}`;
+
+        await socket.sendMessage(sender, {
+            video: { url: video.org },
+            caption: caption,
+            contextInfo: { mentionedJid: [msg.key.participant || sender] }
+        }, { quoted: msg });
+
+    } catch (err) {
+        console.error("TikTok command error:", err);
+        await socket.sendMessage(sender, {
+            text: `❌ An error occurred:\n${err.message}`
+        }, { quoted: msg });
+    }
+
+    break;
+}                  
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
@@ -610,6 +669,67 @@ ${footer}
                     break;     
                 }
 
+                case 'pronhub': {          
+    const q = msg.message?.conversation || 
+              msg.message?.extendedTextMessage?.text || 
+              msg.message?.imageMessage?.caption || 
+              msg.message?.videoMessage?.caption || '';      
+
+    if (!q || q.trim() === '') {         
+        return await socket.sendMessage(sender, { text: '*Need query for search pronhub*' });     
+    }      
+
+    try {         
+       
+        const { data } = await axios.get(`https://phdl-api-thenux.netlify.app/api/search?q=${encodeURIComponent(q)}`);
+        const results = data.results;
+
+        if (!results || results.length === 0) {             
+            return await socket.sendMessage(sender, { text: '*No results found*' });         
+        }          
+
+        const first = results[0];
+        const url = first.url;
+        const dina = first.title;
+        const image = first.thumbnail;
+
+        const desc = `🎬 Title - ${dina}\n🏷️ URL - ${url}\n\n© 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃`;         
+
+        await socket.sendMessage(sender, {             
+            image: { url: image },             
+            caption: desc,         
+        }, { quoted: msg });          
+
+        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });          
+
+        
+        const { data: down } = await axios.get(`https://phdl-api-thenux.netlify.app/api/download?url=${encodeURIComponent(url)}`);
+        const videos = down.videoInfo?.data?.videos;          
+
+        if (!videos || videos.length === 0) {
+            return await socket.sendMessage(sender, { text: "*Download link not found*" });
+        }
+
+ 
+        const bestLink = videos[0].url;
+        const quality = videos[0].quality;
+
+        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });          
+
+        await socket.sendMessage(sender, {             
+            video: { url: bestLink },             
+            mimetype: "video/mp4",             
+            caption: `${dina} (📹 ${quality})`        
+        }, { quoted: msg });      
+
+    } catch (err) {         
+        console.error("Pronhub Plugin Error:", err);         
+        await socket.sendMessage(sender, { text: "*Error fetching data*" });     
+    }      
+
+    break; 		
+                    }
+                
                 // SYSTEM COMMAND
                 case 'system': {
     const startTime = socketCreationTime.get(number) || Date.now();
@@ -634,6 +754,71 @@ ${footer}
     });
     break;
                 }
+                
+                case 'weather':
+    try {
+        // Messages in English
+        const messages = {
+            noCity: "❗ *Please provide a city name!* \n📋 *Usage*: .weather [city name]",
+            weather: (data) => `
+*⛩️ Cyber Anuwh MD Weather Report 🌤*
+
+*━🌍 ${data.name}, ${data.sys.country} 🌍━*
+
+*🌡️ Temperature*: _${data.main.temp}°C_
+
+*🌡️ Feels Like*: _${data.main.feels_like}°C_
+
+*🌡️ Min Temp*: _${data.main.temp_min}°C_
+
+*🌡️ Max Temp*: _${data.main.temp_max}°C_
+
+*💧 Humidity*: ${data.main.humidity}%
+
+*☁️ Weather*: ${data.weather[0].main}
+
+*🌫️ Description*: _${data.weather[0].description}_
+
+*💨 Wind Speed*: ${data.wind.speed} m/s
+
+*🔽 Pressure*: ${data.main.pressure} hPa
+
+> POWERED BY ANUGA SENITHU ❗
+`,
+            cityNotFound: "🚫 *City not found!* \n🔍 Please check the spelling and try again.",
+            error: "⚠️ *An error occurred!* \n🔄 Please try again later."
+        };
+
+        // Check if a city name was provided
+        if (!args || args.length === 0) {
+            await socket.sendMessage(sender, { text: messages.noCity });
+            break;
+        }
+
+        const apiKey = '2d61a72574c11c4f36173b627f8cb177';
+        const city = args.join(" ");
+        const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+        const response = await axios.get(url);
+        const data = response.data;
+
+        // Get weather icon
+        const weatherIcon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        
+        await socket.sendMessage(sender, {
+            image: { url: weatherIcon },
+            caption: messages.weather(data)
+        });
+
+    } catch (e) {
+        console.log(e);
+        if (e.response && e.response.status === 404) {
+            await socket.sendMessage(sender, { text: messages.cityNotFound });
+        } else {
+            await socket.sendMessage(sender, { text: messages.error });
+        }
+    }
+    break;
 
                 // JID COMMAND
                 case 'jid': {
@@ -744,11 +929,11 @@ break                   // BOOM COMMAND
         // 🎧 Use multiple reliable APIs as fallback
         const apis = [
             // Primary API - YouTube Music
-            `https://api-smd.herokuapp.com/youtube/download?search=${encodeURIComponent(q)}&type=song`,
+            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}&type=song`,
             // Fallback API 1
-            `https://api.zackraihan.com/ytmp3?query=${encodeURIComponent(q)}`,
+            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`,
             // Fallback API 2
-            `https://scrap-srv.vercel.app/api/ytmp3?query=${encodeURIComponent(q)}`,
+            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`,
             // Your original API as last resort
             `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`
         ];
