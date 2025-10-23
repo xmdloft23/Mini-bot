@@ -744,7 +744,7 @@ Example:
         await socket.sendMessage(sender, { text: `🔍 *Searching for:* _${q}_ ...` });
 
         // 🎧 Use DavidCyrilTech API
-        const apiUrl = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(q)}`;
+        const apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`;
         const apiResponse = await fetch(apiUrl);
         const data = await apiResponse.json();
 
