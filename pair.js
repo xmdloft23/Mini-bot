@@ -643,27 +643,75 @@ ${footer}
                     break;
                 }
 
-             case "vv": case "readviewonce": {
- if (!isOwner) return reply(mess.owner);
-if (!m.quoted) return reply("reply means viewOnce nya!")
-let msg = m?.quoted?.message?.imageMessage || m?.quoted?.message?.videoMessage || m?.quoted?.message?.audioMessage || m?.quoted
-if (!msg.viewOnce && m.quoted.mtype !== "viewOnceMessageV2" && !msg.viewOnce) return reply("Pesan itu bukan viewonce!")
-const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
-let media = await downloadContentFromMessage(msg, msg.mimetype == 'image/jpeg' ? 'image' : msg.mimetype == 'video/mp4' ? 'video' : 'audio')
-    let type = msg.mimetype
-    let buffer = Buffer.from([])
-    for await (const chunk of media) {
-        buffer = Buffer.concat([buffer, chunk])
+             case "vv":
+case "readviewonce": {
+    // Permission check
+    if (!isOwner) return reply(mess.owner);
+    
+    // Validate quoted message
+    if (!m.quoted) return reply("Reply ke pesan ViewOnce-nya!");
+    
+    // Extract media message
+    const quoted = m.quoted;
+    const mediaMsg = quoted.message?.imageMessage || 
+                    quoted.message?.videoMessage || 
+                    quoted.message?.audioMessage || 
+                    quoted.message;
+    
+    if (!mediaMsg) return reply("Pesan yang direply tidak mengandung media!");
+    
+    // Validate ViewOnce
+    const isViewOnce = mediaMsg.viewOnce || 
+                      quoted.mtype === "viewOnceMessageV2" || 
+                      quoted.message?.viewOnceMessage;
+    
+    if (!isViewOnce) return reply("Pesan itu bukan ViewOnce!");
+    
+    try {
+        // Download media
+        const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
+        const mediaStream = await downloadContentFromMessage(mediaMsg, 'buffer');
+        
+        // Convert stream to buffer
+        let buffer = Buffer.from([]);
+        for await (const chunk of mediaStream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
+        
+        // Determine media type
+        const mimetype = mediaMsg.mimetype;
+        const caption = mediaMsg.caption || "";
+        
+        // Send media based on type
+        if (/image\/jpeg/.test(mimetype)) {
+            return Encore.sendMessage(m.chat, { 
+                image: buffer, 
+                caption: caption 
+            }, { quoted: m });
+            
+        } else if (/video\/mp4/.test(mimetype)) {
+            return Encore.sendMessage(m.chat, { 
+                video: buffer, 
+                caption: caption 
+            }, { quoted: m });
+            
+        } else if (/audio\//.test(mimetype)) {
+            return Encore.sendMessage(m.chat, { 
+                audio: buffer, 
+                mimetype: "audio/mpeg", 
+                ptt: true 
+            }, { quoted: m });
+            
+        } else {
+            return reply("Tipe media tidak didukung!");
+        }
+        
+    } catch (error) {
+        console.error("Error processing ViewOnce:", error);
+        return reply("Gagal memproses media ViewOnce!");
     }
-    if (/video/.test(type)) {
-        return Encore.sendMessage(m.chat, {video: buffer, caption: msg.caption || ""}, {quoted: m})
-    } else if (/image/.test(type)) {
-        return Encore.sendMessage(m.chat, {image: buffer, caption: msg.caption || ""}, {quoted: m})
-    } else if (/audio/.test(type)) {
-        return Encore.sendMessage(m.chat, {audio: buffer, mimetype: "audio/mpeg", ptt: true}, {quoted: m})
-    } 
 }
-break                   // BOOM COMMAND        
+break;                   // BOOM COMMAND        
                 case 'boom': {
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
