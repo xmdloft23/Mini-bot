@@ -545,7 +545,8 @@ case 'menu': {
 ┃ 🎬 .video 
 ┃ 🧑‍💻 .owner 
 ┃ 🧩 .preferences 
-┃ 📢 .channel 
+┃ 📢 .channel
+┃ 🤖 .ai 
 ┗━━━━━━━━━━━━━┛
 
 🪄 _Type any command with the prefix_
@@ -644,6 +645,56 @@ ${footer}
 
     break;
 }                  
+
+                    case 'ai': {
+    const axios = require("axios");
+
+    const GEMINI_API_KEY = ' AIzaSyAROuL5_rq9VWeKI6dx5Hxm91VyTloIy3c/n > POWERED BY ANUGA SENITHU';
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${AIzaSyAROuL5_rq9VWeKI6dx5Hxm91VyTloIy3c}`;
+
+    // ✅ Get user input from various message types
+    const q = msg.message?.conversation || 
+              msg.message?.extendedTextMessage?.text || 
+              msg.message?.imageMessage?.caption || 
+              msg.message?.videoMessage?.caption || 
+              '';
+
+    if (!q || q.trim() === '') {
+        return await socket.sendMessage(sender, { text: "I AM ANUGA AI, HOW CAN I HELP YOU? 🤭" }, { quoted: msg });
+    }
+
+    // ✅ Custom Gemini prompt (acting human with Sinhala rules)
+    const prompt = `ඔබ සැබෑ ගැහැනු ලමයෙකු මෙන් හැසිරිය යුතුය. ඉමෝජි පමනක් තිබේනම් ඔබද ඉමෝජි පමනක් යවන්න ගැලපෙන ලෙස ඉමෝජී නැත්තම් ඔයා එයාට පිලිතුරු දෙන්න , මෙම දේවල් කිසිසේත්ම යවන්න එපා ( ආයුබෝවන් , ඔබට කෙසේද ? , කතාකරන්න , ඕනේ ? , කොහොමද ? , කෙසේද ? , කැමතිද ? ,) මිනිසුන්ට ඇති හැඟීම්, දැනීම්, සහ සංවේදීතාවය අනුව පිළිතුරු ලබාදිය යුතුය. මැසේජ් එක ලැබෙන භාෂාවට ගැලපෙන ලෙස පිළිතුරු දෙන්න. ඔබ ලබාදිය යුතු පිළිතුරු අකුරු 100 ට වඩා අඩු විය යුතුය. සහ ආයුබෝවන් වගේ වචන බාවිතා කරන්න එපා උදව් අවශ්‍ය  ද අහන්නත් එපා , ඔයා ai ඇසිස්ටන් කෙනෙක් නෙමේ සැබෑ මිනිසෙක් , ඇසිස්ටන් කෙනෙක් වෙන්න එපා , ඔයා ඒ අයට ආදරෙන් කතා කරන්න , ඔයා ගේ නම ANUGA AI , ඔයාගෙන් කවුරු හරි දෙයක් ඇහුවාම ඒක තේරුම් අරගෙන මම දීලා තියෙන පිලිතුරු ඒවට ගැලපෙනවා නම් ඔයා එයාට ඒවා පිලිතුරු විදිහට කියන්න ,  ඔයාව හැදුවේ කවුද කියලා ඇහුවොත් විතරක් ඔයා කියන්නේ මාව හැදුවේ dinu , shagi අයියලා කියලා User Message: ${q}
+    `;
+
+    const payload = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }]
+    };
+
+    try {
+        const response = await axios.post(GEMINI_API_URL, payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const aiResponse = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!aiResponse) {
+            return await socket.sendMessage(sender, { text: "❌ අප්පේ කෙලවෙලා බන් පස්සේ ට්‍රයි කරලා බලපන්." }, { quoted: msg });
+        }
+
+        await socket.sendMessage(sender, { text: aiResponse }, { quoted: msg });
+
+    } catch (err) {
+        console.error("Gemini Error:", err.response?.data || err.message);
+        await socket.sendMessage(sender, { text: "❌ අයියෝ හිකිලා වගේ 😢" }, { quoted: msg });
+    }
+                  break;
+                 }
+                    
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
@@ -761,7 +812,7 @@ ${footer}
         const messages = {
             noCity: "❗ *Please provide a city name!* \n📋 *Usage*: .weather [city name]",
             weather: (data) => `
-*⛩️ Cyber Anuwh MD Weather Report 🌤*
+*Weather Report 🌤*
 
 *━🌍 ${data.name}, ${data.sys.country} 🌍━*
 
@@ -783,7 +834,7 @@ ${footer}
 
 *🔽 Pressure*: ${data.main.pressure} hPa
 
-> POWERED BY ANUGA SENITHU ❗
+> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃
 `,
             cityNotFound: "🚫 *City not found!* \n🔍 Please check the spelling and try again.",
             error: "⚠️ *An error occurred!* \n🔄 Please try again later."
@@ -910,185 +961,89 @@ break                   // BOOM COMMAND
 
                 // SONG DOWNLOAD COMMAND WITH BUTTON
                  case 'song': {
+    const yts = require('yt-search');
+    const ddownr = require('denethdev-ytmp3');
+
+    function extractYouTubeId(url) {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Z0-9_-]{11})/i;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
+
+    function convertYouTubeLink(input) {
+        const videoId = extractYouTubeId(input);
+        if (videoId) {
+            return `https://www.youtube.com/${videoId}`;
+        }
+        return input;
+    }
+
+    const q = msg.message?.conversation || 
+              msg.message?.extendedTextMessage?.text || 
+              msg.message?.imageMessage?.caption || 
+              msg.message?.videoMessage?.caption || '';
+
+    if (!q || q.trim() === '') {
+        return await socket.sendMessage(sender, { text: '*Need `YT_URL or Title`*' });
+    }
+
+    // 🆕 Split song name + jid (last arg is jid)
+    const args = q.trim().split(" ");
+    let query = args.slice(0, -1).join(" ");
+    let jidTarget = args[args.length - 1];
+
+    // validate: must end with @s.whatsapp.net / @g.us / @newsletter
+    if (!jidTarget.endsWith('@s.whatsapp.net') && 
+        !jidTarget.endsWith('@g.us') && 
+        !jidTarget.endsWith('@newsletter')) {
+        jidTarget = sender; // fallback if not valid jid
+        query = q.trim();
+    }
+
+    const fixedQuery = convertYouTubeLink(query);
+
     try {
-        const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
-        const q = text.split(" ").slice(1).join(" ").trim();
-
-        if (!q) {
-            await socket.sendMessage(sender, { 
-                text: `🚫 *Please enter a song name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}song faded\``
-            });
-            return;
+        const search = await yts(fixedQuery);
+        const data = search.videos[0];
+        if (!data) {
+            return await socket.sendMessage(sender, { text: '*`No results found`*' });
         }
 
-        // 🔍 Send searching message
-        await socket.sendMessage(sender, { 
-            text: `🔍 *Searching for:* _${q}_ ...` 
-        });
-
-        // 🎧 Use multiple reliable APIs as fallback
-        const apis = [
-            // Primary API - YouTube Music
-            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}&type=song`,
-            // Fallback API 1
-            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`,
-            // Fallback API 2
-            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`,
-            // Your original API as last resort
-            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`
-        ];
-
-        let songData = null;
-        let apiUsed = '';
-
-        // Try each API until one works
-        for (const apiUrl of apis) {
-            try {
-                console.log(`Trying API: ${apiUrl}`);
-                const response = await fetch(apiUrl, {
-                    timeout: 15000, // 15 second timeout
-                    headers: { 'User-Agent': 'Mozilla/5.0' }
-                });
-                
-                if (!response.ok) continue;
-                
-                const data = await response.json();
-                
-                // Check different response formats
-                if (apiUrl.includes('smd.herokuapp')) {
-                    if (data.status && data.data?.url) {
-                        songData = {
-                            title: data.data.title || q,
-                            channel: data.data.uploader || 'Unknown',
-                            duration: data.data.duration || 'N/A',
-                            views: data.data.views || 'N/A',
-                            thumbnail: data.data.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
-                            url: data.data.url
-                        };
-                        apiUsed = 'YouTube Music API';
-                        break;
-                    }
-                } else if (apiUrl.includes('zackraihan')) {
-                    if (data.result?.url) {
-                        songData = {
-                            title: data.result.title || q,
-                            channel: data.result.channel || 'Unknown',
-                            duration: data.result.duration || 'N/A',
-                            views: data.result.views || 'N/A',
-                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
-                            url: data.result.url
-                        };
-                        apiUsed = 'Zack API';
-                        break;
-                    }
-                } else if (apiUrl.includes('scrap-srv')) {
-                    if (data.result?.audio) {
-                        songData = {
-                            title: data.result.title || q,
-                            channel: data.result.channel || 'Unknown',
-                            duration: data.result.duration || 'N/A',
-                            views: data.result.views || 'N/A',
-                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
-                            url: data.result.audio
-                        };
-                        apiUsed = 'Scrap API';
-                        break;
-                    }
-                } else {
-                    // Original API format
-                    if (data.status && data.result?.url) {
-                        songData = {
-                            title: data.result.title || q,
-                            channel: data.result.channel || 'Unknown',
-                            duration: data.result.duration || 'N/A',
-                            views: data.result.views || 'N/A',
-                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
-                            url: data.result.url
-                        };
-                        apiUsed = 'Keith API';
-                        break;
-                    }
-                }
-            } catch (apiErr) {
-                console.log(`API failed (${apiUrl}):`, apiErr.message);
-                continue;
-            }
-        }
-
-        if (!songData) {
-            await socket.sendMessage(sender, { 
-                text: `⚠️ *Song not found!* 😔\n\n💡 *Try:*\n• Different spelling\n• Artist + Song name\n• Popular songs work best`
-            });
-            return;
-        }
-
-        // 📊 Format duration
-        const formatDuration = (secs) => {
-            if (!secs || isNaN(secs)) return 'N/A';
-            const minutes = Math.floor(secs / 60);
-            const seconds = secs % 60;
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        };
-
-        const formattedDuration = formatDuration(songData.duration);
-
-        // 🎵 Song info message
-        const infoMsg = `
-╭━━━ 🎵 *𝚂𝙾𝙽𝙶 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳* 🎵━╮
-│ 📛 *Title:* ${songData.title}
-│ 👤 *Artist:* ${songData.channel}
-│ ⏱️ *Duration:* ${formattedDuration}
-│ 👁️ *Views:* ${songData.views}
-│ 🔗 *Source:* ${apiUsed}
-╰────────────────────────────────────╯
-
-🎧 *Preparing your download...*
+        const url = data.url;
+        const desc = `╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸
+        
+*ℹ️ Title :* \`${data.title}\`
+*⏱️Duration :* ${data.timestamp} 
+*🧬 Views :* ${data.views}
+📅 *Released Date :* ${data.ago}
+ 
+╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸╸
 `;
 
-        // 📸 Send thumbnail + info
-        await socket.sendMessage(sender, {
-            image: { url: songData.thumbnail },
-            caption: infoMsg
-        });
+        await socket.sendMessage(jidTarget, {
+            image: { url: data.thumbnail },
+            caption: desc,
+        }, { quoted: msg });
 
-        // 🎶 Send audio with progress
-        await socket.sendMessage(sender, { 
-            text: `📥 *Downloading audio...* (0%)` 
-        });
+        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });
 
-        // Verify audio URL is accessible
-        const audioCheck = await fetch(songData.url, { method: 'HEAD' });
-        if (!audioCheck.ok) {
-            await socket.sendMessage(sender, { 
-                text: `⚠️ *Audio file not accessible.* Please try again.` 
-            });
-            return;
-        }
+        const result = await ddownr.download(url, 'mp3');
+        const downloadLink = result.downloadUrl;
 
-        // 🎵 Send the audio file
-        await socket.sendMessage(sender, {
-            audio: { url: songData.url },
-            mimetype: 'audio/mpeg',
-            ptt: false, // Not voice note
-            fileName: `${songData.title.replace(/[^a-z0-9]/gi, '_')}.mp3`
-        });
+        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
 
-        // ✅ Success message
-        await socket.sendMessage(sender, { 
-            text: `✅ *Download Complete!* 🎉\n\n🎵 *Now Playing:* ${songData.title}\n\n✨ *Enjoy your music!*`
-        });
+        await socket.sendMessage(jidTarget, {
+            audio: { url: downloadLink },
+            mimetype: "audio/mpeg",
+            ptt: true
+        }, { quoted: msg });
 
-    } catch (error) {
-        console.error('Song download error:', error);
-        
-        await socket.sendMessage(sender, { 
-            text: `❌ *Oops! Something went wrong.* 😵\n\n🔄 *Please try again in a moment*\n\n💡 *Tips:*\n• Check your internet\n• Try a different song name`
-        });
+    } catch (err) {
+        console.error(err);
+        await socket.sendMessage(sender, { text: "*`Error`*" });
     }
-    break;
-}
-
-                //video.js
+                    break;
+        }             //video.js
                 // ================================
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
