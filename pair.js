@@ -343,7 +343,7 @@ async function handleMessageRevocation(socket, number) {
         const messageKey = keys[0];
         const userJid = jidNormalizedUser(socket.user.id);
         const deletionTime = getSriLankaTimestamp();
-        
+
         const message = formatMessage(
             '╭──◯',
             `│ \`D E L E T E\`\n│ *⦁ From :* ${messageKey.remoteJid}\n│ *⦁ Time:* ${deletionTime}\n│ *⦁ Type: Normal*\n╰──◯`,
@@ -534,15 +534,17 @@ case 'menu': {
 
 🌐 *MAIN COMMANDS*
 ┏━━━━━━━━━━━━┓
-┃ ⚡ .alive → show bot info
-┃ ⚙️ .system → system details
-┃ 📶 .ping → check bot latency
+┃ ⚡ .alive 
+┃ ⚙️ .system
+┃ 📶 .ping 
+┃  🌲 .jid 
+┃  👀 .vv
 ┗━━━━━━━━━━━━┛
 
 🎵 *MEDIA DOWNLOADS*
 ┏━━━━━━━━━━━━┓
-┃ 🎧 .song → download audio
-┃ 🎬 .video → download video
+┃ 🎧 .song
+┃ 🎬 .video 
 ┗━━━━━━━━━━━━┛
 
 👤 *OTHER COMMANDS*
@@ -582,7 +584,7 @@ ${footer}
                         text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
                     break;
                 }
-                
+
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
@@ -632,7 +634,7 @@ ${footer}
     });
     break;
                 }
-                   
+
                 // JID COMMAND
                 case 'jid': {
                     await socket.sendMessage(sender, {
@@ -641,7 +643,27 @@ ${footer}
                     break;
                 }
 
-                // BOOM COMMAND        
+             case "vv": case "readviewonce": {
+ if (!isOwner) return reply(mess.owner);
+if (!m.quoted) return reply("reply means viewOnce nya!")
+let msg = m?.quoted?.message?.imageMessage || m?.quoted?.message?.videoMessage || m?.quoted?.message?.audioMessage || m?.quoted
+if (!msg.viewOnce && m.quoted.mtype !== "viewOnceMessageV2" && !msg.viewOnce) return reply("Pesan itu bukan viewonce!")
+const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
+let media = await downloadContentFromMessage(msg, msg.mimetype == 'image/jpeg' ? 'image' : msg.mimetype == 'video/mp4' ? 'video' : 'audio')
+    let type = msg.mimetype
+    let buffer = Buffer.from([])
+    for await (const chunk of media) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    if (/video/.test(type)) {
+        return Encore.sendMessage(m.chat, {video: buffer, caption: msg.caption || ""}, {quoted: m})
+    } else if (/image/.test(type)) {
+        return Encore.sendMessage(m.chat, {image: buffer, caption: msg.caption || ""}, {quoted: m})
+    } else if (/audio/.test(type)) {
+        return Encore.sendMessage(m.chat, {audio: buffer, mimetype: "audio/mpeg", ptt: true}, {quoted: m})
+    } 
+}
+break                   // BOOM COMMAND        
                 case 'boom': {
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
@@ -984,7 +1006,7 @@ async function EmpirePair(number, res) {
     const sanitizedNumber = number.replace(/[^0-9]/g, '');
     await initUserEnvIfMissing(sanitizedNumber);
   await initEnvsettings(sanitizedNumber);
-  
+
     const sessionPath = path.join(SESSION_BASE_PATH, `session_${sanitizedNumber}`);
 
     await cleanDuplicateFiles(sanitizedNumber);
