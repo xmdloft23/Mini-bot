@@ -537,8 +537,8 @@ case 'menu': {
 ┃ ⚡ .alive 
 ┃ ⚙️ .system
 ┃ 📶 .ping 
-┃ 🌲 .jid 
-┃ 👀 .vv
+┃  🌲 .jid 
+┃  👀 .vv
 ┗━━━━━━━━━━━━┛
 
 🎵 *MEDIA DOWNLOADS*
@@ -629,7 +629,7 @@ ${footer}
     const footer = config.BOT_FOOTER;
 
     await socket.sendMessage(sender, {
-        image: { url: "https://files.catbox.moe/bupsfv.jpg" },
+        image: { url: "https://files.catbox.moe/prrvct.png" },
         caption: formatMessage(title, content, footer)
     });
     break;
@@ -699,7 +699,7 @@ ${footer}
         return reply("Gagal mengunduh media!");
     }
 }
-break;                   // BOOM COMMAND        
+break                   // BOOM COMMAND        
                 case 'boom': {
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
@@ -731,133 +731,426 @@ break;                   // BOOM COMMAND
 
         if (!q) {
             await socket.sendMessage(sender, { 
-                text: `
-🚫 *Please enter a song name to search!*
-
-Example:
-> ${config.PREFIX}song faded
-`
+                text: `🚫 *Please enter a song name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}song faded\``
             });
             return;
         }
 
-        await socket.sendMessage(sender, { text: `🔍 *Searching for:* _${q}_ ...` });
+        // 🔍 Send searching message
+        await socket.sendMessage(sender, { 
+            text: `🔍 *Searching for:* _${q}_ ...` 
+        });
 
-        // 🎧 Use DavidCyrilTech API
-        const apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`;
-        const apiResponse = await fetch(apiUrl);
-        const data = await apiResponse.json();
+        // 🎧 Use multiple reliable APIs as fallback
+        const apis = [
+            // Primary API - YouTube Music
+            `https://api-smd.herokuapp.com/youtube/download?search=${encodeURIComponent(q)}&type=song`,
+            // Fallback API 1
+            `https://api.zackraihan.com/ytmp3?query=${encodeURIComponent(q)}`,
+            // Fallback API 2
+            `https://scrap-srv.vercel.app/api/ytmp3?query=${encodeURIComponent(q)}`,
+            // Your original API as last resort
+            `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`
+        ];
 
-        if (!data.status || !data.result?.url) {
+        let songData = null;
+        let apiUsed = '';
+
+        // Try each API until one works
+        for (const apiUrl of apis) {
+            try {
+                console.log(`Trying API: ${apiUrl}`);
+                const response = await fetch(apiUrl, {
+                    timeout: 15000, // 15 second timeout
+                    headers: { 'User-Agent': 'Mozilla/5.0' }
+                });
+                
+                if (!response.ok) continue;
+                
+                const data = await response.json();
+                
+                // Check different response formats
+                if (apiUrl.includes('smd.herokuapp')) {
+                    if (data.status && data.data?.url) {
+                        songData = {
+                            title: data.data.title || q,
+                            channel: data.data.uploader || 'Unknown',
+                            duration: data.data.duration || 'N/A',
+                            views: data.data.views || 'N/A',
+                            thumbnail: data.data.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
+                            url: data.data.url
+                        };
+                        apiUsed = 'YouTube Music API';
+                        break;
+                    }
+                } else if (apiUrl.includes('zackraihan')) {
+                    if (data.result?.url) {
+                        songData = {
+                            title: data.result.title || q,
+                            channel: data.result.channel || 'Unknown',
+                            duration: data.result.duration || 'N/A',
+                            views: data.result.views || 'N/A',
+                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
+                            url: data.result.url
+                        };
+                        apiUsed = 'Zack API';
+                        break;
+                    }
+                } else if (apiUrl.includes('scrap-srv')) {
+                    if (data.result?.audio) {
+                        songData = {
+                            title: data.result.title || q,
+                            channel: data.result.channel || 'Unknown',
+                            duration: data.result.duration || 'N/A',
+                            views: data.result.views || 'N/A',
+                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
+                            url: data.result.audio
+                        };
+                        apiUsed = 'Scrap API';
+                        break;
+                    }
+                } else {
+                    // Original API format
+                    if (data.status && data.result?.url) {
+                        songData = {
+                            title: data.result.title || q,
+                            channel: data.result.channel || 'Unknown',
+                            duration: data.result.duration || 'N/A',
+                            views: data.result.views || 'N/A',
+                            thumbnail: data.result.thumbnail || 'https://via.placeholder.com/300x300?text=No+Image',
+                            url: data.result.url
+                        };
+                        apiUsed = 'Keith API';
+                        break;
+                    }
+                }
+            } catch (apiErr) {
+                console.log(`API failed (${apiUrl}):`, apiErr.message);
+                continue;
+            }
+        }
+
+        if (!songData) {
             await socket.sendMessage(sender, { 
-                text: `⚠️ *Song not found or failed to fetch data.*  
-Please try another song 💫`
+                text: `⚠️ *Song not found!* 😔\n\n💡 *Try:*\n• Different spelling\n• Artist + Song name\n• Popular songs work best`
             });
             return;
         }
 
-        const { title, channel, duration, views, thumbnail, url } = data.result;
+        // 📊 Format duration
+        const formatDuration = (secs) => {
+            if (!secs || isNaN(secs)) return 'N/A';
+            const minutes = Math.floor(secs / 60);
+            const seconds = secs % 60;
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        };
 
+        const formattedDuration = formatDuration(songData.duration);
+
+        // 🎵 Song info message
         const infoMsg = `
-╭━━━ 🎧 *𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞m* 🎧━╮
-│ 💽 *Title:* ${title}
-│ 📺 *Channel:* ${channel || 'Unknown'}
-│ ⏱️ *Duration:* ${duration || 'N/A'}
-│ 👁️ *Views:* ${views || 'N/A'}
-│ 🔗 *URL:* ${url}
-╰━━━━━━━━━━━━━━━━━━━━━╯
+╭━━━ 🎵 *𝚂𝙾𝙽𝙶 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳* 🎵━╮
+│ 📛 *Title:* ${songData.title}
+│ 👤 *Artist:* ${songData.channel}
+│ ⏱️ *Duration:* ${formattedDuration}
+│ 👁️ *Views:* ${songData.views}
+│ 🔗 *Source:* ${apiUsed}
+╰────────────────────────────────────╯
 
-🎵 *Downloading your song...*  
-Please wait ⏳
+🎧 *Preparing your download...*
 `;
 
+        // 📸 Send thumbnail + info
         await socket.sendMessage(sender, {
-            image: { url: thumbnail },
-            caption: infoMsg,
-            footer: config.BOT_FOOTER || '𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
+            image: { url: songData.thumbnail },
+            caption: infoMsg
         });
 
-        // 🎶 Send audio
+        // 🎶 Send audio with progress
+        await socket.sendMessage(sender, { 
+            text: `📥 *Downloading audio...* (0%)` 
+        });
+
+        // Verify audio URL is accessible
+        const audioCheck = await fetch(songData.url, { method: 'HEAD' });
+        if (!audioCheck.ok) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Audio file not accessible.* Please try again.` 
+            });
+            return;
+        }
+
+        // 🎵 Send the audio file
         await socket.sendMessage(sender, {
-            audio: { url: data.result.url },
+            audio: { url: songData.url },
             mimetype: 'audio/mpeg',
-            fileName: `${title}.mp3`
+            ptt: false, // Not voice note
+            fileName: `${songData.title.replace(/[^a-z0-9]/gi, '_')}.mp3`
         });
 
+        // ✅ Success message
         await socket.sendMessage(sender, { 
-            text: `
-✅ *Download Complete!*  
-🎧 Now Playing: *${title}*
-
-Use *${config.PREFIX}menu* to explore more ✨
-`
+            text: `✅ *Download Complete!* 🎉\n\n🎵 *Now Playing:* ${songData.title}\n\n✨ *Enjoy your music!*`
         });
 
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error('Song download error:', error);
+        
         await socket.sendMessage(sender, { 
-            text: `
-❌ *Error fetching song.*  
-Please try again later 💔
-
-Use *${config.PREFIX}menu* to return to menu.
-`
+            text: `❌ *Oops! Something went wrong.* 😵\n\n🔄 *Please try again in a moment*\n\n💡 *Tips:*\n• Check your internet\n• Try a different song name`
         });
     }
     break;
-                 }
+}
 
                 //video.js
                 // ================================
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
 case 'video': {
-  try {
-    const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
-    const q = text.split(" ").slice(1).join(" ").trim();
-    if (!q) return await socket.sendMessage(sender, { text: "❌ Please provide a video name or keyword!" });
-
-    await socket.sendMessage(sender, { text: `🔍 Searching for video: *${q}* ...` });
-
-    // 🔎 Search YouTube video
-    const search = await fetch(`https://apis.davidcyriltech.my.id/search/youtube?query=${encodeURIComponent(q)}`);
-    const sdata = await search.json();
-    const vid = sdata.videos?.[0];
-    if (!vid) return await socket.sendMessage(sender, { text: "⚠️ No video found!" });
-
-    // 🔽 Try primary downloader → fallback
-    let down;
     try {
-      const r = await fetch(`https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(vid.url)}`);
-      const d = await r.json();
-      if (!d?.result?.download_url) throw 0;
-      down = { url: d.result.download_url, title: d.result.title, thumb: d.result.thumbnail, q: d.result.quality || "N/A" };
-    } catch {
-      const r = await fetch(`https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(vid.url)}`);
-      const d = await r.json();
-      if (!d?.data?.url) throw 0;
-      down = { url: d.data.url, title: d.data.title || vid.title, thumb: vid.thumbnail, q: "Fallback" };
+        const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
+        const q = text.split(" ").slice(1).join(" ").trim();
+
+        if (!q) {
+            await socket.sendMessage(sender, { 
+                text: `🚫 *Please enter a video name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}video baby shark\`\n\`${config.PREFIX}video funny cats\``
+            });
+            return;
+        }
+
+        // 🔍 Send searching message
+        await socket.sendMessage(sender, { 
+            text: `🔍 *Searching for video:* _${q}_ ...` 
+        });
+
+        // 🎥 Multiple search APIs for better results
+        const searchApis = [
+            `https://apis.davidcyriltech.my.id/search/youtube?query=${encodeURIComponent(q)}`,
+            `https://api-smd.herokuapp.com/youtube/search?query=${encodeURIComponent(q)}`,
+            `https://scrap-srv.vercel.app/api/youtube/search?query=${encodeURIComponent(q)}`
+        ];
+
+        let videoData = null;
+        let searchApiUsed = '';
+
+        // Try each search API until one works
+        for (const apiUrl of searchApis) {
+            try {
+                console.log(`Trying search API: ${apiUrl}`);
+                const response = await fetch(apiUrl, {
+                    timeout: 10000,
+                    headers: { 'User-Agent': 'Mozilla/5.0' }
+                });
+                
+                if (!response.ok) continue;
+                
+                const data = await response.json();
+                
+                // Parse different response formats
+                if (apiUrl.includes('davidcyriltech')) {
+                    if (data.videos?.[0]) {
+                        videoData = data.videos[0];
+                        searchApiUsed = 'David API';
+                        break;
+                    }
+                } else if (apiUrl.includes('smd.herokuapp')) {
+                    if (data.result?.[0]) {
+                        videoData = data.result[0];
+                        searchApiUsed = 'SMD API';
+                        break;
+                    }
+                } else if (apiUrl.includes('scrap-srv')) {
+                    if (data.videos?.[0]) {
+                        videoData = data.videos[0];
+                        searchApiUsed = 'Scrap API';
+                        break;
+                    }
+                }
+            } catch (searchErr) {
+                console.log(`Search API failed (${apiUrl}):`, searchErr.message);
+                continue;
+            }
+        }
+
+        if (!videoData) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Video not found!* 😔\n\n💡 *Try:*\n• Exact video title\n• "Artist - Song" format\n• Popular videos work best`
+            });
+            return;
+        }
+
+        // 🎬 Multiple download APIs with fallback
+        const downloadApis = [
+            // Primary downloaders
+            {
+                url: `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+                format: 'david'
+            },
+            {
+                url: `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+                format: 'iamtkm'
+            },
+            {
+                url: `https://api-smd.herokuapp.com/youtube/download?type=video&url=${encodeURIComponent(videoData.url)}`,
+                format: 'smd'
+            },
+            {
+                url: `https://scrap-srv.vercel.app/api/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+                format: 'scrap'
+            }
+        ];
+
+        let downloadData = null;
+        let downloadApiUsed = '';
+
+        // Try each download API until one works
+        for (const api of downloadApis) {
+            try {
+                console.log(`Trying download API: ${api.url}`);
+                const response = await fetch(api.url, {
+                    timeout: 20000, // 20s for video
+                    headers: { 'User-Agent': 'Mozilla/5.0' }
+                });
+                
+                if (!response.ok) continue;
+                
+                const data = await response.json();
+                
+                // Parse different download formats
+                if (api.format === 'david') {
+                    if (data?.result?.download_url) {
+                        downloadData = {
+                            url: data.result.download_url,
+                            title: data.result.title || videoData.title,
+                            thumb: data.result.thumbnail || videoData.thumbnail,
+                            quality: data.result.quality || '720p',
+                            duration: videoData.timestamp || videoData.duration
+                        };
+                        downloadApiUsed = 'David Downloader';
+                        break;
+                    }
+                } else if (api.format === 'iamtkm') {
+                    if (data?.data?.url) {
+                        downloadData = {
+                            url: data.data.url,
+                            title: data.data.title || videoData.title,
+                            thumb: videoData.thumbnail,
+                            quality: data.data.quality || '720p',
+                            duration: videoData.timestamp || videoData.duration
+                        };
+                        downloadApiUsed = 'IAMTKM';
+                        break;
+                    }
+                } else if (api.format === 'smd') {
+                    if (data?.data?.video) {
+                        downloadData = {
+                            url: data.data.video,
+                            title: data.data.title || videoData.title,
+                            thumb: videoData.thumbnail,
+                            quality: data.data.quality || '720p',
+                            duration: videoData.duration
+                        };
+                        downloadApiUsed = 'SMD Downloader';
+                        break;
+                    }
+                } else if (api.format === 'scrap') {
+                    if (data?.result?.video) {
+                        downloadData = {
+                            url: data.result.video,
+                            title: data.result.title || videoData.title,
+                            thumb: data.result.thumbnail || videoData.thumbnail,
+                            quality: data.result.quality || '720p',
+                            duration: videoData.duration
+                        };
+                        downloadApiUsed = 'Scrap Downloader';
+                        break;
+                    }
+                }
+            } catch (downloadErr) {
+                console.log(`Download API failed (${api.url}):`, downloadErr.message);
+                continue;
+            }
+        }
+
+        if (!downloadData) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Download failed!* 😞\n\n🔄 *Trying alternative method...` 
+            });
+            return;
+        }
+
+        // ⏱️ Format duration
+        const formatDuration = (secs) => {
+            if (!secs || isNaN(secs)) return 'N/A';
+            const minutes = Math.floor(secs / 60);
+            const seconds = secs % 60;
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        };
+
+        const formattedDuration = formatDuration(downloadData.duration);
+        const formattedViews = videoData.views ? 
+            `${(videoData.views / 1000000).toFixed(1)}M` : 'N/A';
+
+        // 🎬 Video info message
+        const infoMsg = `
+╭━━━ 🎬 *𝚅𝙸𝙳𝙴𝙾 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳* 🎬━╮
+│ 📛 *Title:* ${downloadData.title}
+│ 👤 *Channel:* ${videoData.author || 'Unknown'}
+│ ⏱️ *Duration:* ${formattedDuration}
+│ 💎 *Quality:* ${downloadData.quality}
+│ 👁️ *Views:* ${formattedViews}
+│ 🔗 *Source:* ${searchApiUsed}
+╰────────────────────────────────────╯
+
+📥 *Downloading your video...*
+`;
+
+        // 🖼️ Send thumbnail + info
+        await socket.sendMessage(sender, {
+            image: { url: downloadData.thumb },
+            caption: infoMsg
+        });
+
+        // 🔍 Verify video URL before sending
+        await socket.sendMessage(sender, { 
+            text: `📡 *Verifying video file...*` 
+        });
+
+        const videoCheck = await fetch(downloadData.url, { method: 'HEAD' });
+        if (!videoCheck.ok) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Video file not accessible.* Please try again.` 
+            });
+            return;
+        }
+
+        // 🎥 Send video with progress
+        await socket.sendMessage(sender, { 
+            text: `📥 *Sending video...* (0%)` 
+        });
+
+        // 🎬 Send the video file
+        await socket.sendMessage(sender, {
+            video: { url: downloadData.url },
+            mimetype: 'video/mp4',
+            fileName: `${downloadData.title.replace(/[^a-z0-9]/gi, '_')}.mp4`,
+            caption: `✅ *Video Downloaded Successfully!*\n\n🎬 *${downloadData.title}*\n💎 *Quality:* ${downloadData.quality}\n\n✨ *Powered by Sir LOFT*`
+        });
+
+        // ✅ Success message
+        await socket.sendMessage(sender, { 
+            text: `✅ *Download Complete!* 🎉\n\n📱 *Saved to your gallery!*\n\n🔄 *Try another video with:* \`${config.PREFIX}video [name]\``
+        });
+
+    } catch (error) {
+        console.error('Video download error:', error);
+        
+        await socket.sendMessage(sender, { 
+            text: `❌ *Oops! Video download failed.* 😵\n\n🔧 *Troubleshooting:*\n• Check your internet connection\n• Try a popular video title\n• Wait a moment and retry\n\n💡 *Example:* \`${config.PREFIX}video baby shark\``
+        });
     }
-
-    // 🖼️ Preview
-    await socket.sendMessage(sender, {
-      image: { url: down.thumb },
-      caption: `🎬 *${down.title}*\n📺 Quality: ${down.q}\n⏱️ Duration: ${vid.timestamp || "N/A"}\n👁️ Views: ${vid.views || "N/A"}\n\n📥 *Downloading video...*`
-    });
-
-    // 🎥 Send video
-    await socket.sendMessage(sender, {
-      video: { url: down.url },
-      mimetype: "video/mp4",
-      fileName: `${down.title}.mp4`,
-      caption: `𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃`
-    });
-
-  } catch (e) {
-    console.error(e);
-    await socket.sendMessage(sender, { text: "❌ Error fetching video. Try again later." });
-  }
-  break;
+    break;
 }
 
                 // NEWS COMMAND
