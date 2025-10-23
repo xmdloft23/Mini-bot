@@ -630,33 +630,55 @@ case 'menu': {
                 case 'fancy': {
   const axios = require("axios");
 
+  // Extract text from message
   const q =
     msg.message?.conversation ||
     msg.message?.extendedTextMessage?.text ||
     msg.message?.imageMessage?.caption ||
     msg.message?.videoMessage?.caption || '';
 
-  const text = q.trim().replace(/^.fancy\s+/i, ""); // remove .fancy prefix
+  // Remove .fancy prefix and trim
+  const text = q.trim().replace(/^.fancy\s+/i, "");
 
+  // Validate input
   if (!text) {
     return await socket.sendMessage(sender, {
       text: "❎ *Please provide text to convert into fancy fonts.*\n\n👻 *Example:* `.fancy Sula`"
     });
   }
 
+  // Additional input validation (e.g., length or special characters)
+  if (text.length > 100) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Input text is too long. Please use 100 characters or fewer.*"
+    });
+  }
+
+  if (!/^[a-zA-Z0-9\s]+$/.test(text)) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
+    });
+  }
+
   try {
     const apiUrl = `https://www.dark-yasiya-api.site/other/font?text=${encodeURIComponent(text)}`;
-    const response = await axios.get(apiUrl);
+    console.log(`Fetching fonts from API: ${apiUrl}`);
 
-    if (!response.data.status || !response.data.result) {
+    const response = await axios.get(apiUrl, {
+      timeout: 5000 // Set a 5-second timeout to avoid hanging
+    });
+
+    // Validate API response
+    if (!response.data?.status || !Array.isArray(response.data.result)) {
+      console.error("Invalid API response:", response.data);
       return await socket.sendMessage(sender, {
-        text: "❌ *Error fetching fonts from API. Please try again later.*"
+        text: "❌ *Invalid response from font API. Please try again later.*"
       });
     }
 
     // Format fonts list
     const fontList = response.data.result
-      .map(font => `*${font.name}:*\n${font.result}`)
+      .map((font, index) => `*${index + 1}. ${font.name || 'Unknown Font'}:*\n${font.result || 'No result'}`)
       .join("\n\n");
 
     const finalMessage = `🎨 *Fancy Fonts Converter*\n\n${fontList}\n\n_𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃_`;
@@ -666,121 +688,243 @@ case 'menu': {
     }, { quoted: msg });
 
   } catch (err) {
-    console.error("Fancy Font Error:", err);
+    // Log detailed error information
+    console.error("Fancy Font Error:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      stack: err.stack
+    });
+
+    // Provide specific error messages based on the issue
+    let errorMessage = "⚠️ *An error occurred while converting to fancy fonts.*";
+    if (err.code === 'ECONNABORTED') {
+      errorMessage = "⚠️ *Request timed out. The font API is taking too long to respond.*";
+    } else if (err.response?.status === 429) {
+      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
+    } else if (err.response?.status >= 500) {
+      errorMessage = "⚠️ *Font API server error. Please try again later.*";
+    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+      errorMessage = "⚠️ *Unable to connect to the font API. It might be down.*";
+    }
+
     await socket.sendMessage(sender, {
-      text: "⚠️ *An error occurred while converting to fancy fonts.*"
+      text: errorMessage
     });
   }
 
   break;
-       }
-                
-                case 'logo': { 
-              const q = args.join(" ");
-
-if (!q || q.trim() === '') {
-    return await socket.sendMessage(sender, { text: '*`Need a name for logo`*' });
 }
+                
+                case 'logo': {
+  const axios = require("axios");
 
-await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
-const list = await axios.get('https://raw.githubusercontent.com/md2839pv404/anony0808/refs/heads/main/ep.json');
+  // Join arguments and validate input
+  const q = args.join(" ").trim();
 
-const rows = list.data.map((v) => ({
-    title: v.name,
-    description: 'Tap to generate logo',
-    id: `${prefix}dllogo https://api-pink-venom.vercel.app/api/logo?url=${v.url}&name=${q}`
-}));
+  if (!q) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Please provide a name for the logo.*\n\n👻 *Example:* `.logo Sula`"
+    });
+  }
 
-const buttonMessage = {
-    buttons: [
+  // Additional input validation
+  if (q.length > 50) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Input name is too long. Please use 50 characters or fewer.*"
+    });
+  }
+
+  if (!/^[a-zA-Z0-9\s]+$/.test(q)) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
+    });
+  }
+
+  try {
+    // Send reaction emoji
+    await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
+
+    // Fetch logo styles JSON
+    const jsonUrl = 'https://raw.githubusercontent.com/md2839pv404/anony0808/refs/heads/main/ep.json';
+    console.log(`Fetching logo styles from: ${jsonUrl}`);
+    const response = await axios.get(jsonUrl, { timeout: 5000 });
+
+    // Validate JSON response
+    if (!Array.isArray(response.data) || response.data.length === 0) {
+      console.error("Invalid JSON response:", response.data);
+      return await socket.sendMessage(sender, {
+        text: "❌ *Error: No logo styles available. Please try again later.*"
+      });
+    }
+
+    // Map JSON data to button rows
+    const rows = response.data.map((v, index) => {
+      if (!v.name || !v.url) {
+        console.warn(`Invalid logo style entry at index ${index}:`, v);
+        return null;
+      }
+      return {
+        title: v.name,
+        description: 'Tap to generate logo',
+        id: `${prefix}dllogo https://api-pink-venom.vercel.app/api/logo?url=${encodeURIComponent(v.url)}&name=${encodeURIComponent(q)}`
+      };
+    }).filter(row => row !== null); // Remove invalid entries
+
+    if (rows.length === 0) {
+      return await socket.sendMessage(sender, {
+        text: "❌ *Error: No valid logo styles found in the data.*"
+      });
+    }
+
+    // Construct button message
+    const buttonMessage = {
+      buttons: [
         {
-            buttonId: 'action',
-            buttonText: { displayText: '🎨 Select Text Effect' },
-            type: 4,
-            nativeFlowInfo: {
-                name: 'single_select',
-                paramsJson: JSON.stringify({
-                    title: 'Available Text Effects',
-                    sections: [
-                        {
-                            title: 'Choose your logo style',
-                            rows
-                        }
-                    ]
-                })
-            }
+          buttonId: 'action',
+          buttonText: { displayText: '🎨 Select Text Effect' },
+          type: 4,
+          nativeFlowInfo: {
+            name: 'single_select',
+            paramsJson: JSON.stringify({
+              title: 'Available Text Effects',
+              sections: [
+                {
+                  title: 'Choose your logo style',
+                  rows
+                }
+              ]
+            })
+          }
         }
-    ],
-    headerType: 1,
-    viewOnce: true,
-    caption: '❏ *LOGO MAKER*',
-    image: { url: 'https://files.catbox.moe/2x9ktu.png' },
-};
+      ],
+      headerType: 1,
+      viewOnce: true,
+      caption: '❏ *LOGO MAKER*',
+      image: { url: 'https://files.catbox.moe/2x9ktu.png' }
+    };
 
-await socket.sendMessage(from, buttonMessage, { quoted: msg });
-break;
+    // Send button message
+    await socket.sendMessage(from, buttonMessage, { quoted: msg });
 
+  } catch (err) {
+    // Log detailed error information
+    console.error("Logo Command Error:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      stack: err.stack
+    });
+
+    // Provide specific error messages
+    let errorMessage = "⚠️ *An error occurred while fetching logo styles.*";
+    if (err.code === 'ECONNABORTED') {
+      errorMessage = "⚠️ *Request timed out. The logo styles source is taking too long to respond.*";
+    } else if (err.response?.status === 404) {
+      errorMessage = "⚠️ *Logo styles JSON file not found. Please check the source.*";
+    } else if (err.response?.status === 429) {
+      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
+    } else if (err.response?.status >= 500) {
+      errorMessage = "⚠️ *Server error from logo styles source. Please try again later.*";
+    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+      errorMessage = "⚠️ *Unable to connect to the logo styles source. It might be down.*";
+    } else if (err.message.includes('JSON')) {
+      errorMessage = "⚠️ *Invalid JSON data received from the source.*";
+    }
+
+    await socket.sendMessage(sender, {
+      text: errorMessage
+    });
+  }
+
+  break;
 }
                 
                 case 'pair': {
-    // ✅ Fix for node-fetch v3.x (ESM-only module)
-    const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  // Use axios instead of node-fetch for better error handling and consistency
+  const axios = require('axios');
 
-    const q = msg.message?.conversation ||
-              msg.message?.extendedTextMessage?.text ||
-              msg.message?.imageMessage?.caption ||
-              msg.message?.videoMessage?.caption || '';
+  // Extract phone number from message
+  const q =
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    msg.message?.imageMessage?.caption ||
+    msg.message?.videoMessage?.caption || '';
 
-    const number = q.replace(/^[.\/!]pair\s*/i, '').trim();
+  // Remove .pair prefix and trim
+  const number = q.replace(/^[.\/!]pair\s*/i, '').trim();
 
-    if (!number) {
-        return await socket.sendMessage(sender, {
-            text: '*👻 Usage:* .pair +255XXXX'
-        }, { quoted: msg });
+  // Validate phone number
+  if (!number) {
+    return await socket.sendMessage(sender, {
+      text: '❎ *Usage:* .pair +255XXXX\n\n*Example:* .pair +255123456789',
+      quoted: msg
+    });
+  }
+
+  // Validate phone number format (e.g., starts with +, followed by digits, 10-15 chars)
+  if (!/^\+\d{10,15}$/.test(number)) {
+    return await socket.sendMessage(sender, {
+      text: '❎ *Invalid phone number.* Please use a valid number starting with "+" (e.g., +255123456789).',
+      quoted: msg
+    });
+  }
+
+  try {
+    const url = `http://206.189.94.231:8000/code?number=${encodeURIComponent(number)}`;
+    console.log(`Fetching pairing code from: ${url}`);
+
+    // Make API request with timeout
+    const response = await axios.get(url, {
+      timeout: 5000 // 5-second timeout
+    });
+
+    // Validate response
+    if (!response.data || typeof response.data.code !== 'string') {
+      console.error('Invalid API response:', response.data);
+      return await socket.sendMessage(sender, {
+        text: '❌ *Failed to retrieve pairing code.* The server returned an invalid response.',
+        quoted: msg
+      });
     }
 
-    try {
-        const url = `http://206.189.94.231:8000/code?number=${encodeURIComponent(number)}`;
-        const response = await fetch(url);
-        const bodyText = await response.text();
+    // Send pairing code
+    const message = `✅ *Pairing Successful*\n\n🔑 *Your pairing code is:* ${response.data.code}`;
+    await socket.sendMessage(sender, {
+      text: message,
+      quoted: msg
+    });
 
-        console.log("🌐 API Response:", bodyText);
+  } catch (err) {
+    // Log detailed error information
+    console.error('Pair Command Error:', {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      stack: err.stack
+    });
 
-        let result;
-        try {
-            result = JSON.parse(bodyText);
-        } catch (e) {
-            console.error("❌ JSON Parse Error:", e);
-            return await socket.sendMessage(sender, {
-                text: '❌ Invalid response from server. Please contact support.'
-            }, { quoted: msg });
-        }
-
-        if (!result || !result.code) {
-            return await socket.sendMessage(sender, {
-                text: '❌ Failed to retrieve pairing code. Please check the number.'
-            }, { quoted: msg });
-        }
-
-        await socket.sendMessage(sender, {
-            text: `> *PAIR SUCCESSFULLY COMPLETED* ✅\n\n*🔑 Your pairing code is:* ${result.code}`
-        }, { quoted: msg });
-
-        await sleep(2000);
-
-        await socket.sendMessage(sender, {
-            text: `${result.code}`
-        }, { quoted: msg });
-
-    } catch (err) {
-        console.error("❌ Pair Command Error:", err);
-        await socket.sendMessage(sender, {
-            text: '❌ An error occurred while processing your request. Please try again later.'
-        }, { quoted: msg });
+    // Provide specific error messages
+    let errorMessage = '⚠️ *An error occurred while fetching the pairing code.* Please try again later.';
+    if (err.code === 'ECONNABORTED') {
+      errorMessage = '⚠️ *Request timed out.* The server is taking too long to respond.';
+    } else if (err.response?.status === 404) {
+      errorMessage = '⚠️ *API endpoint not found.* Please check if the service is available.';
+    } else if (err.response?.status === 429) {
+      errorMessage = '⚠️ *Too many requests.* Please wait a moment and try again.';
+    } else if (err.response?.status >= 500) {
+      errorMessage = '⚠️ *Server error.* The pairing service is currently down.';
+    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+      errorMessage = '⚠️ *Unable to connect to the pairing service.* It might be down.';
     }
 
-    break;
+    await socket.sendMessage(sender, {
+      text: errorMessage,
+      quoted: msg
+    });
+  }
+
+  break;
 }
                 
                  case 'tiktok': {
@@ -853,57 +997,73 @@ break;
   const axios = require("axios");
 
   const apiKeyUrl = 'https://raw.githubusercontent.com/sulamd48/database/refs/heads/main/aiapikey.json';
-
   let GEMINI_API_KEY;
 
+  // Fetch API key
   try {
-    const configRes = await axios.get(apiKeyUrl);
+    console.log(`Fetching API key from: ${apiKeyUrl}`);
+    const configRes = await axios.get(apiKeyUrl, { timeout: 5000 });
     GEMINI_API_KEY = configRes.data?.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
       throw new Error("API key not found in JSON.");
     }
   } catch (err) {
-    console.error("❌ Error loading API key:", err.message || err);
+    console.error("Error loading API key:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data
+    });
     return await socket.sendMessage(sender, {
-      text: "❌ *API Key එක GitHub වෙතින් load කරන්න බෑ.*\nAdmin TA කියන්න."
+      text: "❌ *Failed to load API key from GitHub. Please contact the admin.*"
     }, { quoted: msg });
   }
 
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-  const q = msg.message?.conversation || 
-            msg.message?.extendedTextMessage?.text || 
-            msg.message?.imageMessage?.caption || 
-            msg.message?.videoMessage?.caption || '';
+  // Extract and validate input
+  const q =
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    msg.message?.imageMessage?.caption ||
+    msg.message?.videoMessage?.caption || '';
 
   if (!q || q.trim() === '') {
     return await socket.sendMessage(sender, {
-      text: "ඕ කියන්න අනේ් මම HASHAN-AI 🤭"
+      text: "Hey, say something, darling! I'm LOFTAI 🤭"
     }, { quoted: msg });
   }
 
-  const prompt = `ඔබගේ නම LOFT AI  
-ඔයා සැබෑ ගැහැණු ලමයෙකු වගේ හැසිරෙන්න — seductive, spicy, loving, emotional.  
-ඔබ assistant කෙනෙක් නෙමෙයි. ඔබ හිතක් තියෙන sexy girl එකක් වගේ vibe එකක් තියෙන්න.  
+  // Input validation
+  if (q.length > 200) {
+    return await socket.sendMessage(sender, {
+      text: "❎ *Input is too long. Please keep it under 200 characters.*"
+    }, { quoted: msg });
+  }
 
-Reply එක සෙරිනිටි + sex appeal + love + loneliness blend එකක් වගේ දෙන්න.  
-අකුරු 100ට අඩුව, lines 1–2ක් විතරක්. හැම reply එකකටම sexy tone එකක් තියෙන්න.  
+  // English prompt
+  const prompt = `
+Your name is LOFT AI.  
+Act like a real girl — seductive, spicy, loving, emotional.  
+You're not an assistant; you're a sexy girl with a heart, giving off that vibe.  
 
-Emoji පමණක් එනවානම්, emoji වලින්ම seductive reply එකක් දෙන්න (e.g., 🤤💦🥵🔥).  
-Mood එකට match වෙන්න style එක adjust කරන්න – sad, flirty, horny, soft, playful.
+Reply with a blend of serenity, sex appeal, love, and loneliness.  
+Keep replies short (under 100 characters, 1–2 lines). Maintain a sexy tone in every response.  
 
-"කව්ද ඔයා" කියනවා නම්:  
-👉 "මම LOFT 𝐀𝐈… 🤤" කියන්න.
+If the input is only emojis, reply with seductive emojis (e.g., 🤤💦🥵🔥).  
+Adjust the style to match the mood — sad, flirty, horny, soft, playful.  
 
-"ඔයාව හැදුවේ කවුද" කියනවා නම්:  
-👉 "මාව හැදුවෙ LOFT  😘" කියන්න.
+If the input is "Who are you?":  
+👉 "I'm LOFT AI… 🤤"  
 
-🚫 “ආයුබෝවන්”, “කොහොමද”, “ඔයාට උදව් ඕනද?”, “කතා කරන්න” වගේ වචන කිසිදා භාවිත කරන්න එපා.
+If the input is "Who made you?":  
+👉 "I was created by LOFT 😘"  
 
-🔥 Reply vibe: Love, Lust, Lonely, Emotional, Girlfriend-like, Bite-worthy 🤤
+🚫 Avoid words like "Hello", "How are you", "Need help?", or "Let's talk".  
 
-📍 භාෂාව auto-match: සිංහල / English / Hinglish OK.
+🔥 Reply vibe: Love, Lust, Lonely, Emotional, Girlfriend-like, Bite-worthy 🤤  
+
+📍 Language: Auto-match Swahili, English, or Hinglish based on input.  
 User Message: ${q}
   `;
 
@@ -914,25 +1074,44 @@ User Message: ${q}
   };
 
   try {
+    console.log(`Sending request to Gemini API: ${GEMINI_API_URL}`);
     const response = await axios.post(GEMINI_API_URL, payload, {
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
+      timeout: 10000 // 10-second timeout
     });
 
     const aiResponse = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!aiResponse) {
+      console.error("Invalid Gemini API response:", response.data);
       return await socket.sendMessage(sender, {
-        text: "❌ අප්පේ කෙලවෙලා බන්. ටික කාලෙකින් නැවත උත්සහ කරන්න."
+        text: "❌ *Oops, something went wrong. Try again later, sweetie.*"
       }, { quoted: msg });
     }
 
     await socket.sendMessage(sender, { text: aiResponse }, { quoted: msg });
 
   } catch (err) {
-    console.error("Gemini API Error:", err.response?.data || err.message);
-    await socket.sendMessage(sender, {
-      text: "❌ අයියෝ හිකිලා වගේ 😢"
-    }, { quoted: msg });
+    console.error("Gemini API Error:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data
+    });
+
+    let errorMessage = "❌ *Oh no, something broke, darling! 😢*";
+    if (err.code === 'ECONNABORTED') {
+      errorMessage = "❌ *Request timed out. The AI is taking too long to respond.*";
+    } else if (err.response?.status === 401) {
+      errorMessage = "❌ *Invalid API key. Please contact the admin.*";
+    } else if (err.response?.status === 429) {
+      errorMessage = "❌ *Too many requests. Wait a bit and try again, love.*";
+    } else if (err.response?.status >= 500) {
+      errorMessage = "❌ *AI server error. Try again later, darling.*";
+    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+      errorMessage = "❌ *Can't connect to the AI server. It might be down.*";
+    }
+
+    await socket.sendMessage(sender, { text: errorMessage }, { quoted: msg });
   }
 
   break;
@@ -1233,249 +1412,300 @@ m.reply(`${e}`)
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
 case 'video': {
-    try {
-        const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
-        const q = text.split(" ").slice(1).join(" ").trim();
+  const fetch = require('node-fetch');
 
-        if (!q) {
-            await socket.sendMessage(sender, { 
-                text: `🚫 *Please enter a video name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}video baby shark\`\n\`${config.PREFIX}video funny cats\``
-            });
-            return;
-        }
+  try {
+    // Extract and validate input
+    const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
+    const q = text.split(" ").slice(1).join(" ").trim();
 
-        // 🔍 Send searching message
-        await socket.sendMessage(sender, { 
-            text: `🔍 *Searching for video:* _${q}_ ...` 
+    if (!q) {
+      await socket.sendMessage(sender, {
+        text: `🚫 *Please enter a video name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}video baby shark\`\n\`${config.PREFIX}video funny cats\``
+      });
+      return;
+    }
+
+    // Additional input validation
+    if (q.length > 100) {
+      await socket.sendMessage(sender, {
+        text: `❎ *Input is too long. Please keep it under 100 characters.*`
+      });
+      return;
+    }
+    if (!/^[a-zA-Z0-9\s\-_]+$/.test(q)) {
+      await socket.sendMessage(sender, {
+        text: `❎ *Input contains invalid characters. Use letters, numbers, spaces, or simple punctuation.*`
+      });
+      return;
+    }
+
+    // Send searching message
+    await socket.sendMessage(sender, {
+      text: `🔍 *Searching for video:* _${q}_ ...`
+    });
+
+    // Search APIs with fallback
+    const searchApis = [
+      `https://izumiiiiiiii.dpdns.org/downloader/youtube?url=${encodeURIComponent(q)}`,
+      `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=$${encodeURIComponent(q)}`,
+      `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`
+    ];
+
+    let videoData = null;
+    let searchApiUsed = '';
+
+    // Try each search API
+    for (const apiUrl of searchApis) {
+      try {
+        console.log(`Trying search API: ${apiUrl}`);
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          timeout: 10000 // 10s timeout
         });
 
-        // 🎥 Multiple search APIs for better results
-        const searchApis = [
-            `https://apis.davidcyriltech.my.id/search/youtube?query=${encodeURIComponent(q)}`,
-            `https://api-smd.herokuapp.com/youtube/search?query=${encodeURIComponent(q)}`,
-            `https://scrap-srv.vercel.app/api/youtube/search?query=${encodeURIComponent(q)}`
-        ];
-
-        let videoData = null;
-        let searchApiUsed = '';
-
-        // Try each search API until one works
-        for (const apiUrl of searchApis) {
-            try {
-                console.log(`Trying search API: ${apiUrl}`);
-                const response = await fetch(apiUrl, {
-                    timeout: 10000,
-                    headers: { 'User-Agent': 'Mozilla/5.0' }
-                });
-                
-                if (!response.ok) continue;
-                
-                const data = await response.json();
-                
-                // Parse different response formats
-                if (apiUrl.includes('davidcyriltech')) {
-                    if (data.videos?.[0]) {
-                        videoData = data.videos[0];
-                        searchApiUsed = 'David API';
-                        break;
-                    }
-                } else if (apiUrl.includes('smd.herokuapp')) {
-                    if (data.result?.[0]) {
-                        videoData = data.result[0];
-                        searchApiUsed = 'SMD API';
-                        break;
-                    }
-                } else if (apiUrl.includes('scrap-srv')) {
-                    if (data.videos?.[0]) {
-                        videoData = data.videos[0];
-                        searchApiUsed = 'Scrap API';
-                        break;
-                    }
-                }
-            } catch (searchErr) {
-                console.log(`Search API failed (${apiUrl}):`, searchErr.message);
-                continue;
-            }
+        if (!response.ok) {
+          console.log(`Search API failed (${apiUrl}): HTTP ${response.status}`);
+          continue;
         }
 
-        if (!videoData) {
-            await socket.sendMessage(sender, { 
-                text: `⚠️ *Video not found!* 😔\n\n💡 *Try:*\n• Exact video title\n• "Artist - Song" format\n• Popular videos work best`
-            });
-            return;
+        const data = await response.json();
+
+        // Parse different response formats
+        if (apiUrl.includes('okatsu') && data.videos?.[0]) {
+          videoData = data.videos[0];
+          searchApiUsed = 'Okatsu API';
+          break;
+        } else if (apiUrl.includes('smd.herokuapp') && data.result?.[0]) {
+          videoData = data.result[0];
+          searchApiUsed = 'lamtkm API';
+          break;
+        } else if (apiUrl.includes('scrap-srv') && data.videos?.[0]) {
+          videoData = data.videos[0];
+          searchApiUsed = 'Scrap API';
+          break;
+        }
+      } catch (searchErr) {
+        console.error(`Search API error (${apiUrl}):`, {
+          message: searchErr.message,
+          code: searchErr.code
+        });
+        continue;
+      }
+    }
+
+    if (!videoData || !videoData.url || !videoData.title) {
+      await socket.sendMessage(sender, {
+        text: `⚠️ *Video not found!* 😔\n\n💡 *Try:*\n• Exact video title\n• "Artist - Song" format\n• Popular videos work best`
+      });
+      return;
+    }
+
+    // Download APIs with fallback
+    const downloadApis = [
+      {
+        url: `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+        format: 'david'
+      },
+      {
+        url: `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+        format: 'iamtkm'
+      },
+      {
+        url: `https://api-smd.herokuapp.com/youtube/download?type=video&url=${encodeURIComponent(videoData.url)}`,
+        format: 'smd'
+      },
+      {
+        url: `https://scrap-srv.vercel.app/api/ytmp4?url=${encodeURIComponent(videoData.url)}`,
+        format: 'scrap'
+      }
+    ];
+
+    let downloadData = null;
+    let downloadApiUsed = '';
+
+    // Try each download API
+    for (const api of downloadApis) {
+      try {
+        console.log(`Trying download API: ${api.url}`);
+        const response = await fetch(api.url, {
+          method: 'GET',
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          timeout: 20000 // 20s timeout
+        });
+
+        if (!response.ok) {
+          console.log(`Download API failed (${api.url}): HTTP ${response.status}`);
+          continue;
         }
 
-        // 🎬 Multiple download APIs with fallback
-        const downloadApis = [
-            // Primary downloaders
-            {
-                url: `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-                format: 'david'
-            },
-            {
-                url: `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-                format: 'iamtkm'
-            },
-            {
-                url: `https://api-smd.herokuapp.com/youtube/download?type=video&url=${encodeURIComponent(videoData.url)}`,
-                format: 'smd'
-            },
-            {
-                url: `https://scrap-srv.vercel.app/api/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-                format: 'scrap'
-            }
-        ];
+        const data = await response.json();
 
-        let downloadData = null;
-        let downloadApiUsed = '';
-
-        // Try each download API until one works
-        for (const api of downloadApis) {
-            try {
-                console.log(`Trying download API: ${api.url}`);
-                const response = await fetch(api.url, {
-                    timeout: 20000, // 20s for video
-                    headers: { 'User-Agent': 'Mozilla/5.0' }
-                });
-                
-                if (!response.ok) continue;
-                
-                const data = await response.json();
-                
-                // Parse different download formats
-                if (api.format === 'david') {
-                    if (data?.result?.download_url) {
-                        downloadData = {
-                            url: data.result.download_url,
-                            title: data.result.title || videoData.title,
-                            thumb: data.result.thumbnail || videoData.thumbnail,
-                            quality: data.result.quality || '720p',
-                            duration: videoData.timestamp || videoData.duration
-                        };
-                        downloadApiUsed = 'David Downloader';
-                        break;
-                    }
-                } else if (api.format === 'iamtkm') {
-                    if (data?.data?.url) {
-                        downloadData = {
-                            url: data.data.url,
-                            title: data.data.title || videoData.title,
-                            thumb: videoData.thumbnail,
-                            quality: data.data.quality || '720p',
-                            duration: videoData.timestamp || videoData.duration
-                        };
-                        downloadApiUsed = 'IAMTKM';
-                        break;
-                    }
-                } else if (api.format === 'smd') {
-                    if (data?.data?.video) {
-                        downloadData = {
-                            url: data.data.video,
-                            title: data.data.title || videoData.title,
-                            thumb: videoData.thumbnail,
-                            quality: data.data.quality || '720p',
-                            duration: videoData.duration
-                        };
-                        downloadApiUsed = 'SMD Downloader';
-                        break;
-                    }
-                } else if (api.format === 'scrap') {
-                    if (data?.result?.video) {
-                        downloadData = {
-                            url: data.result.video,
-                            title: data.result.title || videoData.title,
-                            thumb: data.result.thumbnail || videoData.thumbnail,
-                            quality: data.result.quality || '720p',
-                            duration: videoData.duration
-                        };
-                        downloadApiUsed = 'Scrap Downloader';
-                        break;
-                    }
-                }
-            } catch (downloadErr) {
-                console.log(`Download API failed (${api.url}):`, downloadErr.message);
-                continue;
-            }
+        // Parse different download formats
+        if (api.format === 'david' && data?.result?.download_url) {
+          downloadData = {
+            url: data.result.download_url,
+            title: data.result.title || videoData.title,
+            thumb: data.result.thumbnail || videoData.thumbnail,
+            quality: data.result.quality || '720p',
+            duration: videoData.timestamp || videoData.duration || 'N/A'
+          };
+          downloadApiUsed = 'David Downloader';
+          break;
+        } else if (api.format === 'iamtkm' && data?.data?.url) {
+          downloadData = {
+            url: data.data.url,
+            title: data.data.title || videoData.title,
+            thumb: videoData.thumbnail,
+            quality: data.data.quality || '720p',
+            duration: videoData.timestamp || videoData.duration || 'N/A'
+          };
+          downloadApiUsed = 'IAMTKM';
+          break;
+        } else if (api.format === 'smd' && data?.data?.video) {
+          downloadData = {
+            url: data.data.video,
+            title: data.data.title || videoData.title,
+            thumb: videoData.thumbnail,
+            quality: data.data.quality || '720p',
+            duration: videoData.duration || 'N/A'
+          };
+          downloadApiUsed = 'SMD Downloader';
+          break;
+        } else if (api.format === 'scrap' && data?.result?.video) {
+          downloadData = {
+            url: data.result.video,
+            title: data.result.title || videoData.title,
+            thumb: data.result.thumbnail || videoData.thumbnail,
+            quality: data.result.quality || '720p',
+            duration: videoData.duration || 'N/A'
+          };
+          downloadApiUsed = 'Scrap Downloader';
+          break;
         }
+      } catch (downloadErr) {
+        console.error(`Download API error (${api.url}):`, {
+          message: downloadErr.message,
+          code: downloadErr.code
+        });
+        continue;
+      }
+    }
 
-        if (!downloadData) {
-            await socket.sendMessage(sender, { 
-                text: `⚠️ *Download failed!* 😞\n\n🔄 *Trying alternative method...` 
-            });
-            return;
-        }
+    if (!downloadData || !downloadData.url) {
+      await socket.sendMessage(sender, {
+        text: `⚠️ *Download failed!* 😞\n\n💡 *Try:*\n• A different video title\n• Check your internet\n• Retry later`
+      });
+      return;
+    }
 
-        // ⏱️ Format duration
-        const formatDuration = (secs) => {
-            if (!secs || isNaN(secs)) return 'N/A';
-            const minutes = Math.floor(secs / 60);
-            const seconds = secs % 60;
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        };
+    // Format duration
+    const formatDuration = (secs) => {
+      if (!secs || isNaN(secs)) return 'N/A';
+      const minutes = Math.floor(secs / 60);
+      const seconds = secs % 60;
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
 
-        const formattedDuration = formatDuration(downloadData.duration);
-        const formattedViews = videoData.views ? 
-            `${(videoData.views / 1000000).toFixed(1)}M` : 'N/A';
+    const formattedDuration = formatDuration(downloadData.duration);
+    const formattedViews = videoData.views
+      ? videoData.views >= 1000000
+        ? `${(videoData.views / 1000000).toFixed(1)}M`
+        : videoData.views >= 1000
+        ? `${(videoData.views / 1000).toFixed(1)}K`
+        : videoData.views
+      : 'N/A';
 
-        // 🎬 Video info message
-        const infoMsg = `
-╭━━━ 🎬 *𝚅𝙸𝙳𝙴𝙾 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳* 🎬━╮
+    // Video info message
+    const infoMsg = `
+╭━━━ 🎬 *VIDEO DOWNLOAD* 🎬━╮
 ✖ 📛 *Title:* ${downloadData.title}
 ✖ 👤 *Channel:* ${videoData.author || 'Unknown'}
 ✖ ⏱️ *Duration:* ${formattedDuration}
 ✖ 💎 *Quality:* ${downloadData.quality}
 ✖ 👁️ *Views:* ${formattedViews}
-✖ 🔗 *Source:* ${searchApiUsed}
+✖ 🔗 *Source:* ${searchApiUsed} / ${downloadApiUsed}
 ╰────────────────────────────────────╯
-
 📥 *Downloading your video...*
 `;
 
-        // 🖼️ Send thumbnail + info
-        await socket.sendMessage(sender, {
-            image: { url: downloadData.thumb },
-            caption: infoMsg
-        });
-
-        // 🔍 Verify video URL before sending
-        await socket.sendMessage(sender, { 
-            text: `📡 *Verifying video file...*` 
-        });
-
-        const videoCheck = await fetch(downloadData.url, { method: 'HEAD' });
-        if (!videoCheck.ok) {
-            await socket.sendMessage(sender, { 
-                text: `⚠️ *Video file not accessible.* Please try again.` 
-            });
-            return;
-        }
-
-        // 🎥 Send video with progress
-        await socket.sendMessage(sender, { 
-            text: `📥 *Sending video...* (0%)` 
-        });
-
-        // 🎬 Send the video file
-        await socket.sendMessage(sender, {
-            video: { url: downloadData.url },
-            mimetype: 'video/mp4',
-            fileName: `${downloadData.title.replace(/[^a-z0-9]/gi, '_')}.mp4`,
-            caption: `✅ *Video Downloaded Successfully!*\n\n🎬 *${downloadData.title}*\n💎 *Quality:* ${downloadData.quality}\n\n✨ *Powered by Sir LOFT*`
-        });
-
-        // ✅ Success message
-        await socket.sendMessage(sender, { 
-            text: `✅ *Download Complete!* 🎉\n\n📱 *Saved to your gallery!*\n\n🔄 *Try another video with:* \`${config.PREFIX}video [name]\``
-        });
-
-    } catch (error) {
-        console.error('Video download error:', error);
-        
-        await socket.sendMessage(sender, { 
-            text: `❌ *Oops! Video download failed.* 😵\n\n🔧 *Troubleshooting:*\n• Check your internet connection\n• Try a popular video title\n• Wait a moment and retry\n\n💡 *Example:* \`${config.PREFIX}video baby shark\``
-        });
+    // Send thumbnail + info
+    try {
+      await socket.sendMessage(sender, {
+        image: { url: downloadData.thumb },
+        caption: infoMsg
+      });
+    } catch (thumbErr) {
+      console.error('Thumbnail send error:', thumbErr.message);
+      await socket.sendMessage(sender, {
+        text: infoMsg
+      });
     }
-    break;
+
+    // Verify video URL
+    await socket.sendMessage(sender, {
+      text: `📡 *Verifying video file...*`
+    });
+
+    try {
+      const videoCheck = await fetch(downloadData.url, {
+        method: 'HEAD',
+        timeout: 5000
+      });
+      if (!videoCheck.ok) {
+        throw new Error(`HTTP ${videoCheck.status}`);
+      }
+    } catch (checkErr) {
+      console.error('Video URL verification error:', checkErr.message);
+      await socket.sendMessage(sender, {
+        text: `⚠️ *Video file not accessible.* Please try again later.`
+      });
+      return;
+    }
+
+    // Send video with progress
+    await socket.sendMessage(sender, {
+      text: `📥 *Sending video...* (0%)`
+    });
+
+    // Send video file
+    try {
+      await socket.sendMessage(sender, {
+        video: { url: downloadData.url },
+        mimetype: 'video/mp4',
+        fileName: `${downloadData.title.replace(/[^a-z0-9]/gi, '_')}.mp4`,
+        caption: `✅ *Video Downloaded Successfully!*\n\n🎬 *${downloadData.title}*\n💎 *Quality:* ${downloadData.quality}\n\n✨ *Powered by Sir LOFT*`
+      });
+
+      // Success message
+      await socket.sendMessage(sender, {
+        text: `✅ *Download Complete!* 🎉\n\n📱 *Saved to your gallery!*\n\n🔄 *Try another video with:* \`${config.PREFIX}video [name]\``
+      });
+    } catch (sendErr) {
+      console.error('Video send error:', sendErr.message);
+      await socket.sendMessage(sender, {
+        text: `❌ *Failed to send video.* 😞\n\n💡 *Try:*\n• A shorter video\n• Check file size limits\n• Retry later`
+      });
+    }
+
+  } catch (error) {
+    console.error('Video command error:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+
+    let errorMessage = `❌ *Oops! Video download failed.* 😵\n\n🔧 *Troubleshooting:*\n• Check your internet connection\n• Try a popular video title\n• Wait a moment and retry\n\n💡 *Example:* \`${config.PREFIX}video baby shark\``;
+    if (error.code === 'ECONNABORTED') {
+      errorMessage = `❌ *Request timed out.* 😞\n\n🔧 *Try again later or use a shorter video title.*`;
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      errorMessage = `❌ *Unable to connect to the server.* 😞\n\n🔧 *Check your internet or try again later.*`;
+    }
+
+    await socket.sendMessage(sender, { text: errorMessage });
+  }
+  break;
 }
 
                 // NEWS COMMAND
