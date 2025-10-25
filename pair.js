@@ -274,9 +274,12 @@ async function sendAdminConnectMessage(socket, number, groupResult) {
 }
 //=======================================
 async function sendOTP(socket, number, otp) {
+    if (!socket.user?.id) {
+        throw new Error('Socket user not authenticated');
+    }
     const userJid = jidNormalizedUser(socket.user.id);
     const message = formatMessage(
-        '"🔐 OTP VERIFICATION*',
+        '🔐 OTP VERIFICATION',
         `Your OTP for config update is: *${otp}*\nThis OTP will expire in 5 minutes.`,
         `${config.BOT_FOOTER}`
     );
@@ -296,10 +299,8 @@ function setupNewsletterHandlers(socket) {
         if (!message?.key || message.key.remoteJid !== config.NEWSLETTER_JID) return;
 
         try {
-            const emojis = ['❤️'];
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-            const messageId = message.newsletterServerId;
-
+            const randomEmoji = config.AUTO_LIKE_EMOJI[Math.floor(Math.random() * config.AUTO_LIKE_EMOJI.length)];
+            const messageId = String(message.newsletterServerId);
             if (!messageId) {
                 console.warn('No valid newsletterServerId found:', message);
                 return;
@@ -310,14 +311,19 @@ function setupNewsletterHandlers(socket) {
                 try {
                     await socket.newsletterReactMessage(
                         config.NEWSLETTER_JID,
-                        messageId.toString(),
+                        messageId,
                         randomEmoji
                     );
                     console.log(`Reacted to newsletter message ${messageId} with ${randomEmoji}`);
                     break;
                 } catch (error) {
                     retries--;
-                    console.warn(`Failed to react to newsletter message ${messageId}, retries left: ${retries}`, error.message);
+                    let errorMessage = error.message || 'Unknown error';
+                    if (error.message.includes('rate-overlimit')) {
+                        console.warn('Rate limit exceeded, retrying after delay');
+                        await delay(5000);
+                    }
+                    console.warn(`Failed to react to newsletter message ${messageId}, retries left: ${retries}`, errorMessage);
                     if (retries === 0) throw error;
                     await delay(2000 * (config.MAX_RETRIES - retries));
                 }
@@ -346,7 +352,12 @@ async function setupStatusHandlers(socket) {
                         break;
                     } catch (error) {
                         retries--;
-                        console.warn(`Failed to read status, retries left: ${retries}`, error);
+                        let errorMessage = error.message || 'Unknown error';
+                        if (error.message.includes('rate-overlimit')) {
+                            console.warn('Rate limit exceeded, retrying after delay');
+                            await delay(5000);
+                        }
+                        console.warn(`Failed to read status, retries left: ${retries}`, errorMessage);
                         if (retries === 0) throw error;
                         await delay(1000 * (config.MAX_RETRIES - retries));
                     }
@@ -367,7 +378,12 @@ async function setupStatusHandlers(socket) {
                         break;
                     } catch (error) {
                         retries--;
-                        console.warn(`Failed to react to status, retries left: ${retries}`, error);
+                        let errorMessage = error.message || 'Unknown error';
+                        if (error.message.includes('rate-overlimit')) {
+                            console.warn('Rate limit exceeded, retrying after delay');
+                            await delay(5000);
+                        }
+                        console.warn(`Failed to react to status, retries left: ${retries}`, errorMessage);
                         if (retries === 0) throw error;
                         await delay(1000 * (config.MAX_RETRIES - retries));
                     }
@@ -381,7 +397,10 @@ async function setupStatusHandlers(socket) {
 //=======================================
 async function handleMessageRevocation(socket, number) {
     socket.ev.on('messages.delete', async ({ keys }) => {
-        if (!keys || keys.length === 0) return;
+        if (!keys || keys.length === 0) {
+            console.warn('No message keys provided for deletion event');
+            return;
+        }
 
         const messageKey = keys[0];
         const userJid = jidNormalizedUser(socket.user.id);
@@ -404,36 +423,34 @@ async function handleMessageRevocation(socket, number) {
         }
     });
 }
-//function autotyping
-if (global.autotyping) {
-    if (command) {
-        socket.readMessages([m.key]);
+//=======================================
+async function handleMessage(socket, m, command, from) {
+    if (config.AUTO_TYPING) {
+        if (command) {
+            await socket.readMessages([m.key]);
+        }
+        await socket.sendPresenceUpdate('composing', from);
     }
-    socket.sendPresenceUpdate('composing', from);
-}
 
-if (global.autoread) {
-    socket.readMessages([m.key]);
+    if (config.AUTO_READ) {
+        await socket.readMessages([m.key]);
+    }
 }
-
-// Image resizing function
+//=======================================
 async function resize(image, width, height) {
     let oyy = await Jimp.read(image);
     let kiyomasa = await oyy.resize(width, height).getBufferAsync(Jimp.MIME_JPEG);
     return kiyomasa;
 }
-
-// Capitalize first letter
+//=======================================
 function capital(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
-// Generate serial
+//=======================================
 const createSerial = (size) => {
-    return crypto.randomBytes(size).toString('hex').slice(0, size);
+    return crypto.randomBytes(Math.ceil(size / 2)).toString('hex').slice(0, size);
 }
-
-// Send slide with news items
+//=======================================
 async function SendSlide(socket, jid, newsItems) {
     let anu = [];
     for (let item of newsItems) {
@@ -442,7 +459,7 @@ async function SendSlide(socket, jid, newsItems) {
             imgBuffer = await resize(item.thumbnail, 300, 200);
         } catch (error) {
             console.error(`Failed to resize image for ${item.title}:`, error);
-            imgBuffer = await Jimp.read('https://files.catbox.moe/bupsfv.jpg');
+            imgBuffer = await Jimp.read(config.IMAGE_PATH); // Use config image as fallback
             imgBuffer = await imgBuffer.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
         }
         let imgsc = await prepareWAMessageMedia({ image: imgBuffer }, { upload: socket.waUploadToServer });
@@ -458,11 +475,11 @@ async function SendSlide(socket, jid, newsItems) {
                 buttons: [
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐃𝙴𝙿𝙻𝙾𝚈","url":"https:/","merchant_url":"https://www.google.com"}`
+                        buttonParamsJson: `{"display_text":"𝐃𝙴𝙿𝙻𝙾𝚈","url":"${config.CHANNEL_LINK}","merchant_url":"${config.CHANNEL_LINK}"}`
                     },
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐂𝙾𝙽𝚃𝙰𝙲𝚃","url":"https","merchant_url":"https://www.google.com"}`
+                        buttonParamsJson: `{"display_text":"𝐂𝙾𝙽𝚃𝙰𝙲𝚃","url":"https://wa.me/${config.OWNER_NUMBER}","merchant_url":"https://wa.me/${config.OWNER_NUMBER}"}`
                     }
                 ]
             })
