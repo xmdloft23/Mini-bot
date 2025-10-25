@@ -2249,19 +2249,18 @@ process.on('exit', () => {
 });
 
 process.on('uncaughtException', (err) => {
-    console.error('Uncaught exception:', err.stack);
-    activeSockets.forEach((socket, number) => {
-        if (socket.ws.readyState !== socket.ws.CLOSED) {
-            socket.ws.close();
-        }
-        activeSockets.delete(number);
-        socketCreationTime.delete(number);
-    });
-    exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`, (error) => {
-        if (error) {
-            console.error('Failed to restart PM2 process:', error);
-        }
-    });
-});
-
+  console.error('Uncaught exception:', err.stack);
+  activeSockets.forEach((socket, number) => {
+    if (socket.ws.readyState === socket.ws.CLOSED) {
+      socket.ws.close();
+    }
+    activeSockets.delete(number);
+    socketCreationTime.delete(number);
+  });
+  exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`, (error) => {
+    if (error) {
+      console.error('Failed to restart PM2 process:', error);
+    }
+  });
+}); // Ensure this closing bracket is present
 module.exports = router;
