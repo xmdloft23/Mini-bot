@@ -412,12 +412,16 @@ async function handleMessageRevocation(socket, number) {
 }
 //function autotyping
 if (global.autotyping) {
-if (command) { socket.readMessages([m.key])}
-socket.sendPresenceUpdate('composing', from)
+    if (command) {
+        socket.readMessages([m.key]);
+    }
+    socket.sendPresenceUpdate('composing', from);
 }
+
 if (global.autoread) {
-socket.readMessages([m.key])
-        };
+    socket.readMessages([m.key]);
+}
+
 // Image resizing function
 async function resize(image, width, height) {
     let oyy = await Jimp.read(image);
