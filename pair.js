@@ -3,22 +3,22 @@ const router = express.Router();
 const fs = require('fs-extra');
 const path = require('path');
 const { exec } = require('child_process');
-const { emptyDirSync } = require('fs');
+const { emptyDirSync } = require('fs-extra'); // Corrected import
 const pino = require('pino');
 const { Octokit } = require('@octokit/rest');
 const moment = require('moment-timezone');
 const Jimp = require('jimp');
 const crypto = require('crypto');
 const axios = require('axios');
-const yts = require("yt-search");
-const fetch = require("node-fetch"); 
+const yts = require('yt-search');
+const fetch = require('node-fetch');
 const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
 const { pickRandom } = require('./loft/function.js');
 //=======================================
-const autoReact = getSetting('AUTO_REACT')|| 'on';
+const autoReact = getSetting('AUTO_REACT') || 'on';
 
 //=======================================
 const {
@@ -41,7 +41,7 @@ const config = {
     PREFIX: '.',
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/G3ChQEjwrdVBTBUQHWSNHF?mode=ems_copy_t',
-    ADMIN_LIST_PATH: './admin.json',
+    ADMIN_LIST_PATH: path.join(__dirname, 'admin.json'), // Use path.join
     IMAGE_PATH: 'https://files.catbox.moe/2x9ktu.png',
     NEWSLETTER_JID: '120363398106360290@newsletter',
     NEWSLETTER_MESSAGE_ID: '0088',
@@ -62,6 +62,17 @@ const config = {
     }
 };
 
+// Validate environment variables
+const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN || throwError('GITHUB_TOKEN is not set')
+});
+const owner = process.env.GITHUB_REPO_OWNER || throwError('GITHUB_REPO_OWNER is not set');
+const repo = process.env.GITHUB_REPO_NAME || throwError('GITHUB_REPO_NAME is not set');
+
+function throwError(message) {
+    throw new Error(message);
+}
+
 // List Message Generator
 function generateListMessage(text, buttonTitle, sections) {
     return {
@@ -81,26 +92,18 @@ function generateButtonMessage(content, buttons, image = null) {
         buttons: buttons,
         headerType: 1 // Default to text header
     };
-//=======================================
     // Add image if provided
     if (image) {
         message.headerType = 4; // Image header
         message.image = typeof image === 'string' ? { url: image } : image;
     }
-
     return message;
 }
 //=======================================
-const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
-});
-const owner = process.env.GITHUB_REPO_OWNER;
-const repo = process.env.GITHUB_REPO_NAME;
-
 const activeSockets = new Map();
 const socketCreationTime = new Map();
-const SESSION_BASE_PATH = './session';
-const NUMBER_LIST_PATH = './numbers.json';
+const SESSION_BASE_PATH = path.join(__dirname, 'session'); // Use path.join
+const NUMBER_LIST_PATH = path.join(__dirname, 'numbers.json'); // Use path.join
 const otpStore = new Map();
 
 if (!fs.existsSync(SESSION_BASE_PATH)) {
@@ -129,21 +132,30 @@ function getSriLankaTimestamp() {
 }
 async function cleanDuplicateFiles(number) {
     try {
-        // ...
+        const sanitizedNumber = number.replace(/[^0-9]/g, '');
+        const { data } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: `session`
+        });
+        const sessionFiles = data.filter(file => file.name.includes(sanitizedNumber));
+        const configFiles = data.filter(file => file.name.includes('config')); // Adjust as needed
+
         if (sessionFiles.length > 1) {
             for (let i = 1; i < sessionFiles.length; i++) {
                 await octokit.repos.deleteFile({
                     owner,
                     repo,
-                    path: `session/sessionFiles[i].name`,
-                    message: `Delete duplicate session file for{sanitizedNumber}`,
+                    path: `session/${sessionFiles[i].name}`,
+                    message: `Delete duplicate session file for ${sanitizedNumber}`,
                     sha: sessionFiles[i].sha
                 });
-                console.log(`Deleted duplicate session file: sessionFiles[i].name`);
-            
+                console.log(`Deleted duplicate session file: ${sessionFiles[i].name}`);
+            }
+        }
 
-        if (configFiles.length > 1) 
-            console.log(`Config file for{sanitizedNumber} already exists`);
+        if (configFiles.length > 1) {
+            console.log(`Config file for ${sanitizedNumber} already exists`);
         }
     } catch (error) {
         console.error(`Failed to clean duplicate files for ${number}:`, error);
@@ -151,47 +163,48 @@ async function cleanDuplicateFiles(number) {
 }
 
 //=======================================
-
-async function oneViewmeg(socket, isOwner, msg, sender) {
-  if (isOwner) {
-    try {
-      const akuru = sender;
-      const quot = msg;
-      if (quot) {
-        if (quot.imageMessage?.viewOnce) {
-          console.log("hi");
-          let cap = quot.imageMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
-          await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
-        } else if (quot.videoMessage?.viewOnce) {
-          console.log("hi");
-          let cap = quot.videoMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
-          await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
-        } else if (quot.audioMessage?.viewOnce) {
-          console.log("hi");
-          let cap = quot.audioMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
-
-await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
-        } else if (quot.viewOnceMessageV2?.message?.imageMessage) {
-          let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.imageMessage);
-          await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
-        } else if (quot.viewOnceMessageV2?.message?.videoMessage) {
-          let cap = quot.viewOnceMessageV2?.message?.videoMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.videoMessage);
-          await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
-        } else if (quot.viewOnceMessageV2Extension?.message?.audioMessage) {
-          let cap = quot.viewOnceMessageV2Extension?.message?.audioMessage?.caption || "";
-          let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2Extension.message.audioMessage);
-          await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+async function oneViewMessage(socket, isOwner, msg, sender) {
+    if (isOwner) {
+        try {
+            const akuru = sender;
+            const quot = msg;
+            if (quot) {
+                if (quot.imageMessage?.viewOnce) {
+                    console.log("Processing view-once image");
+                    let cap = quot.imageMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
+                    await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
+                } else if (quot.videoMessage?.viewOnce) {
+                    console.log("Processing view-once video");
+                    let cap = quot.videoMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
+                    await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
+                } else if (quot.audioMessage?.viewOnce) {
+                    console.log("Processing view-once audio");
+                    let cap = quot.audioMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
+                    await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+                } else if (quot.viewOnceMessageV2?.message?.imageMessage) {
+                    let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.imageMessage);
+                    await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
+                } else if (quot.viewOnceMessageV2?.message?.videoMessage) {
+                    let cap = quot.viewOnceMessageV2?.message?.videoMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.videoMessage);
+                    await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
+                } else if (quot.viewOnceMessageV2Extension?.message?.audioMessage) {
+                    let cap = quot.viewOnceMessageV2Extension?.message?.audioMessage?.caption || "";
+                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2Extension.message.audioMessage);
+                    await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+                } else {
+                    await socket.sendMessage(akuru, { text: "No valid view-once media found." });
+                }
+            }
+        } catch (error) {
+            console.error("Error processing view-once message:", error);
+            await socket.sendMessage(akuru, { text: "Failed to process view-once message." });
         }
-      }
-    } catch (error) {
-      console.error(error);
     }
-  }
 }
 
 async function joinGroup(socket) {
@@ -220,6 +233,9 @@ async function joinGroup(socket) {
                 errorMessage = 'Bot is already a member of the group';
             } else if (error.message.includes('gone')) {
                 errorMessage = 'Group invite link is invalid or expired';
+            } else if (error.message.includes('rate-overlimit')) {
+                errorMessage = 'Rate limit exceeded, please try again later';
+                await delay(5000);
             }
             console.warn(`Failed to join group, retries left: ${retries}`, errorMessage);
             if (retries === 0) {
