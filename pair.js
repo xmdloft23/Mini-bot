@@ -1712,47 +1712,55 @@ case 'ytv':
 
 // Setup message handlers
 function setupMessageHandlers(socket) {
+    // Validate socket and its event emitter
+    if (!socket || !socket.ev) {
+        console.error('Invalid socket or event emitter');
+        return;
+    }
+
     socket.ev.on('messages.upsert', async ({ messages }) => {
+        // Ensure messages array exists and has at least one message
+        if (!messages?.length) {
+            console.warn('No messages received in upsert event');
+            return;
+        }
+
         const msg = messages[0];
-        if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
+        // Skip invalid messages or specific JIDs
+        if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) {
+            return;
+        }
+
+        // Extract message text for copying
+        let messageText = '';
+        if (msg.message.conversation) {
+            messageText = msg.message.conversation;
+        } else if (msg.message.extendedTextMessage?.text) {
+            messageText = msg.message.extendedTextMessage.text;
+        }
 
         if (autoReact === 'on') {
             try {
                 await socket.sendPresenceUpdate('recording', msg.key.remoteJid);
                 console.log(`Set recording presence for ${msg.key.remoteJid}`);
+
+                // Copy message text to clipboard if available
+                if (messageText) {
+                    try {
+                        await navigator.clipboard.writeText(messageText);
+                        console.log(`Copied message to clipboard: ${messageText.substring(0, 50)}...`);
+                        // Optionally notify the user in the chat
+                        await socket.sendMessage(msg.key.remoteJid, { text: 'Message copied to clipboard!' });
+                    } catch (clipError) {
+                        console.error('Failed to copy message to clipboard:', clipError);
+                        await socket.sendMessage(msg.key.remoteJid, { text: 'Failed to copy message.' });
+                    }
+                }
             } catch (error) {
                 console.error('Failed to set recording presence:', error);
             }
         }
     });
-}
-
-// Delete session from GitHub
-async function deleteSessionFromGitHub(number) {
-    try {
-        const sanitizedNumber = number.replace(/[^0-9]/g, '');
-        const { data } = await octokit.repos.getContent({
-            owner,
-            repo,
-            path: 'session'
-        });
-
-        const sessionFiles = data.filter(file =>
-            file.name.includes(sanitizedNumber) && file.name.endsWith('.json')
-        );
-
-        for (const file of sessionFiles) {
-            await octokit.repos.deleteFile({
-                owner,
-                repo,
-                path: `session/${file.name}`,
-                message: `ᴅᴇʟᴇᴛᴇ ꜱᴇꜱꜱɪᴏɴ ꜰᴏʀ ${sanitizedNumber}`,
-                sha: file.sha
-            });
-        }
-    } catch (error) {
-        console.error('ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ꜱᴇꜱꜱɪᴏɴ ꜰʀᴏᴍ ɢɪᴛʜᴜʙ:', error);
-    }
 }
 
 // Restore session from GitHub
