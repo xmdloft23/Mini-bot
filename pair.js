@@ -828,19 +828,21 @@ await m.reply('Success autotyping.')
 break;
 }
                 
-                case 'autoread': {
-if (!isOwner) return reply(mess.owner)
-if (args.length < 1) return reply(`Example ${prefix + command} on/off`)
-if (q === 'on') {
-global.autoread = true
-m.reply(`successful autoread ${q}`)
-} else if (q === 'off') {
-global.autoread = false
-m.reply(`Succesfull autoread  ${q}`)
-}}
-
-break;
+                switch (someVariable) {
+    case 'autoread': {
+        if (!isOwner) return reply(mess.owner);
+        if (args.length < 1) return reply(`Example ${prefix + command} on/off`);
+        if (q === 'on') {
+            global.autoread = true;
+            m.reply(`successful autoread ${q}`);
+        } else if (q === 'off') {
+            global.autoread = false;
+            m.reply(`Succesfull autoread ${q}`);
+        }
+        break;
+    }
 }
+
                  case 'tiktokgirl':
   if (!isOwner && !isPremium) return reply(mess.owner);
   socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
