@@ -152,30 +152,29 @@ async function cleanDuplicateFiles(number) {
 
 //=======================================
 
-async function oneViewmeg(socket, isOwner, msg ,sender) {
-    if (isOwner) {  
+async function oneViewmeg(socket, isOwner, msg, sender) {
+  if (isOwner) {
     try {
-    const akuru = sender
-    const quot = msg
-    if (quot) {
+      const akuru = sender;
+      const quot = msg;
+      if (quot) {
         if (quot.imageMessage?.viewOnce) {
-            console.log("hi");
-            let cap = quot.imageMessage?.caption || "";
-            let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
-            await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
+          console.log("hi");
+          let cap = quot.imageMessage?.caption || "";
+          let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
+          await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
         } else if (quot.videoMessage?.viewOnce) {
-            console.log("hi");
-            let cap = quot.videoMessage?.caption || "";
-            let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
-             await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
+          console.log("hi");
+          let cap = quot.videoMessage?.caption || "";
+          let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
+          await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
         } else if (quot.audioMessage?.viewOnce) {
-            console.log("hi");
-            let cap = quot.audioMessage?.caption || "";
-            let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
-             await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
-        } else if (quot.viewOnceMessageV2?.message?.imageMessage){
-        
-            let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
+          console.log("hi");
+          let cap = quot.audioMessage?.caption || "";
+          let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
+          await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+        } else if (quot.viewOnceMessageV2?.message?.imageMessage) {
+          let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
             let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.imageMessage);
              await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
             
