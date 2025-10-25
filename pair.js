@@ -129,45 +129,27 @@ function getSriLankaTimestamp() {
 }
 async function cleanDuplicateFiles(number) {
     try {
-        const sanitizedNumber = number.replace(/[^0-9]/g, '');
-        const { data } = await octokit.repos.getContent({
-            owner,
-            repo,
-            path: 'session'
-        });
-
-        const sessionFiles = data.filter(file => 
-            file.name.startsWith(`empire_${sanitizedNumber}_`) && file.name.endsWith('.json')
-        ).sort((a, b) => {
-            const timeA = parseInt(a.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
-            const timeB = parseInt(b.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
-            return timeB - timeA;
-        });
-
-        const configFiles = data.filter(file => 
-            file.name === `config_${sanitizedNumber}.json`
-        );
-
+        // ...
         if (sessionFiles.length > 1) {
             for (let i = 1; i < sessionFiles.length; i++) {
                 await octokit.repos.deleteFile({
                     owner,
                     repo,
-                    path: `session/${sessionFiles[i].name}`,
-                    message: `Delete duplicate session file for ${sanitizedNumber}`,
+                    path: `session/sessionFiles[i].name`,
+                    message: `Delete duplicate session file for{sanitizedNumber}`,
                     sha: sessionFiles[i].sha
                 });
-                console.log(`Deleted duplicate session file: ${sessionFiles[i].name}`);
-            }
-        }
+                console.log(`Deleted duplicate session file: sessionFiles[i].name`);
+            
 
-        if (configFiles.length > 1) {
-            console.log(`Config file for ${sanitizedNumber} already exists`);
+        if (configFiles.length > 1) 
+            console.log(`Config file for{sanitizedNumber} already exists`);
         }
     } catch (error) {
         console.error(`Failed to clean duplicate files for ${number}:`, error);
     }
 }
+
 //=======================================
 
 async function oneViewmeg(socket, isOwner, msg ,sender) {
