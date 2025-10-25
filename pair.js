@@ -1435,8 +1435,8 @@ User Message: ${q}
         await socket.sendMessage(sender, { text: "*Error fetching data*" });     
     }      
 
-    break; 		
-                    }
+break; 		
+ }
                 
                 // SYSTEM COMMAND
                 case 'system': {
@@ -1461,7 +1461,7 @@ User Message: ${q}
         caption: formatMessage(title, content, footer)
     });
     break;
-                }
+   }
                 
                 case 'weather':
     try {
@@ -1501,7 +1501,7 @@ User Message: ${q}
         if (!args || args.length === 0) {
             await socket.sendMessage(sender, { text: messages.noCity });
             break;
-        }
+}
 
         const apiKey = '2d61a72574c11c4f36173b627f8cb177';
         const city = args.join(" ");
@@ -1527,6 +1527,7 @@ User Message: ${q}
         }
     }
     break;
+}
 
                 // JID COMMAND
                 case 'jid': {
