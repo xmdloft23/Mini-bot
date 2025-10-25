@@ -746,20 +746,23 @@ break;
   }
 }
 
-                case 'ping': {     
-                    var inital = new Date().getTime();
-                    let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
-                    var final = new Date().getTime();
-                    await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
-                    await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
-                    await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
-                    await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
-                    await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
+                switch (someVariable) {
+    case 'ping': {
+        var initial = new Date().getTime();
+        let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
+        var final = new Date().getTime();
+        await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
+        await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
+        await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
+        await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
+        await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
 
-                    return await socket.sendMessage(sender, {
-                        text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
-                    break;
-                }
+        return await socket.sendMessage(sender, {
+            text: '*Pong ' + (final - initial) + ' Ms*', edit: ping.key
+        });
+        break;
+    }
+ 
                 
                 case 'ig': {
     const axios = require('axios');
