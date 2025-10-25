@@ -857,7 +857,7 @@ break;
     }, { quoted: m });
     break;
 }
-                
+               switch (someVariable) { 
                 case 'fancy': {
   const axios = require("axios");
 
@@ -946,7 +946,7 @@ break;
 
   break;
 }
-                
+                switch (someVariable) {
                 case 'logo': {
   const axios = require("axios");
 
@@ -1071,6 +1071,7 @@ break;
   break;
 }
                 
+               switch (someVariable) {
                 case 'pair': {
   // Use axios instead of node-fetch for better error handling and consistency
   const axios = require('axios');
@@ -1158,6 +1159,7 @@ break;
   break;
 }
                 
+                switch (someVariable) {
                  case 'tiktok': {
     const axios = require('axios');
 
@@ -1224,6 +1226,7 @@ break;
     break;
 }                  
 
+                   switch (someVariable) {
                     case 'ai': {
   const axios = require("axios");
 
