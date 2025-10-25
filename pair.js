@@ -828,7 +828,7 @@ await m.reply('Success autotyping.')
 break;
 }
                 
-                case 'autoread':{
+                case 'autoread': {
 if (!isOwner) return reply(mess.owner)
 if (args.length < 1) return reply(`Example ${prefix + command} on/off`)
 if (q === 'on') {
@@ -837,8 +837,7 @@ m.reply(`successful autoread ${q}`)
 } else if (q === 'off') {
 global.autoread = false
 m.reply(`Succesfull autoread  ${q}`)
-}
-}
+}}
 
 break;
 }
