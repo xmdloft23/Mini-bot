@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
 const { exec } = require('child_process');
+const { emptyDirSync } = require('fs');
 const router = express.Router();
 const pino = require('pino');
 const { Octokit } = require('@octokit/rest');
@@ -2230,16 +2231,37 @@ router.get('/getabout', async (req, res) => {
 // Cleanup
 process.on('exit', () => {
     activeSockets.forEach((socket, number) => {
-        socket.ws.close();
+        if (socket.ws.readyState !== socket.ws.CLOSED) {
+            socket.ws.close();
+        }
         activeSockets.delete(number);
         socketCreationTime.delete(number);
     });
-    fs.emptyDirSync(SESSION_BASE_PATH);
+    if (SESSION_BASE_PATH) {
+        try {
+            emptyDirSync(SESSION_BASE_PATH);
+        } catch (err) {
+            console.error('Failed to empty directory:', err);
+        }
+    } else {
+        console.warn('SESSION_BASE_PATH is not defined');
+    }
 });
 
 process.on('uncaughtException', (err) => {
-    console.error('Uncaught exception:', err);
-    exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`);
+    console.error('Uncaught exception:', err.stack);
+    activeSockets.forEach((socket, number) => {
+        if (socket.ws.readyState !== socket.ws.CLOSED) {
+            socket.ws.close();
+        }
+        activeSockets.delete(number);
+        socketCreationTime.delete(number);
+    });
+    exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`, (error) => {
+        if (error) {
+            console.error('Failed to restart PM2 process:', error);
+        }
+    });
 });
 
 module.exports = router;
