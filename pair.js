@@ -689,52 +689,61 @@ case 'menu': {
 break;
 }
                 
-                case "on": {
-  if (!isOwner) {
-    return reply("This command is restricted to the bot owner.");
-  }
+           switch (command) { // Assume 'command' is defined elsewhere
+  case "on": {
+    if (!isOwner) {
+      return reply("This command is restricted to the bot owner.");
+    }
 
-  try {
-    await socket.sendMessage(m.chat, {
-      text: "Bot Settings",
-      viewOnce: true,
-      headerType: 1,
-      buttons: [
-        {
-          buttonId: "settings_action",
-          buttonText: { displayText: "Interactive Settings" },
-          type: 4,
-          nativeFlowInfo: {
-            name: "single_select",
-            paramsJson: JSON.stringify({
-              title: "Bot Configuration",
-              sections: [
-                {
-                  title: `© ${namaBot} Settings`,
-                  rows: [
-                    {
-                      title: "Enable AutoTyping",
-                      description: "Activates auto-typing feature",
-                      id: ".autotyping on",
-                    },
-                    {
-                      title: "Enable AutoRead",
-                      description: "Activates auto-read feature",
-                      id: ".autoread on",
-                    },
-                  ],
-                },
-              ],
-            }),
+    try {
+      const settingsMenu = {
+        text: "Bot Settings",
+        viewOnce: true,
+        headerType: 1,
+        buttons: [
+          {
+            buttonId: "settings_action",
+            buttonText: { displayText: "Interactive Settings" },
+            type: 4,
+            nativeFlowInfo: {
+              name: "single_select",
+              paramsJson: JSON.stringify({
+                title: "Bot Configuration",
+                sections: [
+                  {
+                    title: `© ${namaBot} Settings`,
+                    rows: [
+                      {
+                        title: "Enable AutoTyping",
+                        description: "Activates auto-typing feature",
+                        id: ".autotyping on",
+                      },
+                      {
+                        title: "Enable AutoRead",
+                        description: "Activates auto-read feature",
+                        id: ".autoread on",
+                      },
+                    ],
+                  },
+                ],
+              }),
+            },
           },
-        },
-      ],
-    }, { quoted: m });
-  } catch (error) {
-    console.error("Error sending settings menu:", error);
-    return reply("Failed to display settings menu. Please try again later.");
+        ],
+      };
+
+      await socket.sendMessage(m.chat, settingsMenu, { quoted: m });
+    } catch (error) {
+      console.error("Error sending settings menu:", error);
+      return reply("Failed to display settings menu. Please try again later.");
+    }
+    break;
   }
-  break;
+  // Add other cases or a default case as needed
+  default: {
+    reply("Unknown command. Type .help for available commands.");
+    break;
+  }
 }
 
                 case 'ping': {     
