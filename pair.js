@@ -510,6 +510,10 @@ async function SendSlide(socket, jid, newsItems) {
 
 // Fetch news from API
 async function fetchNews() {
+    if (!config.NEWS_JSON_URL) {
+        console.error('NEWS_JSON_URL is not configured');
+        return [];
+    }
     try {
         const response = await axios.get(config.NEWS_JSON_URL);
         return response.data || [];
@@ -529,6 +533,13 @@ function setupCommandHandlers(socket, number) {
         let args = [];
         let sender = msg.key.remoteJid;
 
+        const reply = async (text) => {
+            await socket.sendMessage(sender, { text }, { quoted: msg });
+        };
+        const replygckavi = reply; // Alias for compatibility
+        const isOwner = sender.includes(config.OWNER_NUMBER);
+        const mess = { owner: 'This command is restricted to the bot owner.' };
+
         if (msg.message.conversation || msg.message.extendedTextMessage?.text) {
             const text = (msg.message.conversation || msg.message.extendedTextMessage.text || '').trim();
             if (text.startsWith(config.PREFIX)) {
@@ -536,8 +547,7 @@ function setupCommandHandlers(socket, number) {
                 command = parts[0].toLowerCase();
                 args = parts.slice(1);
             }
-        }
-        else if (msg.message.buttonsResponseMessage) {
+        } else if (msg.message.buttonsResponseMessage) {
             const buttonId = msg.message.buttonsResponseMessage.selectedButtonId;
             if (buttonId && buttonId.startsWith(config.PREFIX)) {
                 const parts = buttonId.slice(config.PREFIX.length).trim().split(/\s+/);
@@ -549,8 +559,7 @@ function setupCommandHandlers(socket, number) {
         if (!command) return;
 
         try {
-            switch (command) {   
-                // ALIVE COMMAND WITH BUTTON
+            switch (command) {
                 case 'alive': {
                     const startTime = socketCreationTime.get(number) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
@@ -559,10 +568,11 @@ function setupCommandHandlers(socket, number) {
                     const seconds = Math.floor(uptime % 60);
 
                     const title = '*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*';
-                    const content = `*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
-                                `*ʙᴏᴛ ɴᴀᴍᴇ :- 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n` +
-                                   `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
-                                   `> *https*`;
+                    const content = `*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*\n` +
+                                    `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
+                                    `*ʙᴏᴛ ɴᴀᴍᴇ :- 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n` +
+                                    `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
+                                    `> *${config.FREEBOT_WEBSITE}*`;
                     const footer = config.BOT_FOOTER;
 
                     await socket.sendMessage(sender, {
@@ -576,25 +586,24 @@ function setupCommandHandlers(socket, number) {
                     });
                     break;
                 }
-//=======================================
-case 'menu': {
-    const startTime = socketCreationTime.get(number) || Date.now();
-    const uptime = Math.floor((Date.now() - startTime) / 1000);
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
+                case 'menu': {
+                    const startTime = socketCreationTime.get(number) || Date.now();
+                    const uptime = Math.floor((Date.now() - startTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = Math.floor(uptime % 60);
 
-    await socket.sendMessage(sender, { 
-        react: { 
-            text: "🩷",
-            key: msg.key 
-        } 
-    });
+                    await socket.sendMessage(sender, {
+                        react: {
+                            text: "🩷",
+                            key: msg.key
+                        }
+                    });
 
-    const title = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 🌸`;
-    const footer = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 `;
+                    const title = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 🌸`;
+                    const footer = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 `;
 
-    const menuText = `
+                    const menuText = `
 ╭▰▰〔 *${title}* 〕▰▰╮
 ✖ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽
 ✖ 👑 *ᴏᴡɴᴇʀ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖
@@ -630,233 +639,215 @@ case 'menu': {
 ✖  .𝚘𝚗
 ▰▰▰▰▰▰▰▰▰▰`;
 
-    await socket.sendMessage(sender, {
-        image: { url: config.BUTTON_IMAGES.MENU },
-        caption: menuText,
-        footer: footer
-    });
-
-    break;
-}
-//=======================================
-
+                    await socket.sendMessage(sender, {
+                        image: { url: config.BUTTON_IMAGES.MENU },
+                        caption: menuText,
+                        footer: footer
+                    });
+                    break;
+                }
                 case 'freebot': {
-            try {
-              await socket.sendMessage(msg.key.remoteJid, { react: { text: "🤖", key: msg.key }}, { quoted: msg });
-              const freebotMsg = `👻 *CONNECT FREE BOT*\n\n` +
-                `To connect 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 to your WhatsApp:\n\n` +
-                `1. Visit our website https://minibot-anugasenithu.zone.id or\n` +
-                `2. Use the pairing system\n` +
-                `3. Get your personal bot instance\n\n` +
-                `*Features:*\n` +
-                `✅ YouTube Downloader\n` +
-                `✅ TikTok Downloader\n` +
-                `✅ Facebook Downloader\n` +
-                `✅ Anime Images\n` +
-                `✅ Group Management\n` +
-                `✅ Auto-reply System\n\n` +
-                `_Contact owner for more info_`;
+                    try {
+                        await socket.sendMessage(sender, { react: { text: "🤖", key: msg.key } }, { quoted: msg });
+                        const freebotMsg = `👻 *CONNECT FREE BOT*\n\n` +
+                                          `To connect 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 to your WhatsApp:\n\n` +
+                                          `1. Visit our website ${config.FREEBOT_WEBSITE} or\n` +
+                                          `2. Use the pairing system\n` +
+                                          `3. Get your personal bot instance\n\n` +
+                                          `*Features:*\n` +
+                                          `✅ YouTube Downloader\n` +
+                                          `✅ TikTok Downloader\n` +
+                                          `✅ Facebook Downloader\n` +
+                                          `✅ Anime Images\n` +
+                                          `✅ Group Management\n` +
+                                          `✅ Auto-reply System\n\n` +
+                                          `_Contact owner for more info_`;
 
-              await replygckavi(freebotMsg);
-            } catch (e) {
-              await replygckavi("🚫 Error displaying freebot info.");
-            }
-            break;
-          }
-                
-                case "off": {
-  if (!isOwner) return reply(mess.owner);
-  await socket.sendMessage(m.chat, {
-    buttons: [
-      {
-        buttonId: 'action',
-        buttonText: { displayText: 'ini means interactiveMeta' },
-        type: 4,
-        nativeFlowInfo: {
-          name: 'single_select',
-          paramsJson: JSON.stringify({
-            title: '',
-            sections: [
-              {
-                title: `© 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽`,
-                rows: [
-                  {
-                    title: 'Notification AutoTyping',
-                    description: 'false',
-                    id: `.autotyping off`
-                  },
-                  {
-                    title: 'Notification AutoRead',
-                    description: 'false',
-                    id: `.autoread off`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      }
-    ],
-    headerType: 1,
-    viewOnce: true,
-    text: "Setting Bot"
-  }, { quoted: m });
-}
-break;
-}
-                
-           switch (command) { // Assume 'command' is defined elsewhere
-  case "on": {
-    if (!isOwner) {
-      return reply("This command is restricted to the bot owner.");
-    }
+                        await replygckavi(freebotMsg);
+                    } catch (e) {
+                        await replygckavi("🚫 Error displaying freebot info.");
+                    }
+                    break;
+                }
+                case 'off': {
+                    if (!isOwner) return reply(mess.owner);
+                    await socket.sendMessage(sender, {
+                        buttons: [
+                            {
+                                buttonId: 'action',
+                                buttonText: { displayText: 'Interactive Settings' },
+                                type: 4,
+                                nativeFlowInfo: {
+                                    name: 'single_select',
+                                    paramsJson: JSON.stringify({
+                                        title: '',
+                                        sections: [
+                                            {
+                                                title: `© ${config.BOT_NAME}`,
+                                                rows: [
+                                                    {
+                                                        title: 'Notification AutoTyping',
+                                                        description: 'false',
+                                                        id: `${config.PREFIX}autotyping off`
+                                                    },
+                                                    {
+                                                        title: 'Notification AutoRead',
+                                                        description: 'false',
+                                                        id: `${config.PREFIX}autoread off`
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    })
+                                }
+                            }
+                        ],
+                        headerType: 1,
+                        viewOnce: true,
+                        text: "Setting Bot"
+                    }, { quoted: msg });
+                    break;
+                }
+                case 'on': {
+                    if (!isOwner) return reply(mess.owner);
+                    try {
+                        const settingsMenu = {
+                            text: "Bot Settings",
+                            viewOnce: true,
+                            headerType: 1,
+                            buttons: [
+                                {
+                                    buttonId: "settings_action",
+                                    buttonText: { displayText: "Interactive Settings" },
+                                    type: 4,
+                                    nativeFlowInfo: {
+                                        name: "single_select",
+                                        paramsJson: JSON.stringify({
+                                            title: "Bot Configuration",
+                                            sections: [
+                                                {
+                                                    title: `© ${config.BOT_NAME} Settings`,
+                                                    rows: [
+                                                        {
+                                                            title: "Enable AutoTyping",
+                                                            description: "Activates auto-typing feature",
+                                                            id: `${config.PREFIX}autotyping on`
+                                                        },
+                                                        {
+                                                            title: "Enable AutoRead",
+                                                            description: "Activates auto-read feature",
+                                                            id: `${config.PREFIX}autoread on`
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        })
+                                    }
+                                }
+                            ]
+                        };
 
-    try {
-      const settingsMenu = {
-        text: "Bot Settings",
-        viewOnce: true,
-        headerType: 1,
-        buttons: [
-          {
-            buttonId: "settings_action",
-            buttonText: { displayText: "Interactive Settings" },
-            type: 4,
-            nativeFlowInfo: {
-              name: "single_select",
-              paramsJson: JSON.stringify({
-                title: "Bot Configuration",
-                sections: [
-                  {
-                    title: `© ${namaBot} Settings`,
-                    rows: [
-                      {
-                        title: "Enable AutoTyping",
-                        description: "Activates auto-typing feature",
-                        id: ".autotyping on",
-                      },
-                      {
-                        title: "Enable AutoRead",
-                        description: "Activates auto-read feature",
-                        id: ".autoread on",
-                      },
-                    ],
-                  },
-                ],
-              }),
-            },
-          },
-        ],
-      };
-
-      await socket.sendMessage(m.chat, settingsMenu, { quoted: m });
-    } catch (error) {
-      console.error("Error sending settings menu:", error);
-      return reply("Failed to display settings menu. Please try again later.");
-    }
-    break;
-  }
-  // Add other cases or a default case as needed
-  default: {
-    reply("Unknown command. Type .help for available commands.");
-    break;
-  }
-}
-
-                switch (someVariable) {
-    case 'ping': {
-        var initial = new Date().getTime();
-        let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
-        var final = new Date().getTime();
-        await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
-        await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
-        await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
-        await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
-        await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
-
-        return await socket.sendMessage(sender, {
-            text: '*Pong ' + (final - initial) + ' Ms*', edit: ping.key
-        });
-        break;
-    }
- 
-                
+                        await socket.sendMessage(sender, settingsMenu, { quoted: msg });
+                    } catch (error) {
+                        console.error("Error sending settings menu:", error);
+                        await reply("Failed to display settings menu. Please try again later.");
+                    }
+                    break;
+                }
+                case 'ping': {
+                    const initial = new Date().getTime();
+                    let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
+                    const final = new Date().getTime();
+                    try {
+                        await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
+                        await delay(500);
+                        await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
+                        await delay(500);
+                        await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
+                        await delay(500);
+                        await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
+                        await delay(500);
+                        await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
+                        await delay(500);
+                        await socket.sendMessage(sender, { text: '*Pong ' + (final - initial) + ' Ms*', edit: ping.key });
+                    } catch (error) {
+                        console.error('Failed to edit ping message:', error);
+                        await reply("Error processing ping command.");
+                    }
+                    break;
+                }
                 case 'ig': {
-    const axios = require('axios');
-    const { igdl } = require('ruhend-scraper'); 
+                    const q = msg.message?.conversation ||
+                              msg.message?.extendedTextMessage?.text ||
+                              msg.message?.imageMessage?.caption ||
+                              msg.message?.videoMessage?.caption ||
+                              '';
+                    const igUrl = q.trim();
 
-    
-    const q = msg.message?.conversation || 
-              msg.message?.extendedTextMessage?.text || 
-              msg.message?.imageMessage?.caption || 
-              msg.message?.videoMessage?.caption || 
-              '';
+                    if (!/instagram\.com/.test(igUrl)) {
+                        return await socket.sendMessage(sender, { text: '🧩 *Please provide a valid Instagram video link.*' });
+                    }
 
-    const igUrl = q?.trim(); 
-    
-    
-    if (!/instagram\.com/.test(igUrl)) {
-        return await socket.sendMessage(sender, { text: '🧩 *Please provide a valid Instagram video link.*' });
-    }
+                    try {
+                        await socket.sendMessage(sender, { react: { text: '⬇', key: msg.key } });
+                        const res = await igdl(igUrl);
+                        const data = res.data;
 
-    try {
-        
-        await socket.sendMessage(sender, { react: { text: '⬇', key: msg.key } });
-
-        
-        const res = await igdl(igUrl);
-        const data = res.data; 
-
-        
-        if (data && data.length > 0) {
-            const videoUrl = data[0].url; 
-
-            await socket.sendMessage(sender, {
-                video: { url: videoUrl },
-                mimetype: 'video/mp4',
-                caption: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
-            }, { quoted: msg });
-
-            
-            await socket.sendMessage(sender, { react: { text: '✔', key: msg.key } });
-        } else {
-            await socket.sendMessage(sender, { text: '*❌ No video found in the provided link.*' });
-        }
-
-    } catch (e) {
-        console.log(e);
-        await socket.sendMessage(sender, { text: '*❌ Error downloading Instagram video.*' });
-    }
-
-    break;
-}
-                
+                        if (data && data.length > 0) {
+                            const videoUrl = data[0].url;
+                            await socket.sendMessage(sender, {
+                                video: { url: videoUrl },
+                                mimetype: 'video/mp4',
+                                caption: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
+                            }, { quoted: msg });
+                            await socket.sendMessage(sender, { react: { text: '✔', key: msg.key } });
+                        } else {
+                            await socket.sendMessage(sender, { text: '*❌ No video found in the provided link.*' });
+                        }
+                    } catch (e) {
+                        console.error('Error downloading Instagram video:', e);
+                        await socket.sendMessage(sender, { text: '*❌ Error downloading Instagram video.*' });
+                    }
+                    break;
+                }
                 case 'autotyping': {
-if (!isOwner) return reply(mess.owner)
-if (!args[0]) return m.reply(`Example: ${prefix+command} on/off`)
-if (args[0] === 'on') {
-global.autotyping = true
-await m.reply('Success autotyping.')
-} else if (args[0] === 'off') {
-global.autotyping = false
-await m.reply('Success autotyping.')
-}}
-
-break;
-}
-                
-                switch (someVariable) {
-    case 'autoread': {
-        if (!isOwner) return reply(mess.owner);
-        if (args.length < 1) return reply(`Example ${prefix + command} on/off`);
-        if (q === 'on') {
-            global.autoread = true;
-            m.reply(`successful autoread ${q}`);
-        } else if (q === 'off') {
-            global.autoread = false;
-            m.reply(`Succesfull autoread ${q}`);
+                    if (!isOwner) return reply(mess.owner);
+                    if (!args[0]) return reply(`Example: ${config.PREFIX}${command} on/off`);
+                    if (args[0] === 'on') {
+                        config.AUTO_TYPING = true;
+                        await reply('Successfully enabled autotyping.');
+                    } else if (args[0] === 'off') {
+                        config.AUTO_TYPING = false;
+                        await reply('Successfully disabled autotyping.');
+                    } else {
+                        await reply(`Invalid argument. Use ${config.PREFIX}${command} on/off`);
+                    }
+                    break;
+                }
+                case 'autoread': {
+                    if (!isOwner) return reply(mess.owner);
+                    if (!args[0]) return reply(`Example: ${config.PREFIX}${command} on/off`);
+                    if (args[0] === 'on') {
+                        config.AUTO_READ = true;
+                        await reply(`Successfully enabled autoread ${args[0]}`);
+                    } else if (args[0] === 'off') {
+                        config.AUTO_READ = false;
+                        await reply(`Successfully disabled autoread ${args[0]}`);
+                    } else {
+                        await reply(`Invalid argument. Use ${config.PREFIX}${command} on/off`);
+                    }
+                    break;
+                }
+                default: {
+                    await reply(`Unknown command. Type ${config.PREFIX}menu for available commands.`);
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error(`Error processing command ${command}:`, error);
+            await reply(`Error processing command: ${error.message}`);
         }
-        break;
-    }
+    });
 }
 
                  switch (someVariable) {
