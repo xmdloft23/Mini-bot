@@ -843,18 +843,20 @@ break;
     }
 }
 
-                 case 'tiktokgirl':
-  if (!isOwner && !isPremium) return reply(mess.owner);
-  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
-  
-  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
-  var result = pickRandom(call);
+                 switch (someVariable) {
+  case 'tiktokgirl':
+    if (!isOwner && !isPremium) return reply(mess.owner);
+    socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
 
-  socket.sendMessage(m.chat, {
-    caption: 'Here is your TikTok video 🎥',
-    video: { url: result.url }
-  }, { quoted: m });
-break;
+    var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // Ensure path is correct
+    var result = pickRandom(call);
+
+    socket.sendMessage(m.chat, {
+      caption: 'Here is your TikTok video 🎥',
+      video: { url: result.url }
+    }, { quoted: m });
+    break;
+}
                 
                 case 'fancy': {
   const axios = require("axios");
