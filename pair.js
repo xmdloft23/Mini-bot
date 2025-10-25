@@ -690,45 +690,53 @@ break;
 }
                 
                 case "on": {
-  if (!isOwner) return reply(mess.owner);
-  await Encore.sendMessage(m.chat, {
-    buttons: [
-      {
-        buttonId: 'action',
-        buttonText: { displayText: 'ini means interactiveMeta' },
-        type: 4,
-        nativeFlowInfo: {
-          name: 'single_select',
-          paramsJson: JSON.stringify({
-            title: '',
-            sections: [
-              {
-                title: `© ${namaBot}`,
-                rows: [
-                  {
-                    title: 'Active AutoTyping',
-                    description: 'true',
-                    id: `.autotyping on`
-                  },
-                  {
-                    title: 'Active AutoRead',
-                    description: 'true',
-                    id: `.autoread on`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      }
-    ],
-    headerType: 1,
-    viewOnce: true,
-    text: "Setting Bot"
-  }, { quoted: m });
+  if (!isOwner) {
+    return reply("This command is restricted to the bot owner.");
+  }
+
+  try {
+    await socket.sendMessage(m.chat, {
+      text: "Bot Settings",
+      viewOnce: true,
+      headerType: 1,
+      buttons: [
+        {
+          buttonId: "settings_action",
+          buttonText: { displayText: "Interactive Settings" },
+          type: 4,
+          nativeFlowInfo: {
+            name: "single_select",
+            paramsJson: JSON.stringify({
+              title: "Bot Configuration",
+              sections: [
+                {
+                  title: `© ${namaBot} Settings`,
+                  rows: [
+                    {
+                      title: "Enable AutoTyping",
+                      description: "Activates auto-typing feature",
+                      id: ".autotyping on",
+                    },
+                    {
+                      title: "Enable AutoRead",
+                      description: "Activates auto-read feature",
+                      id: ".autoread on",
+                    },
+                  ],
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    }, { quoted: m });
+  } catch (error) {
+    console.error("Error sending settings menu:", error);
+    return reply("Failed to display settings menu. Please try again later.");
+  }
+  break;
 }
-break;
-}
+
                 case 'ping': {     
                     var inital = new Date().getTime();
                     let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
