@@ -1677,37 +1677,35 @@ case 'ytv':
   }
   break;                // NEWS COMMAND
                 case 'news': {
-                    await socket.sendMessage(sender, {
-                        text: '📰 Fetching latest news...'
-                    });
-                    const newsItems = await fetchNews();
-                    if (newsItems.length === 0) {
-                        await socket.sendMessage(sender, {
-                            image: { url: config.IMAGE_PATH },
-                            caption: formatMessage(
-                                '🗂️ NO NEWS AVAILABLE',
-                                '❌ No news updates found at the moment. Please try again later.',
-                                `${config.BOT_FOOTER}`
-                            )
-                        });
-                    } else {
-                        await SendSlide(socket, sender, newsItems.slice(0, 5));
-                    }
-                    break;
-                }
-            }
-        } catch (error) {
-            console.error('Command handler error:', error);
+    await socket.sendMessage(sender, {
+        text: '📰 Fetching latest news...'
+    });
+    try {
+        const newsItems = await fetchNews();
+        if (newsItems.length === 0) {
             await socket.sendMessage(sender, {
                 image: { url: config.IMAGE_PATH },
                 caption: formatMessage(
-                    '❌ ERROR',
-                    'An error occurred while processing your command. Please try again.',
+                    '🗂️ NO NEWS AVAILABLE',
+                    '❌ No news updates found at the moment. Please try again later.',
                     `${config.BOT_FOOTER}`
                 )
             });
+        } else {
+            await SendSlide(socket, sender, newsItems.slice(0, 5));
         }
-    });
+    } catch (error) {
+        console.error('Command handler error:', error);
+        await socket.sendMessage(sender, {
+            image: { url: config.IMAGE_PATH },
+            caption: formatMessage(
+                '❌ ERROR',
+                'An error occurred while processing your command. Please try again.',
+                `${config.BOT_FOOTER}`
+            )
+        });
+    }
+    break;
 }
 
 // Setup message handlers
