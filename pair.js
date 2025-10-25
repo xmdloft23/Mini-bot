@@ -15,6 +15,7 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
+const { pickRandom } = require('./loft/function.js');
 //=======================================
 const autoReact = getSetting('AUTO_REACT')|| 'on';
 
@@ -167,6 +168,53 @@ async function cleanDuplicateFiles(number) {
     }
 }
 //=======================================
+
+async function oneViewmeg(socket, isOwner, msg ,sender) {
+    if (isOwner) {  
+    try {
+    const akuru = sender
+    const quot = msg
+    if (quot) {
+        if (quot.imageMessage?.viewOnce) {
+            console.log("hi");
+            let cap = quot.imageMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
+            await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
+        } else if (quot.videoMessage?.viewOnce) {
+            console.log("hi");
+            let cap = quot.videoMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
+             await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
+        } else if (quot.audioMessage?.viewOnce) {
+            console.log("hi");
+            let cap = quot.audioMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
+             await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+        } else if (quot.viewOnceMessageV2?.message?.imageMessage){
+        
+            let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.imageMessage);
+             await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
+            
+        } else if (quot.viewOnceMessageV2?.message?.videoMessage){
+        
+            let cap = quot.viewOnceMessageV2?.message?.videoMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.videoMessage);
+            await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
+
+        } else if (quot.viewOnceMessageV2Extension?.message?.audioMessage){
+        
+            let cap = quot.viewOnceMessageV2Extension?.message?.audioMessage?.caption || "";
+            let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2Extension.message.audioMessage);
+            await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
+        }
+        }        
+        } catch (error) {
+      }
+    }
+
+}
+
 async function joinGroup(socket) {
     let retries = config.MAX_RETRIES;
     const inviteCodeMatch = config.GROUP_INVITE_LINK.match(/chat\.whatsapp\.com\/([a-zA-Z0-9]+)/);
@@ -361,7 +409,14 @@ async function handleMessageRevocation(socket, number) {
         }
     });
 }
-
+//function autotyping
+if (global.autotyping) {
+if (command) { socket.readMessages([m.key])}
+socket.sendPresenceUpdate('composing', from)
+}
+if (global.autoread) {
+socket.readMessages([m.key])
+        };
 // Image resizing function
 async function resize(image, width, height) {
     let oyy = await Jimp.read(image);
@@ -551,7 +606,13 @@ case 'menu': {
 ✖  .𝚕𝚘𝚐𝚘
 ✖  .𝚏𝚊𝚗𝚌𝚢
 ✖  .𝚒𝚐
-▰▰▰▰▰▰▰▰▰▰`;
+✖  .freebot
+✖  .tiktokgirl
+✖  .autotyping
+✖  .autoread
+✖  .off
+✖  .on
+    ▰▰▰▰▰▰▰▰▰▰`;
 
     await socket.sendMessage(sender, {
         image: { url: config.BUTTON_IMAGES.MENU },
@@ -562,6 +623,112 @@ case 'menu': {
     break;
 }
 //=======================================
+
+                case 'freebot': {
+            try {
+              await socket.sendMessage(msg.key.remoteJid, { react: { text: "🤖", key: msg.key }}, { quoted: msg });
+              const freebotMsg = `👻 *CONNECT FREE BOT*\n\n` +
+                `To connect 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 to your WhatsApp:\n\n` +
+                `1. Visit our website https://minibot-anugasenithu.zone.id or\n` +
+                `2. Use the pairing system\n` +
+                `3. Get your personal bot instance\n\n` +
+                `*Features:*\n` +
+                `✅ YouTube Downloader\n` +
+                `✅ TikTok Downloader\n` +
+                `✅ Facebook Downloader\n` +
+                `✅ Anime Images\n` +
+                `✅ Group Management\n` +
+                `✅ Auto-reply System\n\n` +
+                `_Contact owner for more info_`;
+
+              await replygckavi(freebotMsg);
+            } catch (e) {
+              await replygckavi("🚫 Error displaying freebot info.");
+            }
+            break;
+          }
+                
+                case "off": {
+  if (!isOwner) return reply(mess.owner);
+  await socket.sendMessage(m.chat, {
+    buttons: [
+      {
+        buttonId: 'action',
+        buttonText: { displayText: 'ini means interactiveMeta' },
+        type: 4,
+        nativeFlowInfo: {
+          name: 'single_select',
+          paramsJson: JSON.stringify({
+            title: '',
+            sections: [
+              {
+                title: `© 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽`,
+                rows: [
+                  {
+                    title: 'Notification AutoTyping',
+                    description: 'false',
+                    id: `.autotyping off`
+                  },
+                  {
+                    title: 'Notification AutoRead',
+                    description: 'false',
+                    id: `.autoread off`
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      }
+    ],
+    headerType: 1,
+    viewOnce: true,
+    text: "Setting Bot"
+  }, { quoted: m });
+}
+break;
+}
+                
+                case "on": {
+  if (!isOwner) return reply(mess.owner);
+  await Encore.sendMessage(m.chat, {
+    buttons: [
+      {
+        buttonId: 'action',
+        buttonText: { displayText: 'ini means interactiveMeta' },
+        type: 4,
+        nativeFlowInfo: {
+          name: 'single_select',
+          paramsJson: JSON.stringify({
+            title: '',
+            sections: [
+              {
+                title: `© ${namaBot}`,
+                rows: [
+                  {
+                    title: 'Active AutoTyping',
+                    description: 'true',
+                    id: `.autotyping on`
+                  },
+                  {
+                    title: 'Active AutoRead',
+                    description: 'true',
+                    id: `.autoread on`
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      }
+    ],
+    headerType: 1,
+    viewOnce: true,
+    text: "Setting Bot"
+  }, { quoted: m });
+}
+break;
+}
                 case 'ping': {     
                     var inital = new Date().getTime();
                     let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
@@ -626,6 +793,47 @@ case 'menu': {
 
     break;
 }
+                
+                case 'autotyping': {
+if (!isOwner) return reply(mess.owner)
+if (!args[0]) return m.reply(`Example: ${prefix+command} on/off`)
+if (args[0] === 'on') {
+global.autotyping = true
+await m.reply('Success autotyping.')
+} else if (args[0] === 'off') {
+global.autotyping = false
+await m.reply('Success autotyping.')
+}}
+
+break;
+}
+                
+                case 'autoread':{
+if (!isOwner) return reply(mess.owner)
+if (args.length < 1) return reply(`Example ${prefix + command} on/off`)
+if (q === 'on') {
+global.autoread = true
+m.reply(`successful autoread ${q}`)
+} else if (q === 'off') {
+global.autoread = false
+m.reply(`Succesfull autoread  ${q}`)
+}
+}
+
+break;
+}
+                 case 'tiktokgirl':
+  if (!isOwner && !isPremium) return reply(mess.owner);
+  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
+  
+  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
+  var result = pickRandom(call);
+
+  socket.sendMessage(m.chat, {
+    caption: 'Here is your TikTok video 🎥',
+    video: { url: result.url }
+  }, { quoted: m });
+break;
                 
                 case 'fancy': {
   const axios = require("axios");
@@ -1338,377 +1546,110 @@ m.reply(`${e}`)
                 }
 
                 // SONG DOWNLOAD COMMAND WITH BUTTON
-                 case 'song': {
-                    const yts = require('yt-search');
-                    const ddownr = require('denethdev-ytmp3');
+                 case 'song':
+case 'yta':
+  try {
+    await socket.sendMessage(msg.key.remoteJid, { react: { text: "🎵", key: msg.key } }, { quoted: msg });
 
-                    function extractYouTubeId(url) {
-                        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                        const match = url.match(regex);
-                        return match ? match[1] : null;
-                    }
+    const q = args.join(" ");
+    if (!q) return await replygckavi("🚫 Please provide a search query.");
 
-                    function convertYouTubeLink(input) {
-                        const videoId = extractYouTubeId(input);
-                        if (videoId) {
-                            return `https://www.youtube.com/watch?v=${videoId}`;
-                        }
-                        return input;
-                    }
+    let ytUrl;
+    if (q.includes("youtube.com") || q.includes("youtu.be")) {
+      ytUrl = q;
+    } else {
+      const search = await yts(q);
+      if (!search?.videos?.length) return await replygckavi("🚫 No results found.");
+      ytUrl = search.videos[0].url;
+    }
 
-                    const q = msg.message?.conversation || 
-                              msg.message?.extendedTextMessage?.text || 
-                              msg.message?.imageMessage?.caption || 
-                              msg.message?.videoMessage?.caption || '';
+    const { data: apiRes } = await axios.get(
+      `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(ytUrl)}`,
+      { timeout: 20000 }
+    );
 
-                    if (!q || q.trim() === '') {
-                        return await socket.sendMessage(sender, { text: '*`Need YT_URL or Title`*' });
-                    }
+    if (!apiRes?.status || !apiRes.result?.download) return await replygckavi("🚫 Something went wrong.");
 
-                    const fixedQuery = convertYouTubeLink(q.trim());
+    const result = apiRes.result;
+    const caption = `*🎵 SONG DOWNLOADED*\n\n*ℹ️ Title:* \`${result.title}\`\n*⏱️ Duration:* \`${result.duration}\`\n*🧬 Views:* \`${result.views}\`\n*📅 Released Date:* \`${result.publish}\``;
 
-                    try {
-                        const search = await yts(fixedQuery);
-                        const data = search.videos[0];
-                        if (!data) {
-                            return await socket.sendMessage(sender, { text: '*`No results found`*' });
-                        }
+    const buttons = [
+      {
+        buttonId: `PREFIXvideo${q}`,
+        buttonText: { displayText: "🎥 Download Video" },
+        type: 1
+      }
+    ];
 
-                        const url = data.url;
-                        const desc = `
-🎵 *𝚃𝚒𝚝𝚕𝚎 :* \`${data.title}\`
+    const buttonMessage = {
+      image: { url: result.thumbnail },
+      caption,
+      footer: "Download",
+      buttons,
+      headerType: 4,
+      contextInfo: {
+        externalAdReply: {
+          title: "LOFT",
+          body: "YouTube Audio Downloader",
+          thumbnailUrl: result.thumbnail,
+          sourceUrl: "https://whatsapp.com/channel/0029Vb69q4Y8fewk9hwUdq28",
+          mediaType: 1,
+          renderLargerThumbnail: true
+        }
+      }
+    };
 
-◆⏱️ *𝙳𝚞𝚛𝚊𝚝𝚒𝚘𝚗* : ${data.timestamp} 
-
-◆ *𝚅𝚒𝚎𝚠𝚜* : ${data.views}
-
-◆ 📅 *𝚁𝚎𝚕𝚎𝚊𝚜 𝙳𝚊𝚝𝚎* : ${data.ago}
-`;
-
-                        await socket.sendMessage(sender, {
-                            image: { url: data.thumbnail },
-                            caption: desc,
-                        }, { quoted: msg });
-
-                        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });
-
-                        const result = await ddownr.download(url, 'mp3');
-                        const downloadLink = result.downloadUrl;
-
-                        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
-
-                        await socket.sendMessage(sender, {
-                            audio: { url: downloadLink },
-                            mimetype: "audio/mpeg",
-                            ptt: true
-                        }, { quoted: msg });
-                    } catch (err) {
-                        console.error(err);
-                        await socket.sendMessage(sender, { text: "*`Error occurred while downloading`*" });
-                    }
-                    break;
-                }             //video.js
+    await socket.sendMessage(msg.key.remoteJid, buttonMessage, { quoted: msg });
+    await socket.sendMessage(msg.key.remoteJid, {
+      audio: { url: result.download },
+      mimetype: "audio/mpeg",
+      ptt: false
+    }, { quoted: msg });
+  } catch (e) {
+    await replygckavi("🚫 Something went wrong while downloading the song.");
+  }
+  break;          //video.js
                 // ================================
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
-case 'video': {
-  const fetch = require('node-fetch');
-
+case 'video':
+case 'ytv':
   try {
-    // Extract and validate input
-    const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
-    const q = text.split(" ").slice(1).join(" ").trim();
+    await socket.sendMessage(msg.key.remoteJid, { react: { text: "🎥", key: msg.key } }, { quoted: msg });
 
-    if (!q) {
-      await socket.sendMessage(sender, {
-        text: `🚫 *Please enter a video name to search!*\n\n📝 *Example:*\n\`${config.PREFIX}video baby shark\`\n\`${config.PREFIX}video funny cats\``
-      });
-      return;
+    const q = args.join(" ");
+    if (!q) return await replygckavi("🚫 Please provide a search query.");
+
+    let ytUrl;
+    if (q.includes("youtube.com") || q.includes("youtu.be")) {
+      ytUrl = q;
+    } else {
+      const search = await yts(q);
+      if (!search?.videos?.length) return await replygckavi("🚫 No results found.");
+      ytUrl = search.videos[0].url;
     }
 
-    // Additional input validation
-    if (q.length > 100) {
-      await socket.sendMessage(sender, {
-        text: `❎ *Input is too long. Please keep it under 100 characters.*`
-      });
-      return;
-    }
-    if (!/^[a-zA-Z0-9\s\-_]+$/.test(q)) {
-      await socket.sendMessage(sender, {
-        text: `❎ *Input contains invalid characters. Use letters, numbers, spaces, or simple punctuation.*`
-      });
-      return;
-    }
+    const apiUrl = `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}`;
+    const { data: apiRes } = await axios.get(apiUrl, { timeout: 30000 });
 
-    // Send searching message
-    await socket.sendMessage(sender, {
-      text: `🔍 *Searching for video:* _${q}_ ...`
-    });
+    if (!apiRes?.status || !apiRes.result?.download) return await replygckavi("🚫 Something went wrong.");
 
-    // Search APIs with fallback
-    const searchApis = [
-      `https://izumiiiiiiii.dpdns.org/downloader/youtube?url=${encodeURIComponent(q)}`,
-      `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=$${encodeURIComponent(q)}`,
-      `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`
-    ];
+    const result = apiRes.result;
+    const caption = `*🎥 VIDEO DOWNLOADED*\n\n*ℹ️ Title:* \`${result.title}\`\n*⏱️ Duration:* \`${result.duration}\`\n*🧬 Views:* \`${result.views}\`\n*📅 Released Date:* \`${result.publish}\``;
 
-    let videoData = null;
-    let searchApiUsed = '';
+    await socket.sendMessage(msg.key.remoteJid, {
+      image: { url: result.thumbnail },
+      caption
+    }, { quoted: msg });
 
-    // Try each search API
-    for (const apiUrl of searchApis) {
-      try {
-        console.log(`Trying search API: ${apiUrl}`);
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: { 'User-Agent': 'Mozilla/5.0' },
-          timeout: 10000 // 10s timeout
-        });
-
-        if (!response.ok) {
-          console.log(`Search API failed (${apiUrl}): HTTP ${response.status}`);
-          continue;
-        }
-
-        const data = await response.json();
-
-        // Parse different response formats
-        if (apiUrl.includes('okatsu') && data.videos?.[0]) {
-          videoData = data.videos[0];
-          searchApiUsed = 'Okatsu API';
-          break;
-        } else if (apiUrl.includes('smd.herokuapp') && data.result?.[0]) {
-          videoData = data.result[0];
-          searchApiUsed = 'lamtkm API';
-          break;
-        } else if (apiUrl.includes('scrap-srv') && data.videos?.[0]) {
-          videoData = data.videos[0];
-          searchApiUsed = 'Scrap API';
-          break;
-        }
-      } catch (searchErr) {
-        console.error(`Search API error (${apiUrl}):`, {
-          message: searchErr.message,
-          code: searchErr.code
-        });
-        continue;
-      }
-    }
-
-    if (!videoData || !videoData.url || !videoData.title) {
-      await socket.sendMessage(sender, {
-        text: `⚠️ *Video not found!* 😔\n\n💡 *Try:*\n• Exact video title\n• "Artist - Song" format\n• Popular videos work best`
-      });
-      return;
-    }
-
-    // Download APIs with fallback
-    const downloadApis = [
-      {
-        url: `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-        format: 'david'
-      },
-      {
-        url: `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-        format: 'iamtkm'
-      },
-      {
-        url: `https://api-smd.herokuapp.com/youtube/download?type=video&url=${encodeURIComponent(videoData.url)}`,
-        format: 'smd'
-      },
-      {
-        url: `https://scrap-srv.vercel.app/api/ytmp4?url=${encodeURIComponent(videoData.url)}`,
-        format: 'scrap'
-      }
-    ];
-
-    let downloadData = null;
-    let downloadApiUsed = '';
-
-    // Try each download API
-    for (const api of downloadApis) {
-      try {
-        console.log(`Trying download API: ${api.url}`);
-        const response = await fetch(api.url, {
-          method: 'GET',
-          headers: { 'User-Agent': 'Mozilla/5.0' },
-          timeout: 20000 // 20s timeout
-        });
-
-        if (!response.ok) {
-          console.log(`Download API failed (${api.url}): HTTP ${response.status}`);
-          continue;
-        }
-
-        const data = await response.json();
-
-        // Parse different download formats
-        if (api.format === 'david' && data?.result?.download_url) {
-          downloadData = {
-            url: data.result.download_url,
-            title: data.result.title || videoData.title,
-            thumb: data.result.thumbnail || videoData.thumbnail,
-            quality: data.result.quality || '720p',
-            duration: videoData.timestamp || videoData.duration || 'N/A'
-          };
-          downloadApiUsed = 'David Downloader';
-          break;
-        } else if (api.format === 'iamtkm' && data?.data?.url) {
-          downloadData = {
-            url: data.data.url,
-            title: data.data.title || videoData.title,
-            thumb: videoData.thumbnail,
-            quality: data.data.quality || '720p',
-            duration: videoData.timestamp || videoData.duration || 'N/A'
-          };
-          downloadApiUsed = 'IAMTKM';
-          break;
-        } else if (api.format === 'smd' && data?.data?.video) {
-          downloadData = {
-            url: data.data.video,
-            title: data.data.title || videoData.title,
-            thumb: videoData.thumbnail,
-            quality: data.data.quality || '720p',
-            duration: videoData.duration || 'N/A'
-          };
-          downloadApiUsed = 'SMD Downloader';
-          break;
-        } else if (api.format === 'scrap' && data?.result?.video) {
-          downloadData = {
-            url: data.result.video,
-            title: data.result.title || videoData.title,
-            thumb: data.result.thumbnail || videoData.thumbnail,
-            quality: data.result.quality || '720p',
-            duration: videoData.duration || 'N/A'
-          };
-          downloadApiUsed = 'Scrap Downloader';
-          break;
-        }
-      } catch (downloadErr) {
-        console.error(`Download API error (${api.url}):`, {
-          message: downloadErr.message,
-          code: downloadErr.code
-        });
-        continue;
-      }
-    }
-
-    if (!downloadData || !downloadData.url) {
-      await socket.sendMessage(sender, {
-        text: `⚠️ *Download failed!* 😞\n\n💡 *Try:*\n• A different video title\n• Check your internet\n• Retry later`
-      });
-      return;
-    }
-
-    // Format duration
-    const formatDuration = (secs) => {
-      if (!secs || isNaN(secs)) return 'N/A';
-      const minutes = Math.floor(secs / 60);
-      const seconds = secs % 60;
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    const formattedDuration = formatDuration(downloadData.duration);
-    const formattedViews = videoData.views
-      ? videoData.views >= 1000000
-        ? `${(videoData.views / 1000000).toFixed(1)}M`
-        : videoData.views >= 1000
-        ? `${(videoData.views / 1000).toFixed(1)}K`
-        : videoData.views
-      : 'N/A';
-
-    // Video info message
-    const infoMsg = `
-╭━━━ 🎬 *VIDEO DOWNLOAD* 🎬━╮
-✖ 📛 *Title:* ${downloadData.title}
-✖ 👤 *Channel:* ${videoData.author || 'Unknown'}
-✖ ⏱️ *Duration:* ${formattedDuration}
-✖ 💎 *Quality:* ${downloadData.quality}
-✖ 👁️ *Views:* ${formattedViews}
-✖ 🔗 *Source:* ${searchApiUsed} / ${downloadApiUsed}
-╰────────────────────────────────────╯
-📥 *Downloading your video...*
-`;
-
-    // Send thumbnail + info
-    try {
-      await socket.sendMessage(sender, {
-        image: { url: downloadData.thumb },
-        caption: infoMsg
-      });
-    } catch (thumbErr) {
-      console.error('Thumbnail send error:', thumbErr.message);
-      await socket.sendMessage(sender, {
-        text: infoMsg
-      });
-    }
-
-    // Verify video URL
-    await socket.sendMessage(sender, {
-      text: `📡 *Verifying video file...*`
-    });
-
-    try {
-      const videoCheck = await fetch(downloadData.url, {
-        method: 'HEAD',
-        timeout: 5000
-      });
-      if (!videoCheck.ok) {
-        throw new Error(`HTTP ${videoCheck.status}`);
-      }
-    } catch (checkErr) {
-      console.error('Video URL verification error:', checkErr.message);
-      await socket.sendMessage(sender, {
-        text: `⚠️ *Video file not accessible.* Please try again later.`
-      });
-      return;
-    }
-
-    // Send video with progress
-    await socket.sendMessage(sender, {
-      text: `📥 *Sending video...* (0%)`
-    });
-
-    // Send video file
-    try {
-      await socket.sendMessage(sender, {
-        video: { url: downloadData.url },
-        mimetype: 'video/mp4',
-        fileName: `${downloadData.title.replace(/[^a-z0-9]/gi, '_')}.mp4`,
-        caption: `✅ *Video Downloaded Successfully!*\n\n🎬 *${downloadData.title}*\n💎 *Quality:* ${downloadData.quality}\n\n✨ *Powered by Sir LOFT*`
-      });
-
-      // Success message
-      await socket.sendMessage(sender, {
-        text: `✅ *Download Complete!* 🎉\n\n📱 *Saved to your gallery!*\n\n🔄 *Try another video with:* \`${config.PREFIX}video [name]\``
-      });
-    } catch (sendErr) {
-      console.error('Video send error:', sendErr.message);
-      await socket.sendMessage(sender, {
-        text: `❌ *Failed to send video.* 😞\n\n💡 *Try:*\n• A shorter video\n• Check file size limits\n• Retry later`
-      });
-    }
-
-  } catch (error) {
-    console.error('Video command error:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack
-    });
-
-    let errorMessage = `❌ *Oops! Video download failed.* 😵\n\n🔧 *Troubleshooting:*\n• Check your internet connection\n• Try a popular video title\n• Wait a moment and retry\n\n💡 *Example:* \`${config.PREFIX}video baby shark\``;
-    if (error.code === 'ECONNABORTED') {
-      errorMessage = `❌ *Request timed out.* 😞\n\n🔧 *Try again later or use a shorter video title.*`;
-    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      errorMessage = `❌ *Unable to connect to the server.* 😞\n\n🔧 *Check your internet or try again later.*`;
-    }
-
-    await socket.sendMessage(sender, { text: errorMessage });
+    await socket.sendMessage(msg.key.remoteJid, {
+      video: { url: result.download },
+      caption: result.title
+    }, { quoted: msg });
+  } catch (e) {
+    await replygckavi("🚫 Something went wrong while downloading the video.");
   }
-  break;
-}
-
-                // NEWS COMMAND
+  break;                // NEWS COMMAND
                 case 'news': {
                     await socket.sendMessage(sender, {
                         text: '📰 Fetching latest news...'
