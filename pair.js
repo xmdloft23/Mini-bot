@@ -10,8 +10,7 @@ const Jimp = require('jimp');
 const crypto = require('crypto');
 const axios = require('axios');
 const yts = require("yt-search");
-const fetch = require("node-fetch");
-const { pickRandom } = require('./loft/function.js'); 
+const fetch = require("node-fetch"); 
 const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
@@ -565,20 +564,6 @@ case 'menu': {
                     return await socket.sendMessage(sender, {
                         text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
                     break;
-                }
-                
-                 case 'tiktokgirl':
-  if (!isOwner && !isPremium) return reply(mess.owner);
-  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
-  
-  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
-  var result = pickRandom(call);
-
-  socket.sendMessage(m.chat, {
-    caption: 'Here is your TikTok video 🎥',
-    video: { url: result.url }
-  }, { quoted: m });
-    break;
                 }
                 
                 // OWNER COMMAND WITH VCARD
