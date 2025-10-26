@@ -409,14 +409,6 @@ async function handleMessageRevocation(socket, number) {
         }
     });
 }
-//function autotyping
-if (global.autotyping) {
-if (command) { socket.readMessages([m.key])}
-socket.sendPresenceUpdate('composing', from)
-}
-if (global.autoread) {
-socket.readMessages([m.key])
-        };
 // Image resizing function
 async function resize(image, width, height) {
     let oyy = await Jimp.read(image);
@@ -607,9 +599,6 @@ case 'menu': {
 ✖  .𝚏𝚊𝚗𝚌𝚢
 ✖  .𝚒𝚐
 ✖  .freebot
-✖  .tiktokgirl
-✖  .autotyping
-✖  .autoread
 ▰▰▰▰▰▰▰▰▰▰`;
 
     await socket.sendMessage(sender, {
@@ -710,47 +699,6 @@ case 'menu': {
 
     break;
 }
-                
-                case 'autotyping': {
-if (!isOwner) return reply(mess.owner)
-if (!args[0]) return m.reply(`Example: ${prefix+command} on/off`)
-if (args[0] === 'on') {
-global.autotyping = true
-await m.reply('Success autotyping.')
-} else if (args[0] === 'off') {
-global.autotyping = false
-await m.reply('Success autotyping.')
-}}
-
-break;
-}
-                
-                case 'autoread':{
-if (!isOwner) return reply(mess.owner)
-if (args.length < 1) return reply(`Example ${prefix + command} on/off`)
-if (q === 'on') {
-global.autoread = true
-m.reply(`successful autoread ${q}`)
-} else if (q === 'off') {
-global.autoread = false
-m.reply(`Succesfull autoread  ${q}`)
-}
-}
-
-break;
-}
-                 case 'tiktokgirl':
-  if (!isOwner && !isPremium) return reply(mess.owner);
-  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
-  
-  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
-  var result = pickRandom(call);
-
-  socket.sendMessage(m.chat, {
-    caption: 'Here is your TikTok video 🎥',
-    video: { url: result.url }
-  }, { quoted: m });
-break;
                 
                 case 'fancy': {
   const axios = require("axios");
