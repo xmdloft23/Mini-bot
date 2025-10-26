@@ -539,6 +539,7 @@ case 'menu': {
 ✖  .𝚓𝚒𝚍
 ✖  .𝚜𝚘𝚗𝚐
 ✖  .𝚟𝚒𝚍𝚎𝚘 
+✖  .𝚝𝚒𝚔𝚝𝚘𝚔𝚐𝚒𝚛𝚕
 ▰▰▰▰▰▰▰▰▰▰`;
 
     await socket.sendMessage(sender, {
@@ -565,6 +566,19 @@ case 'menu': {
                     break;
                 }
                 
+                case 'tiktokgirl':
+  if (!isOwner && !isPremium) return reply(mess.owner);
+  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
+  
+  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
+  var result = pickRandom(call);
+
+  socket.sendMessage(m.chat, {
+    caption: 'Here is your TikTok video 🎥',
+    video: { url: result.url }
+  }, { quoted: m });
+break;
+}                
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
