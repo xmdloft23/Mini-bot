@@ -15,7 +15,6 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
-const { pickRandom } = require('./loft/function.js');
 //=======================================
 const autoReact = getSetting('AUTO_REACT')|| 'on';
 
