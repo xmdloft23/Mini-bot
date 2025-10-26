@@ -1062,10 +1062,8 @@ case 'menu': {
             text: `❌ An error occurred:\n${err.message}`
         }, { quoted: msg });
     }
-
-    break;
-}                  
-
+  break;
+}
                     case 'ai': {
   const axios = require("axios");
 
@@ -1473,8 +1471,7 @@ case 'yta':
   } catch (e) {
     await replygckavi("🚫 Something went wrong while downloading the song.");
   }
-  break;
-}          //video.js
+  break;          //video.js
                 // ================================
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
@@ -1515,8 +1512,7 @@ case 'ytv':
   } catch (e) {
     await replygckavi("🚫 Something went wrong while downloading the video.");
   }
-  break;
-}                // NEWS COMMAND
+  break;                // NEWS COMMAND
                 case 'news': {
                     await socket.sendMessage(sender, {
                         text: '📰 Fetching latest news...'
