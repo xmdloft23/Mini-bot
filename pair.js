@@ -567,7 +567,7 @@ case 'menu': {
                     break;
                 }
                 
-                case 'tiktokgirl':
+                 case 'tiktokgirl':
   if (!isOwner && !isPremium) return reply(mess.owner);
   socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
   
@@ -578,8 +578,9 @@ case 'menu': {
     caption: 'Here is your TikTok video 🎥',
     video: { url: result.url }
   }, { quoted: m });
-break;
-}                
+    break;
+                }
+                
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
