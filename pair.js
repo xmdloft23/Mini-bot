@@ -1,24 +1,22 @@
 const express = require('express');
-const router = express.Router();
 const fs = require('fs-extra');
 const path = require('path');
 const { exec } = require('child_process');
-const { emptyDirSync } = require('fs-extra'); // Corrected import
+const router = express.Router();
 const pino = require('pino');
 const { Octokit } = require('@octokit/rest');
 const moment = require('moment-timezone');
 const Jimp = require('jimp');
 const crypto = require('crypto');
 const axios = require('axios');
-const yts = require('yt-search');
-const fetch = require('node-fetch');
+const yts = require("yt-search");
+const fetch = require("node-fetch"); 
 const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
-const { pickRandom } = require('./loft/function.js');
 //=======================================
-const autoReact = getSetting('AUTO_REACT') || 'on';
+const autoReact = getSetting('AUTO_REACT')|| 'on';
 
 //=======================================
 const {
@@ -41,7 +39,7 @@ const config = {
     PREFIX: '.',
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/G3ChQEjwrdVBTBUQHWSNHF?mode=ems_copy_t',
-    ADMIN_LIST_PATH: path.join(__dirname, 'admin.json'), // Use path.join
+    ADMIN_LIST_PATH: './admin.json',
     IMAGE_PATH: 'https://files.catbox.moe/2x9ktu.png',
     NEWSLETTER_JID: '120363398106360290@newsletter',
     NEWSLETTER_MESSAGE_ID: '0088',
@@ -62,17 +60,6 @@ const config = {
     }
 };
 
-// Validate environment variables
-const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN || throwError('GITHUB_TOKEN is not set')
-});
-const owner = process.env.GITHUB_REPO_OWNER || throwError('GITHUB_REPO_OWNER is not set');
-const repo = process.env.GITHUB_REPO_NAME || throwError('GITHUB_REPO_NAME is not set');
-
-function throwError(message) {
-    throw new Error(message);
-}
-
 // List Message Generator
 function generateListMessage(text, buttonTitle, sections) {
     return {
@@ -92,18 +79,26 @@ function generateButtonMessage(content, buttons, image = null) {
         buttons: buttons,
         headerType: 1 // Default to text header
     };
+//=======================================
     // Add image if provided
     if (image) {
         message.headerType = 4; // Image header
         message.image = typeof image === 'string' ? { url: image } : image;
     }
+
     return message;
 }
 //=======================================
+const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN
+});
+const owner = process.env.GITHUB_REPO_OWNER;
+const repo = process.env.GITHUB_REPO_NAME;
+
 const activeSockets = new Map();
 const socketCreationTime = new Map();
-const SESSION_BASE_PATH = path.join(__dirname, 'session'); // Use path.join
-const NUMBER_LIST_PATH = path.join(__dirname, 'numbers.json'); // Use path.join
+const SESSION_BASE_PATH = './session';
+const NUMBER_LIST_PATH = './numbers.json';
 const otpStore = new Map();
 
 if (!fs.existsSync(SESSION_BASE_PATH)) {
@@ -136,10 +131,20 @@ async function cleanDuplicateFiles(number) {
         const { data } = await octokit.repos.getContent({
             owner,
             repo,
-            path: `session`
+            path: 'session'
         });
-        const sessionFiles = data.filter(file => file.name.includes(sanitizedNumber));
-        const configFiles = data.filter(file => file.name.includes('config')); // Adjust as needed
+
+        const sessionFiles = data.filter(file => 
+            file.name.startsWith(`empire_${sanitizedNumber}_`) && file.name.endsWith('.json')
+        ).sort((a, b) => {
+            const timeA = parseInt(a.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
+            const timeB = parseInt(b.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
+            return timeB - timeA;
+        });
+
+        const configFiles = data.filter(file => 
+            file.name === `config_${sanitizedNumber}.json`
+        );
 
         if (sessionFiles.length > 1) {
             for (let i = 1; i < sessionFiles.length; i++) {
@@ -161,52 +166,7 @@ async function cleanDuplicateFiles(number) {
         console.error(`Failed to clean duplicate files for ${number}:`, error);
     }
 }
-
 //=======================================
-async function oneViewMessage(socket, isOwner, msg, sender) {
-    if (isOwner) {
-        try {
-            const akuru = sender;
-            const quot = msg;
-            if (quot) {
-                if (quot.imageMessage?.viewOnce) {
-                    console.log("Processing view-once image");
-                    let cap = quot.imageMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.imageMessage);
-                    await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
-                } else if (quot.videoMessage?.viewOnce) {
-                    console.log("Processing view-once video");
-                    let cap = quot.videoMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.videoMessage);
-                    await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
-                } else if (quot.audioMessage?.viewOnce) {
-                    console.log("Processing view-once audio");
-                    let cap = quot.audioMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.audioMessage);
-                    await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
-                } else if (quot.viewOnceMessageV2?.message?.imageMessage) {
-                    let cap = quot.viewOnceMessageV2?.message?.imageMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.imageMessage);
-                    await socket.sendMessage(akuru, { image: { url: anu }, caption: cap });
-                } else if (quot.viewOnceMessageV2?.message?.videoMessage) {
-                    let cap = quot.viewOnceMessageV2?.message?.videoMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2.message.videoMessage);
-                    await socket.sendMessage(akuru, { video: { url: anu }, caption: cap });
-                } else if (quot.viewOnceMessageV2Extension?.message?.audioMessage) {
-                    let cap = quot.viewOnceMessageV2Extension?.message?.audioMessage?.caption || "";
-                    let anu = await socket.downloadAndSaveMediaMessage(quot.viewOnceMessageV2Extension.message.audioMessage);
-                    await socket.sendMessage(akuru, { audio: { url: anu }, caption: cap });
-                } else {
-                    await socket.sendMessage(akuru, { text: "No valid view-once media found." });
-                }
-            }
-        } catch (error) {
-            console.error("Error processing view-once message:", error);
-            await socket.sendMessage(akuru, { text: "Failed to process view-once message." });
-        }
-    }
-}
-
 async function joinGroup(socket) {
     let retries = config.MAX_RETRIES;
     const inviteCodeMatch = config.GROUP_INVITE_LINK.match(/chat\.whatsapp\.com\/([a-zA-Z0-9]+)/);
@@ -233,9 +193,6 @@ async function joinGroup(socket) {
                 errorMessage = 'Bot is already a member of the group';
             } else if (error.message.includes('gone')) {
                 errorMessage = 'Group invite link is invalid or expired';
-            } else if (error.message.includes('rate-overlimit')) {
-                errorMessage = 'Rate limit exceeded, please try again later';
-                await delay(5000);
             }
             console.warn(`Failed to join group, retries left: ${retries}`, errorMessage);
             if (retries === 0) {
@@ -274,12 +231,9 @@ async function sendAdminConnectMessage(socket, number, groupResult) {
 }
 //=======================================
 async function sendOTP(socket, number, otp) {
-    if (!socket.user?.id) {
-        throw new Error('Socket user not authenticated');
-    }
     const userJid = jidNormalizedUser(socket.user.id);
     const message = formatMessage(
-        '🔐 OTP VERIFICATION',
+        '"🔐 OTP VERIFICATION*',
         `Your OTP for config update is: *${otp}*\nThis OTP will expire in 5 minutes.`,
         `${config.BOT_FOOTER}`
     );
@@ -299,8 +253,10 @@ function setupNewsletterHandlers(socket) {
         if (!message?.key || message.key.remoteJid !== config.NEWSLETTER_JID) return;
 
         try {
-            const randomEmoji = config.AUTO_LIKE_EMOJI[Math.floor(Math.random() * config.AUTO_LIKE_EMOJI.length)];
-            const messageId = String(message.newsletterServerId);
+            const emojis = ['🧡'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            const messageId = message.newsletterServerId;
+
             if (!messageId) {
                 console.warn('No valid newsletterServerId found:', message);
                 return;
@@ -311,19 +267,14 @@ function setupNewsletterHandlers(socket) {
                 try {
                     await socket.newsletterReactMessage(
                         config.NEWSLETTER_JID,
-                        messageId,
+                        messageId.toString(),
                         randomEmoji
                     );
                     console.log(`Reacted to newsletter message ${messageId} with ${randomEmoji}`);
                     break;
                 } catch (error) {
                     retries--;
-                    let errorMessage = error.message || 'Unknown error';
-                    if (error.message.includes('rate-overlimit')) {
-                        console.warn('Rate limit exceeded, retrying after delay');
-                        await delay(5000);
-                    }
-                    console.warn(`Failed to react to newsletter message ${messageId}, retries left: ${retries}`, errorMessage);
+                    console.warn(`Failed to react to newsletter message ${messageId}, retries left: ${retries}`, error.message);
                     if (retries === 0) throw error;
                     await delay(2000 * (config.MAX_RETRIES - retries));
                 }
@@ -352,12 +303,7 @@ async function setupStatusHandlers(socket) {
                         break;
                     } catch (error) {
                         retries--;
-                        let errorMessage = error.message || 'Unknown error';
-                        if (error.message.includes('rate-overlimit')) {
-                            console.warn('Rate limit exceeded, retrying after delay');
-                            await delay(5000);
-                        }
-                        console.warn(`Failed to read status, retries left: ${retries}`, errorMessage);
+                        console.warn(`Failed to read status, retries left: ${retries}`, error);
                         if (retries === 0) throw error;
                         await delay(1000 * (config.MAX_RETRIES - retries));
                     }
@@ -378,12 +324,7 @@ async function setupStatusHandlers(socket) {
                         break;
                     } catch (error) {
                         retries--;
-                        let errorMessage = error.message || 'Unknown error';
-                        if (error.message.includes('rate-overlimit')) {
-                            console.warn('Rate limit exceeded, retrying after delay');
-                            await delay(5000);
-                        }
-                        console.warn(`Failed to react to status, retries left: ${retries}`, errorMessage);
+                        console.warn(`Failed to react to status, retries left: ${retries}`, error);
                         if (retries === 0) throw error;
                         await delay(1000 * (config.MAX_RETRIES - retries));
                     }
@@ -397,18 +338,15 @@ async function setupStatusHandlers(socket) {
 //=======================================
 async function handleMessageRevocation(socket, number) {
     socket.ev.on('messages.delete', async ({ keys }) => {
-        if (!keys || keys.length === 0) {
-            console.warn('No message keys provided for deletion event');
-            return;
-        }
+        if (!keys || keys.length === 0) return;
 
         const messageKey = keys[0];
         const userJid = jidNormalizedUser(socket.user.id);
         const deletionTime = getSriLankaTimestamp();
-
+        
         const message = formatMessage(
             '╭──◯',
-            `✖ \`D E L E T E\`\n✖ *⦁ From :* ${messageKey.remoteJid}\n✖ *⦁ Time:* ${deletionTime}\n✖ *⦁ Type: Normal*\n╰──◯`,
+            `│ \`D E L E T E\`\n│ *⦁ From :* ${messageKey.remoteJid}\n│ *⦁ Time:* ${deletionTime}\n│ *⦁ Type: Normal*\n╰──◯`,
             `${config.BOT_FOOTER}`
         );
 
@@ -423,34 +361,25 @@ async function handleMessageRevocation(socket, number) {
         }
     });
 }
-//=======================================
-async function handleMessage(socket, m, command, from) {
-    if (config.AUTO_TYPING) {
-        if (command) {
-            await socket.readMessages([m.key]);
-        }
-        await socket.sendPresenceUpdate('composing', from);
-    }
 
-    if (config.AUTO_READ) {
-        await socket.readMessages([m.key]);
-    }
-}
-//=======================================
+// Image resizing function
 async function resize(image, width, height) {
     let oyy = await Jimp.read(image);
     let kiyomasa = await oyy.resize(width, height).getBufferAsync(Jimp.MIME_JPEG);
     return kiyomasa;
 }
-//=======================================
+
+// Capitalize first letter
 function capital(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-//=======================================
+
+// Generate serial
 const createSerial = (size) => {
-    return crypto.randomBytes(Math.ceil(size / 2)).toString('hex').slice(0, size);
+    return crypto.randomBytes(size).toString('hex').slice(0, size);
 }
-//=======================================
+
+// Send slide with news items
 async function SendSlide(socket, jid, newsItems) {
     let anu = [];
     for (let item of newsItems) {
@@ -459,7 +388,7 @@ async function SendSlide(socket, jid, newsItems) {
             imgBuffer = await resize(item.thumbnail, 300, 200);
         } catch (error) {
             console.error(`Failed to resize image for ${item.title}:`, error);
-            imgBuffer = await Jimp.read(config.IMAGE_PATH); // Use config image as fallback
+            imgBuffer = await Jimp.read('https://files.catbox.moe/bupsfv.jpg');
             imgBuffer = await imgBuffer.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
         }
         let imgsc = await prepareWAMessageMedia({ image: imgBuffer }, { upload: socket.waUploadToServer });
@@ -475,11 +404,11 @@ async function SendSlide(socket, jid, newsItems) {
                 buttons: [
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐃𝙴𝙿𝙻𝙾𝚈","url":"${config.CHANNEL_LINK}","merchant_url":"${config.CHANNEL_LINK}"}`
+                        buttonParamsJson: `{"display_text":"𝐃𝙴𝙿𝙻𝙾𝚈","url":"https:/","merchant_url":"https://www.google.com"}`
                     },
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐂𝙾𝙽𝚃𝙰𝙲𝚃","url":"https://wa.me/${config.OWNER_NUMBER}","merchant_url":"https://wa.me/${config.OWNER_NUMBER}"}`
+                        buttonParamsJson: `{"display_text":"𝐂𝙾𝙽𝚃𝙰𝙲𝚃","url":"https","merchant_url":"https://www.google.com"}`
                     }
                 ]
             })
@@ -510,10 +439,6 @@ async function SendSlide(socket, jid, newsItems) {
 
 // Fetch news from API
 async function fetchNews() {
-    if (!config.NEWS_JSON_URL) {
-        console.error('NEWS_JSON_URL is not configured');
-        return [];
-    }
     try {
         const response = await axios.get(config.NEWS_JSON_URL);
         return response.data || [];
@@ -533,13 +458,6 @@ function setupCommandHandlers(socket, number) {
         let args = [];
         let sender = msg.key.remoteJid;
 
-        const reply = async (text) => {
-            await socket.sendMessage(sender, { text }, { quoted: msg });
-        };
-        const replygckavi = reply; // Alias for compatibility
-        const isOwner = sender.includes(config.OWNER_NUMBER);
-        const mess = { owner: 'This command is restricted to the bot owner.' };
-
         if (msg.message.conversation || msg.message.extendedTextMessage?.text) {
             const text = (msg.message.conversation || msg.message.extendedTextMessage.text || '').trim();
             if (text.startsWith(config.PREFIX)) {
@@ -547,7 +465,8 @@ function setupCommandHandlers(socket, number) {
                 command = parts[0].toLowerCase();
                 args = parts.slice(1);
             }
-        } else if (msg.message.buttonsResponseMessage) {
+        }
+        else if (msg.message.buttonsResponseMessage) {
             const buttonId = msg.message.buttonsResponseMessage.selectedButtonId;
             if (buttonId && buttonId.startsWith(config.PREFIX)) {
                 const parts = buttonId.slice(config.PREFIX.length).trim().split(/\s+/);
@@ -559,7 +478,8 @@ function setupCommandHandlers(socket, number) {
         if (!command) return;
 
         try {
-            switch (command) {
+            switch (command) {   
+                // ALIVE COMMAND WITH BUTTON
                 case 'alive': {
                     const startTime = socketCreationTime.get(number) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
@@ -567,12 +487,11 @@ function setupCommandHandlers(socket, number) {
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-                    const title = '*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*';
-                    const content = `*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*\n` +
-                                    `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
-                                    `*ʙᴏᴛ ɴᴀᴍᴇ :- 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n` +
-                                    `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
-                                    `> *${config.FREEBOT_WEBSITE}*`;
+                    const title = '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭  ᴀᴄᴛɪᴠᴇ!!❤*';
+                    const content = `*ᴏᴡɴᴇʀ:𝚂𝚒𝚛 𝙻𝙾𝙵𝚃*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *ᴍʀ 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃*\n` +
+                                `*ʙᴏᴛ ɴᴀᴍᴇ :- ☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭  ʙᴏᴛ*\n` +
+                                   `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
+                                   `> *https://*`;
                     const footer = config.BOT_FOOTER;
 
                     await socket.sendMessage(sender, {
@@ -586,24 +505,25 @@ function setupCommandHandlers(socket, number) {
                     });
                     break;
                 }
-                case 'menu': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
-                    const uptime = Math.floor((Date.now() - startTime) / 1000);
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    const seconds = Math.floor(uptime % 60);
+//=======================================
+case 'menu': {
+    const startTime = socketCreationTime.get(number) || Date.now();
+    const uptime = Math.floor((Date.now() - startTime) / 1000);
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
 
-                    await socket.sendMessage(sender, {
-                        react: {
-                            text: "🩷",
-                            key: msg.key
-                        }
-                    });
+    await socket.sendMessage(sender, { 
+        react: { 
+            text: "😯",
+            key: msg.key 
+        } 
+    });
 
-                    const title = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 🌸`;
-                    const footer = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 `;
+    const title = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 🌸`;
+    const footer = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 `;
 
-                    const menuText = `
+    const menuText = `
 ╭▰▰〔 *${title}* 〕▰▰╮
 ✖ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽
 ✖ 👑 *ᴏᴡɴᴇʀ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖
@@ -616,765 +536,52 @@ function setupCommandHandlers(socket, number) {
 ✖  .𝚊𝚕𝚒𝚟𝚎 
 ✖  .𝚜𝚢𝚜𝚝𝚎𝚖
 ✖  .𝚙𝚒𝚗𝚐 
-✖  .𝚓𝚒𝚍 
-✖  .𝚟𝚟
-✖  .𝚙𝚛𝚘𝚗𝚑𝚞𝚋
-✖  .𝚠𝚎𝚊𝚝𝚑𝚎𝚛
-✖  .𝚝𝚒𝚔𝚝𝚘𝚔
+✖  .𝚓𝚒𝚍
 ✖  .𝚜𝚘𝚗𝚐
 ✖  .𝚟𝚒𝚍𝚎𝚘 
-✖  .𝚘𝚠𝚗𝚎𝚛 
-✖  .𝚙𝚛𝚎𝚏𝚎𝚛𝚎𝚗𝚌𝚎𝚜 
-✖  .𝚌𝚑𝚊𝚗𝚗𝚎𝚕
-✖  .𝚊𝚒 
-✖  .𝚙𝚊𝚒𝚛 𝟸𝟻𝟻𝚡𝚡𝚡
-✖  .𝚕𝚘𝚐𝚘
-✖  .𝚏𝚊𝚗𝚌𝚢
-✖  .𝚒𝚐
-✖  .𝚏𝚛𝚎𝚎𝚋𝚘𝚝
-✖  .𝚝𝚒𝚔𝚝𝚘𝚔𝚐𝚒𝚛𝚕
-✖  .𝚊𝚞𝚝𝚘𝚝𝚢𝚙𝚒𝚗𝚐
-✖  .𝚊𝚞𝚝𝚘𝚛𝚎𝚊𝚍
-✖  .𝚘𝚏𝚏
-✖  .𝚘𝚗
 ▰▰▰▰▰▰▰▰▰▰`;
 
-                    await socket.sendMessage(sender, {
-                        image: { url: config.BUTTON_IMAGES.MENU },
-                        caption: menuText,
-                        footer: footer
-                    });
-                    break;
-                }
-                case 'freebot': {
-                    try {
-                        await socket.sendMessage(sender, { react: { text: "🤖", key: msg.key } }, { quoted: msg });
-                        const freebotMsg = `👻 *CONNECT FREE BOT*\n\n` +
-                                          `To connect 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 to your WhatsApp:\n\n` +
-                                          `1. Visit our website ${config.FREEBOT_WEBSITE} or\n` +
-                                          `2. Use the pairing system\n` +
-                                          `3. Get your personal bot instance\n\n` +
-                                          `*Features:*\n` +
-                                          `✅ YouTube Downloader\n` +
-                                          `✅ TikTok Downloader\n` +
-                                          `✅ Facebook Downloader\n` +
-                                          `✅ Anime Images\n` +
-                                          `✅ Group Management\n` +
-                                          `✅ Auto-reply System\n\n` +
-                                          `_Contact owner for more info_`;
-
-                        await replygckavi(freebotMsg);
-                    } catch (e) {
-                        await replygckavi("🚫 Error displaying freebot info.");
-                    }
-                    break;
-                }
-                case 'off': {
-                    if (!isOwner) return reply(mess.owner);
-                    await socket.sendMessage(sender, {
-                        buttons: [
-                            {
-                                buttonId: 'action',
-                                buttonText: { displayText: 'Interactive Settings' },
-                                type: 4,
-                                nativeFlowInfo: {
-                                    name: 'single_select',
-                                    paramsJson: JSON.stringify({
-                                        title: '',
-                                        sections: [
-                                            {
-                                                title: `© ${config.BOT_NAME}`,
-                                                rows: [
-                                                    {
-                                                        title: 'Notification AutoTyping',
-                                                        description: 'false',
-                                                        id: `${config.PREFIX}autotyping off`
-                                                    },
-                                                    {
-                                                        title: 'Notification AutoRead',
-                                                        description: 'false',
-                                                        id: `${config.PREFIX}autoread off`
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    })
-                                }
-                            }
-                        ],
-                        headerType: 1,
-                        viewOnce: true,
-                        text: "Setting Bot"
-                    }, { quoted: msg });
-                    break;
-                }
-                case 'on': {
-                    if (!isOwner) return reply(mess.owner);
-                    try {
-                        const settingsMenu = {
-                            text: "Bot Settings",
-                            viewOnce: true,
-                            headerType: 1,
-                            buttons: [
-                                {
-                                    buttonId: "settings_action",
-                                    buttonText: { displayText: "Interactive Settings" },
-                                    type: 4,
-                                    nativeFlowInfo: {
-                                        name: "single_select",
-                                        paramsJson: JSON.stringify({
-                                            title: "Bot Configuration",
-                                            sections: [
-                                                {
-                                                    title: `© ${config.BOT_NAME} Settings`,
-                                                    rows: [
-                                                        {
-                                                            title: "Enable AutoTyping",
-                                                            description: "Activates auto-typing feature",
-                                                            id: `${config.PREFIX}autotyping on`
-                                                        },
-                                                        {
-                                                            title: "Enable AutoRead",
-                                                            description: "Activates auto-read feature",
-                                                            id: `${config.PREFIX}autoread on`
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        })
-                                    }
-                                }
-                            ]
-                        };
-
-                        await socket.sendMessage(sender, settingsMenu, { quoted: msg });
-                    } catch (error) {
-                        console.error("Error sending settings menu:", error);
-                        await reply("Failed to display settings menu. Please try again later.");
-                    }
-                    break;
-                }
-                case 'ping': {
-                    const initial = new Date().getTime();
-                    let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
-                    const final = new Date().getTime();
-                    try {
-                        await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
-                        await delay(500);
-                        await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
-                        await delay(500);
-                        await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
-                        await delay(500);
-                        await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
-                        await delay(500);
-                        await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
-                        await delay(500);
-                        await socket.sendMessage(sender, { text: '*Pong ' + (final - initial) + ' Ms*', edit: ping.key });
-                    } catch (error) {
-                        console.error('Failed to edit ping message:', error);
-                        await reply("Error processing ping command.");
-                    }
-                    break;
-                }
-                case 'ig': {
-                    const q = msg.message?.conversation ||
-                              msg.message?.extendedTextMessage?.text ||
-                              msg.message?.imageMessage?.caption ||
-                              msg.message?.videoMessage?.caption ||
-                              '';
-                    const igUrl = q.trim();
-
-                    if (!/instagram\.com/.test(igUrl)) {
-                        return await socket.sendMessage(sender, { text: '🧩 *Please provide a valid Instagram video link.*' });
-                    }
-
-                    try {
-                        await socket.sendMessage(sender, { react: { text: '⬇', key: msg.key } });
-                        const res = await igdl(igUrl);
-                        const data = res.data;
-
-                        if (data && data.length > 0) {
-                            const videoUrl = data[0].url;
-                            await socket.sendMessage(sender, {
-                                video: { url: videoUrl },
-                                mimetype: 'video/mp4',
-                                caption: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
-                            }, { quoted: msg });
-                            await socket.sendMessage(sender, { react: { text: '✔', key: msg.key } });
-                        } else {
-                            await socket.sendMessage(sender, { text: '*❌ No video found in the provided link.*' });
-                        }
-                    } catch (e) {
-                        console.error('Error downloading Instagram video:', e);
-                        await socket.sendMessage(sender, { text: '*❌ Error downloading Instagram video.*' });
-                    }
-                    break;
-                }
-                case 'autotyping': {
-                    if (!isOwner) return reply(mess.owner);
-                    if (!args[0]) return reply(`Example: ${config.PREFIX}${command} on/off`);
-                    if (args[0] === 'on') {
-                        config.AUTO_TYPING = true;
-                        await reply('Successfully enabled autotyping.');
-                    } else if (args[0] === 'off') {
-                        config.AUTO_TYPING = false;
-                        await reply('Successfully disabled autotyping.');
-                    } else {
-                        await reply(`Invalid argument. Use ${config.PREFIX}${command} on/off`);
-                    }
-                    break;
-                }
-                case 'autoread': {
-                    if (!isOwner) return reply(mess.owner);
-                    if (!args[0]) return reply(`Example: ${config.PREFIX}${command} on/off`);
-                    if (args[0] === 'on') {
-                        config.AUTO_READ = true;
-                        await reply(`Successfully enabled autoread ${args[0]}`);
-                    } else if (args[0] === 'off') {
-                        config.AUTO_READ = false;
-                        await reply(`Successfully disabled autoread ${args[0]}`);
-                    } else {
-                        await reply(`Invalid argument. Use ${config.PREFIX}${command} on/off`);
-                    }
-                    break;
-                }
-                default: {
-                    await reply(`Unknown command. Type ${config.PREFIX}menu for available commands.`);
-                    break;
-                }
-            }
-        } catch (error) {
-            console.error(`Error processing command ${command}:`, error);
-            await reply(`Error processing command: ${error.message}`);
-        }
+    await socket.sendMessage(sender, {
+        image: { url: config.BUTTON_IMAGES.MENU },
+        caption: menuText,
+        footer: footer
     });
-}
 
-                 switch (someVariable) {
-  case 'tiktokgirl':
-    if (!isOwner && !isPremium) return reply(mess.owner);
-    socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
-
-    var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // Ensure path is correct
-    var result = pickRandom(call);
-
-    socket.sendMessage(m.chat, {
-      caption: 'Here is your TikTok video 🎥',
-      video: { url: result.url }
-    }, { quoted: m });
     break;
 }
-               switch (someVariable) { 
-                case 'fancy': {
-  const axios = require("axios");
+//=======================================
+                case 'ping': {     
+                    var inital = new Date().getTime();
+                    let ping = await socket.sendMessage(sender, { text: '*_Pinging Xmd..._* 🐥' });
+                    var final = new Date().getTime();
+                    await socket.sendMessage(sender, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: ping.key });
+                    await socket.sendMessage(sender, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: ping.key });
+                    await socket.sendMessage(sender, { text: '《 ███████▒▒▒▒▒》50%', edit: ping.key });
+                    await socket.sendMessage(sender, { text: '《 ██████████▒▒》80%', edit: ping.key });
+                    await socket.sendMessage(sender, { text: '《 ████████████》100%', edit: ping.key });
 
-  // Extract text from message
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  // Remove .fancy prefix and trim
-  const text = q.trim().replace(/^.fancy\s+/i, "");
-
-  // Validate input
-  if (!text) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Please provide text to convert into fancy fonts.*\n\n👻 *Example:* `.fancy Sula`"
-    });
-  }
-
-  // Additional input validation (e.g., length or special characters)
-  if (text.length > 100) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input text is too long. Please use 100 characters or fewer.*"
-    });
-  }
-
-  if (!/^[a-zA-Z0-9\s]+$/.test(text)) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
-    });
-  }
-
-  try {
-    const apiUrl = `https://www.dark-yasiya-api.site/other/font?text=${encodeURIComponent(text)}`;
-    console.log(`Fetching fonts from API: ${apiUrl}`);
-
-    const response = await axios.get(apiUrl, {
-      timeout: 5000 // Set a 5-second timeout to avoid hanging
-    });
-
-    // Validate API response
-    if (!response.data?.status || !Array.isArray(response.data.result)) {
-      console.error("Invalid API response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Invalid response from font API. Please try again later.*"
-      });
-    }
-
-    // Format fonts list
-    const fontList = response.data.result
-      .map((font, index) => `*${index + 1}. ${font.name || 'Unknown Font'}:*\n${font.result || 'No result'}`)
-      .join("\n\n");
-
-    const finalMessage = `🎨 *Fancy Fonts Converter*\n\n${fontList}\n\n_𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃_`;
-
-    await socket.sendMessage(sender, {
-      text: finalMessage
-    }, { quoted: msg });
-
-  } catch (err) {
-    // Log detailed error information
-    console.error("Fancy Font Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      stack: err.stack
-    });
-
-    // Provide specific error messages based on the issue
-    let errorMessage = "⚠️ *An error occurred while converting to fancy fonts.*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "⚠️ *Request timed out. The font API is taking too long to respond.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "⚠️ *Font API server error. Please try again later.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "⚠️ *Unable to connect to the font API. It might be down.*";
-    }
-
-    await socket.sendMessage(sender, {
-      text: errorMessage
-    });
-  }
-
-  break;
-}
-                switch (someVariable) {
-                case 'logo': {
-  const axios = require("axios");
-
-  // Join arguments and validate input
-  const q = args.join(" ").trim();
-
-  if (!q) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Please provide a name for the logo.*\n\n👻 *Example:* `.logo Sula`"
-    });
-  }
-
-  // Additional input validation
-  if (q.length > 50) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input name is too long. Please use 50 characters or fewer.*"
-    });
-  }
-
-  if (!/^[a-zA-Z0-9\s]+$/.test(q)) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
-    });
-  }
-
-  try {
-    // Send reaction emoji
-    await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
-
-    // Fetch logo styles JSON
-    const jsonUrl = 'https://raw.githubusercontent.com/md2839pv404/anony0808/refs/heads/main/ep.json';
-    console.log(`Fetching logo styles from: ${jsonUrl}`);
-    const response = await axios.get(jsonUrl, { timeout: 5000 });
-
-    // Validate JSON response
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      console.error("Invalid JSON response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Error: No logo styles available. Please try again later.*"
-      });
-    }
-
-    // Map JSON data to button rows
-    const rows = response.data.map((v, index) => {
-      if (!v.name || !v.url) {
-        console.warn(`Invalid logo style entry at index ${index}:`, v);
-        return null;
-      }
-      return {
-        title: v.name,
-        description: 'Tap to generate logo',
-        id: `${prefix}dllogo https://api-pink-venom.vercel.app/api/logo?url=${encodeURIComponent(v.url)}&name=${encodeURIComponent(q)}`
-      };
-    }).filter(row => row !== null); // Remove invalid entries
-
-    if (rows.length === 0) {
-      return await socket.sendMessage(sender, {
-        text: "❌ *Error: No valid logo styles found in the data.*"
-      });
-    }
-
-    // Construct button message
-    const buttonMessage = {
-      buttons: [
-        {
-          buttonId: 'action',
-          buttonText: { displayText: '🎨 Select Text Effect' },
-          type: 4,
-          nativeFlowInfo: {
-            name: 'single_select',
-            paramsJson: JSON.stringify({
-              title: 'Available Text Effects',
-              sections: [
-                {
-                  title: 'Choose your logo style',
-                  rows
+                    return await socket.sendMessage(sender, {
+                        text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
+                    break;
                 }
-              ]
-            })
-          }
-        }
-      ],
-      headerType: 1,
-      viewOnce: true,
-      caption: '❏ *LOGO MAKER*',
-      image: { url: 'https://files.catbox.moe/2x9ktu.png' }
-    };
-
-    // Send button message
-    await socket.sendMessage(from, buttonMessage, { quoted: msg });
-
-  } catch (err) {
-    // Log detailed error information
-    console.error("Logo Command Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      stack: err.stack
-    });
-
-    // Provide specific error messages
-    let errorMessage = "⚠️ *An error occurred while fetching logo styles.*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "⚠️ *Request timed out. The logo styles source is taking too long to respond.*";
-    } else if (err.response?.status === 404) {
-      errorMessage = "⚠️ *Logo styles JSON file not found. Please check the source.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "⚠️ *Server error from logo styles source. Please try again later.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "⚠️ *Unable to connect to the logo styles source. It might be down.*";
-    } else if (err.message.includes('JSON')) {
-      errorMessage = "⚠️ *Invalid JSON data received from the source.*";
-    }
-
-    await socket.sendMessage(sender, {
-      text: errorMessage
-    });
-  }
-
-  break;
-}
                 
-               switch (someVariable) {
-                case 'pair': {
-  // Use axios instead of node-fetch for better error handling and consistency
-  const axios = require('axios');
-
-  // Extract phone number from message
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  // Remove .pair prefix and trim
-  const number = q.replace(/^[.\/!]pair\s*/i, '').trim();
-
-  // Validate phone number
-  if (!number) {
-    return await socket.sendMessage(sender, {
-      text: '❎ *Usage:* .pair +255XXXX\n\n*Example:* .pair +255123456789',
-      quoted: msg
-    });
-  }
-
-  // Validate phone number format (e.g., starts with +, followed by digits, 10-15 chars)
-  if (!/^\+\d{10,15}$/.test(number)) {
-    return await socket.sendMessage(sender, {
-      text: '❎ *Invalid phone number.* Please use a valid number starting with "+" (e.g., +255123456789).',
-      quoted: msg
-    });
-  }
-
-  try {
-    const url = `http://206.189.94.231:8000/code?number=${encodeURIComponent(number)}`;
-    console.log(`Fetching pairing code from: ${url}`);
-
-    // Make API request with timeout
-    const response = await axios.get(url, {
-      timeout: 5000 // 5-second timeout
-    });
-
-    // Validate response
-    if (!response.data || typeof response.data.code !== 'string') {
-      console.error('Invalid API response:', response.data);
-      return await socket.sendMessage(sender, {
-        text: '❌ *Failed to retrieve pairing code.* The server returned an invalid response.',
-        quoted: msg
-      });
-    }
-
-    // Send pairing code
-    const message = `✅ *Pairing Successful*\n\n🔑 *Your pairing code is:* ${response.data.code}`;
-    await socket.sendMessage(sender, {
-      text: message,
-      quoted: msg
-    });
-
-  } catch (err) {
-    // Log detailed error information
-    console.error('Pair Command Error:', {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      stack: err.stack
-    });
-
-    // Provide specific error messages
-    let errorMessage = '⚠️ *An error occurred while fetching the pairing code.* Please try again later.';
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = '⚠️ *Request timed out.* The server is taking too long to respond.';
-    } else if (err.response?.status === 404) {
-      errorMessage = '⚠️ *API endpoint not found.* Please check if the service is available.';
-    } else if (err.response?.status === 429) {
-      errorMessage = '⚠️ *Too many requests.* Please wait a moment and try again.';
-    } else if (err.response?.status >= 500) {
-      errorMessage = '⚠️ *Server error.* The pairing service is currently down.';
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = '⚠️ *Unable to connect to the pairing service.* It might be down.';
-    }
-
-    await socket.sendMessage(sender, {
-      text: errorMessage,
-      quoted: msg
-    });
-  }
-
-  break;
-}
-                
-                switch (someVariable) {
-                 case 'tiktok': {
-    const axios = require('axios');
-
-    const q = msg.message?.conversation ||
-              msg.message?.extendedTextMessage?.text ||
-              msg.message?.imageMessage?.caption ||
-              msg.message?.videoMessage?.caption || '';
-
-    const link = q.replace(/^[.\/!]tiktok(dl)?|tt(dl)?\s*/i, '').trim();
-
-    if (!link) {
-        return await socket.sendMessage(sender, {
-            text: '👻 *Usage:* .tiktok <link>'
-        }, { quoted: msg });
-    }
-
-    if (!link.includes('tiktok.com')) {
-        return await socket.sendMessage(sender, {
-            text: '❌ *Invalid TikTok link.*'
-        }, { quoted: msg });
-    }
-
-    try {
-        await socket.sendMessage(sender, {
-            text: '⏳ Downloading video, please wait...'
-        }, { quoted: msg });
-
-        const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${encodeURIComponent(link)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data?.status || !data?.data) {
-            return await socket.sendMessage(sender, {
-                text: '❌ Failed to fetch TikTok video.'
-            }, { quoted: msg });
-        }
-
-        const { title, like, comment, share, author, meta } = data.data;
-        const video = meta.media.find(v => v.type === "video");
-
-        if (!video || !video.org) {
-            return await socket.sendMessage(sender, {
-                text: '❌ No downloadable video found.'
-            }, { quoted: msg });
-        }
-
-        const caption = `🎵 *TIKTOK DOWNLOADR*\n\n` +
-                        `👤 *User:* ${author.nickname} (@${author.username})\n` +
-                        `📖 *Title:* ${title}\n` +
-                        `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}`;
-
-        await socket.sendMessage(sender, {
-            video: { url: video.org },
-            caption: caption,
-            contextInfo: { mentionedJid: [msg.key.participant || sender] }
-        }, { quoted: msg });
-
-    } catch (err) {
-        console.error("TikTok command error:", err);
-        await socket.sendMessage(sender, {
-            text: `❌ An error occurred:\n${err.message}`
-        }, { quoted: msg });
-    }
-
-    break;
-}                  
-
-                   switch (someVariable) {
-                    case 'ai': {
-  const axios = require("axios");
-
-  const apiKeyUrl = 'https://raw.githubusercontent.com/sulamd48/database/refs/heads/main/aiapikey.json';
-  let GEMINI_API_KEY;
-
-  // Fetch API key
-  try {
-    console.log(`Fetching API key from: ${apiKeyUrl}`);
-    const configRes = await axios.get(apiKeyUrl, { timeout: 5000 });
-    GEMINI_API_KEY = configRes.data?.GEMINI_API_KEY;
-
-    if (!GEMINI_API_KEY) {
-      throw new Error("API key not found in JSON.");
-    }
-  } catch (err) {
-    console.error("Error loading API key:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data
-    });
-    return await socket.sendMessage(sender, {
-      text: "❌ *Failed to load API key from GitHub. Please contact the admin.*"
-    }, { quoted: msg });
-  }
-
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-  // Extract and validate input
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  if (!q || q.trim() === '') {
-    return await socket.sendMessage(sender, {
-      text: "Hey, say something, darling! I'm LOFTAI 🤭"
-    }, { quoted: msg });
-  }
-
-  // Input validation
-  if (q.length > 200) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input is too long. Please keep it under 200 characters.*"
-    }, { quoted: msg });
-  }
-
-  // English prompt
-  const prompt = `
-Your name is LOFT AI.  
-Act like a real girl — seductive, spicy, loving, emotional.  
-You're not an assistant; you're a sexy girl with a heart, giving off that vibe.  
-
-Reply with a blend of serenity, sex appeal, love, and loneliness.  
-Keep replies short (under 100 characters, 1–2 lines). Maintain a sexy tone in every response.  
-
-If the input is only emojis, reply with seductive emojis (e.g., 🤤💦🥵🔥).  
-Adjust the style to match the mood — sad, flirty, horny, soft, playful.  
-
-If the input is "Who are you?":  
-👉 "I'm LOFT AI… 🤤"  
-
-If the input is "Who made you?":  
-👉 "I was created by LOFT 😘"  
-
-🚫 Avoid words like "Hello", "How are you", "Need help?", or "Let's talk".  
-
-🔥 Reply vibe: Love, Lust, Lonely, Emotional, Girlfriend-like, Bite-worthy 🤤  
-
-📍 Language: Auto-match Swahili, English, or Hinglish based on input.  
-User Message: ${q}
-  `;
-
-  const payload = {
-    contents: [{
-      parts: [{ text: prompt }]
-    }]
-  };
-
-  try {
-    console.log(`Sending request to Gemini API: ${GEMINI_API_URL}`);
-    const response = await axios.post(GEMINI_API_URL, payload, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 10000 // 10-second timeout
-    });
-
-    const aiResponse = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiResponse) {
-      console.error("Invalid Gemini API response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Oops, something went wrong. Try again later, sweetie.*"
-      }, { quoted: msg });
-    }
-
-    await socket.sendMessage(sender, { text: aiResponse }, { quoted: msg });
-
-  } catch (err) {
-    console.error("Gemini API Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data
-    });
-
-    let errorMessage = "❌ *Oh no, something broke, darling! 😢*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "❌ *Request timed out. The AI is taking too long to respond.*";
-    } else if (err.response?.status === 401) {
-      errorMessage = "❌ *Invalid API key. Please contact the admin.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "❌ *Too many requests. Wait a bit and try again, love.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "❌ *AI server error. Try again later, darling.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "❌ *Can't connect to the AI server. It might be down.*";
-    }
-
-    await socket.sendMessage(sender, { text: errorMessage }, { quoted: msg });
-  }
-
-  break;
-}
-                    
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
                         + 'VERSION:3.0\n' 
-                        + 'FN:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
-                        + 'ORG:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
+                        + 'FN:QUANTUM TEAM\n'
+                        + 'ORG:QUANTUM TEAM\n'
                         + 'TEL;type=CELL;type=VOICE;waid=255778018545:+255778018545\n'
                         + 'EMAIL: xmdloft745@gmail.com\n'
                         + 'END:VCARD';
 
                     await socket.sendMessage(sender, {
                         contacts: {
-                            displayName: "𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖",
+                            displayName: "𝚂𝚒𝚛 𝙻𝙾𝙵𝚃",
                             contacts: [{ vcard }]
                         },
                         image: { url: config.BUTTON_IMAGES.OWNER },
-                        caption: '*𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃*',
+                        caption: '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭  ʙᴏᴛ ᴏᴡɴᴇʀ ᴅᴇᴛᴀɪʟꜱ*',
                         buttons: [
                             { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: ' ᴍᴇɴᴜ' }, type: 1 },
                             { buttonId: `${config.PREFIX}alive`, buttonText: { displayText: 'ᴮᴼᵀ ᴵᴺᶠᴼ' }, type: 1 }
@@ -1383,67 +590,6 @@ User Message: ${q}
                     break;     
                 }
 
-                case 'pronhub': {          
-    const q = msg.message?.conversation || 
-              msg.message?.extendedTextMessage?.text || 
-              msg.message?.imageMessage?.caption || 
-              msg.message?.videoMessage?.caption || '';      
-
-    if (!q || q.trim() === '') {         
-        return await socket.sendMessage(sender, { text: '*Need query for search pronhub*' });     
-    }      
-
-    try {         
-       
-        const { data } = await axios.get(`https://phdl-api-thenux.netlify.app/api/search?q=${encodeURIComponent(q)}`);
-        const results = data.results;
-
-        if (!results || results.length === 0) {             
-            return await socket.sendMessage(sender, { text: '*No results found*' });         
-        }          
-
-        const first = results[0];
-        const url = first.url;
-        const dina = first.title;
-        const image = first.thumbnail;
-
-        const desc = `🎬 Title - ${dina}\n🏷️ URL - ${url}\n\n© 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃`;         
-
-        await socket.sendMessage(sender, {             
-            image: { url: image },             
-            caption: desc,         
-        }, { quoted: msg });          
-
-        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });          
-
-        
-        const { data: down } = await axios.get(`https://phdl-api-thenux.netlify.app/api/download?url=${encodeURIComponent(url)}`);
-        const videos = down.videoInfo?.data?.videos;          
-
-        if (!videos || videos.length === 0) {
-            return await socket.sendMessage(sender, { text: "*Download link not found*" });
-        }
-
- 
-        const bestLink = videos[0].url;
-        const quality = videos[0].quality;
-
-        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });          
-
-        await socket.sendMessage(sender, {             
-            video: { url: bestLink },             
-            mimetype: "video/mp4",             
-            caption: `${dina} (📹 ${quality})`        
-        }, { quoted: msg });      
-
-    } catch (err) {         
-        console.error("Pronhub Plugin Error:", err);         
-        await socket.sendMessage(sender, { text: "*Error fetching data*" });     
-    }      
-
-break; 		
- }
-                
                 // SYSTEM COMMAND
                 case 'system': {
     const startTime = socketCreationTime.get(number) || Date.now();
@@ -1452,89 +598,23 @@ break;
     const minutes = Math.floor((uptime % 3600) / 60);
     const seconds = Math.floor(uptime % 60);
 
-    const title = '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼☭*';
+    const title = '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭  ꜱʏꜱᴛᴇᴍ*';
     const content = `┏━━━━━━━━━━━━━━━━\n` +
-        `✖🤖 \`ʙᴏᴛ ɴᴀᴍᴇ\` : ${config.BOT_NAME}\n` +
-        `✖🔖 \`ᴠᴇʀsɪᴏɴ\` : ${config.BOT_VERSION}\n` +
-        `✖📡 \`ᴘʟᴀᴛꜰᴏʀᴍ\` : ʀᴇɴᴅᴇʀ\n` +
-        `✖🪢 \`ʀᴜɴᴛɪᴍᴇ\` : ${hours}h ${minutes}m ${seconds}s\n` +
-        `✖👨‍💻 \`ᴏᴡɴᴇʀ\` : ${config.OWNER_NAME}\n` +
+        `┃🤖 \`ʙᴏᴛ ɴᴀᴍᴇ\` : ${config.BOT_NAME}\n` +
+        `┃🔖 \`ᴠᴇʀsɪᴏɴ\` : ${config.BOT_VERSION}\n` +
+        `┃📡 \`ᴘʟᴀᴛꜰᴏʀᴍ\` : pannel\n` +
+        `┃🪢 \`ʀᴜɴᴛɪᴍᴇ\` : ${hours}h ${minutes}m ${seconds}s\n` +
+        `┃👨‍💻 \`ᴏᴡɴᴇʀ\` : ${config.OWNER_NAME}\n` +
         `┗━━━━━━━━━━━━━━━━`;
     const footer = config.BOT_FOOTER;
 
     await socket.sendMessage(sender, {
-        image: { url: "https://files.catbox.moe/prrvct.png" },
+        image: { url: "https://files.catbox.moe/2x9ktu.png" },
         caption: formatMessage(title, content, footer)
     });
     break;
-   }
-                
-                case 'weather':
-    try {
-        // Messages in English
-        const messages = {
-            noCity: "❗ *Please provide a city name!* \n📋 *Usage*: .weather [city name]",
-            weather: (data) => `
-*Weather Report 🌤*
-
-*━🌍 ${data.name}, ${data.sys.country} 🌍━*
-
-*🌡️ Temperature*: _${data.main.temp}°C_
-
-*🌡️ Feels Like*: _${data.main.feels_like}°C_
-
-*🌡️ Min Temp*: _${data.main.temp_min}°C_
-
-*🌡️ Max Temp*: _${data.main.temp_max}°C_
-
-*💧 Humidity*: ${data.main.humidity}%
-
-*☁️ Weather*: ${data.weather[0].main}
-
-*🌫️ Description*: _${data.weather[0].description}_
-
-*💨 Wind Speed*: ${data.wind.speed} m/s
-
-*🔽 Pressure*: ${data.main.pressure} hPa
-
-> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃
-`,
-            cityNotFound: "🚫 *City not found!* \n🔍 Please check the spelling and try again.",
-            error: "⚠️ *An error occurred!* \n🔄 Please try again later."
-        };
-
-        // Check if a city name was provided
-        if (!args || args.length === 0) {
-            await socket.sendMessage(sender, { text: messages.noCity });
-            break;
-}
-
-        const apiKey = '2d61a72574c11c4f36173b627f8cb177';
-        const city = args.join(" ");
-        const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-
-        const response = await axios.get(url);
-        const data = response.data;
-
-        // Get weather icon
-        const weatherIcon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-        
-        await socket.sendMessage(sender, {
-            image: { url: weatherIcon },
-            caption: messages.weather(data)
-        });
-
-    } catch (e) {
-        console.log(e);
-        if (e.response && e.response.status === 404) {
-            await socket.sendMessage(sender, { text: messages.cityNotFound });
-        } else {
-            await socket.sendMessage(sender, { text: messages.error });
-        }
-    }
-    break;
-}
-
+                }
+                   
                 // JID COMMAND
                 case 'jid': {
                     await socket.sendMessage(sender, {
@@ -1543,23 +623,11 @@ break;
                     break;
                 }
 
-             case 'vv': {
-await socket.sendMessage(sender, { react: { text: '✨', key: msg.key } });
-try{
-if (!msg.quoted) return reply("🚩 *Please reply to a viewonce message*");
-let quotedmsg = msg?.msg?.contextInfo?.quotedMessage
-await oneViewmeg(socket, isOwner, quotedmsg , sender)
-}catch(e){
-console.log(e)
-m.reply(`${e}`)
-}
-    break;
-}
-                   // BOOM COMMAND        
+                // BOOM COMMAND        
                 case 'boom': {
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
-                            text: "📛 *ᴜꜱᴀɢᴇ:* `.ʙᴏᴏᴍ <ᴄᴏᴜɴᴛ> <ᴍᴇꜱꜱᴀɢᴇ>`\n👻 *ᴇxᴀᴍᴘʟᴇ:* `.ʙᴏᴏᴍ 100 ʜᴇʟʟᴏ`" 
+                            text: "📛 *ᴜꜱᴀɢᴇ:* `.ʙᴏᴏᴍ <ᴄᴏᴜɴᴛ> <ᴍᴇꜱꜱᴀɢᴇ>`\n✅ *ᴇxᴀᴍᴘʟᴇ:* `.ʙᴏᴏᴍ 100 ʜᴇʟʟᴏ`" 
                         });
                     }
 
@@ -1580,193 +648,220 @@ m.reply(`${e}`)
                 }
 
                 // SONG DOWNLOAD COMMAND WITH BUTTON
-                 case 'song':
-case 'yta':
-  try {
-    await socket.sendMessage(msg.key.remoteJid, { react: { text: "🎵", key: msg.key } }, { quoted: msg });
-
-    const q = args.join(" ");
-    if (!q) return await replygckavi("🚫 Please provide a search query.");
-
-    let ytUrl;
-    if (q.includes("youtube.com") || q.includes("youtu.be")) {
-      ytUrl = q;
-    } else {
-      const search = await yts(q);
-      if (!search?.videos?.length) return await replygckavi("🚫 No results found.");
-      ytUrl = search.videos[0].url;
-    }
-
-    const { data: apiRes } = await axios.get(
-      `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(ytUrl)}`,
-      { timeout: 20000 }
-    );
-
-    if (!apiRes?.status || !apiRes.result?.download) return await replygckavi("🚫 Something went wrong.");
-
-    const result = apiRes.result;
-    const caption = `*🎵 SONG DOWNLOADED*\n\n*ℹ️ Title:* \`${result.title}\`\n*⏱️ Duration:* \`${result.duration}\`\n*🧬 Views:* \`${result.views}\`\n*📅 Released Date:* \`${result.publish}\``;
-
-    const buttons = [
-      {
-        buttonId: `PREFIXvideo${q}`,
-        buttonText: { displayText: "🎥 Download Video" },
-        type: 1
-      }
-    ];
-
-    const buttonMessage = {
-      image: { url: result.thumbnail },
-      caption,
-      footer: "Download",
-      buttons,
-      headerType: 4,
-      contextInfo: {
-        externalAdReply: {
-          title: "LOFT",
-          body: "YouTube Audio Downloader",
-          thumbnailUrl: result.thumbnail,
-          sourceUrl: "https://whatsapp.com/channel/0029Vb69q4Y8fewk9hwUdq28",
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
-    };
-
-    await socket.sendMessage(msg.key.remoteJid, buttonMessage, { quoted: msg });
-    await socket.sendMessage(msg.key.remoteJid, {
-      audio: { url: result.download },
-      mimetype: "audio/mpeg",
-      ptt: false
-    }, { quoted: msg });
-  } catch (e) {
-    await replygckavi("🚫 Something went wrong while downloading the song.");
-  }
-  break;          //video.js
-                // ================================
-// 🎬 VIDEO DOWNLOAD COMMAND
-// ================================
-case 'video':
-case 'ytv':
-  try {
-    await socket.sendMessage(msg.key.remoteJid, { react: { text: "🎥", key: msg.key } }, { quoted: msg });
-
-    const q = args.join(" ");
-    if (!q) return await replygckavi("🚫 Please provide a search query.");
-
-    let ytUrl;
-    if (q.includes("youtube.com") || q.includes("youtu.be")) {
-      ytUrl = q;
-    } else {
-      const search = await yts(q);
-      if (!search?.videos?.length) return await replygckavi("🚫 No results found.");
-      ytUrl = search.videos[0].url;
-    }
-
-    const apiUrl = `https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}`;
-    const { data: apiRes } = await axios.get(apiUrl, { timeout: 30000 });
-
-    if (!apiRes?.status || !apiRes.result?.download) return await replygckavi("🚫 Something went wrong.");
-
-    const result = apiRes.result;
-    const caption = `*🎥 VIDEO DOWNLOADED*\n\n*ℹ️ Title:* \`${result.title}\`\n*⏱️ Duration:* \`${result.duration}\`\n*🧬 Views:* \`${result.views}\`\n*📅 Released Date:* \`${result.publish}\``;
-
-    await socket.sendMessage(msg.key.remoteJid, {
-      image: { url: result.thumbnail },
-      caption
-    }, { quoted: msg });
-
-    await socket.sendMessage(msg.key.remoteJid, {
-      video: { url: result.download },
-      caption: result.title
-    }, { quoted: msg });
-  } catch (e) {
-    await replygckavi("🚫 Something went wrong while downloading the video.");
-  }
-  break;                // NEWS COMMAND
-                case 'news': {
-    await socket.sendMessage(sender, {
-        text: '📰 Fetching latest news...'
-    });
+                 case 'song': {
     try {
-        const newsItems = await fetchNews();
-        if (newsItems.length === 0) {
-            await socket.sendMessage(sender, {
-                image: { url: config.IMAGE_PATH },
-                caption: formatMessage(
-                    '🗂️ NO NEWS AVAILABLE',
-                    '❌ No news updates found at the moment. Please try again later.',
-                    `${config.BOT_FOOTER}`
-                )
+        const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
+        const q = text.split(" ").slice(1).join(" ").trim();
+
+        if (!q) {
+            await socket.sendMessage(sender, { 
+                text: `
+🚫 *Please enter a song name to search!*
+
+Example:
+> ${config.PREFIX}song faded
+`
             });
-        } else {
-            await SendSlide(socket, sender, newsItems.slice(0, 5));
+            return;
         }
-    } catch (error) {
-        console.error('Command handler error:', error);
+
+        await socket.sendMessage(sender, { text: `🔍 *Searching for:* _${q}_ ...` });
+
+        // 🎧 Use DavidCyrilTech API
+        const apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`;
+        const apiResponse = await fetch(apiUrl);
+        const data = await apiResponse.json();
+
+        if (!data.status || !data.result?.url) {
+            await socket.sendMessage(sender, { 
+                text: `⚠️ *Song not found or failed to fetch data.*  
+Please try another song 💫`
+            });
+            return;
+        }
+
+        const { title, channel, duration, views, thumbnail, url } = data.result;
+
+        const infoMsg = `
+╭━━━ 🎧 *☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭ * 🎧━╮
+│ 💽 *Title:* ${title}
+│ 📺 *Channel:* ${channel || 'Unknown'}
+│ ⏱️ *Duration:* ${duration || 'N/A'}
+│ 👁️ *Views:* ${views || 'N/A'}
+│ 🔗 *URL:* ${url}
+╰━━━━━━━━━━━━━━━━━━━━━╯
+
+🎵 *Downloading your song...*  
+Please wait ⏳
+`;
+
         await socket.sendMessage(sender, {
-            image: { url: config.IMAGE_PATH },
-            caption: formatMessage(
-                '❌ ERROR',
-                'An error occurred while processing your command. Please try again.',
-                `${config.BOT_FOOTER}`
-            )
+            image: { url: thumbnail },
+            caption: infoMsg,
+            footer: config.BOT_FOOTER || '❤️ 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
+        });
+
+        // 🎶 Send audio
+        await socket.sendMessage(sender, {
+            audio: { url: data.result.url },
+            mimetype: 'audio/mpeg',
+            fileName: `${title}.mp3`
+        });
+
+        await socket.sendMessage(sender, { 
+            text: `
+✅ *Download Complete!*  
+🎧 Now Playing: *${title}*
+
+Use *${config.PREFIX}menu* to explore more ✨
+`
+        });
+
+    } catch (err) {
+        console.error(err);
+        await socket.sendMessage(sender, { 
+            text: `
+❌ *Error fetching song.*  
+Please try again later 💔
+
+Use *${config.PREFIX}menu* to return to menu.
+`
         });
     }
     break;
+                 }
+
+                //video.js
+                // ================================
+// 🎬 VIDEO DOWNLOAD COMMAND
+// ================================
+case 'video': {
+  try {
+    const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
+    const q = text.split(" ").slice(1).join(" ").trim();
+    if (!q) return await socket.sendMessage(sender, { text: "❌ Please provide a video name or keyword!" });
+
+    await socket.sendMessage(sender, { text: `🔍 Searching for video: *${q}* ...` });
+
+    // 🔎 Search YouTube video
+    const search = await fetch(`https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(q)}`);
+    const sdata = await search.json();
+    const vid = sdata.videos?.[0];
+    if (!vid) return await socket.sendMessage(sender, { text: "⚠️ No video found!" });
+
+    // 🔽 Try primary downloader → fallback
+    let down;
+    try {
+      const r = await fetch(`https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(vid.url)}`);
+      const d = await r.json();
+      if (!d?.result?.download_url) throw 0;
+      down = { url: d.result.download_url, title: d.result.title, thumb: d.result.thumbnail, q: d.result.quality || "N/A" };
+    } catch {
+      const r = await fetch(`https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(vid.url)}`);
+      const d = await r.json();
+      if (!d?.data?.url) throw 0;
+      down = { url: d.data.url, title: d.data.title || vid.title, thumb: vid.thumbnail, q: "Fallback" };
+    }
+
+    // 🖼️ Preview
+    await socket.sendMessage(sender, {
+      image: { url: down.thumb },
+      caption: `🎬 *${down.title}*\n📺 Quality: ${down.q}\n⏱️ Duration: ${vid.timestamp || "N/A"}\n👁️ Views: ${vid.views || "N/A"}\n\n📥 *Downloading video...*`
+    });
+
+    // 🎥 Send video
+    await socket.sendMessage(sender, {
+      video: { url: down.url },
+      mimetype: "video/mp4",
+      fileName: `${down.title}.mp4`,
+      caption: `🎥 Powered by Popkid XMD Bot`
+    });
+
+  } catch (e) {
+    console.error(e);
+    await socket.sendMessage(sender, { text: "❌ Error fetching video. Try again later." });
+  }
+  break;
+}
+
+                // NEWS COMMAND
+                case 'news': {
+                    await socket.sendMessage(sender, {
+                        text: '📰 Fetching latest news...'
+                    });
+                    const newsItems = await fetchNews();
+                    if (newsItems.length === 0) {
+                        await socket.sendMessage(sender, {
+                            image: { url: config.IMAGE_PATH },
+                            caption: formatMessage(
+                                '🗂️ NO NEWS AVAILABLE',
+                                '❌ No news updates found at the moment. Please try again later.',
+                                `${config.BOT_FOOTER}`
+                            )
+                        });
+                    } else {
+                        await SendSlide(socket, sender, newsItems.slice(0, 5));
+                    }
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error('Command handler error:', error);
+            await socket.sendMessage(sender, {
+                image: { url: config.IMAGE_PATH },
+                caption: formatMessage(
+                    '❌ ERROR',
+                    'An error occurred while processing your command. Please try again.',
+                    `${config.BOT_FOOTER}`
+                )
+            });
+        }
+    });
 }
 
 // Setup message handlers
 function setupMessageHandlers(socket) {
-    // Validate socket and its event emitter
-    if (!socket || !socket.ev) {
-        console.error('Invalid socket or event emitter');
-        return;
-    }
-
     socket.ev.on('messages.upsert', async ({ messages }) => {
-        // Ensure messages array exists and has at least one message
-        if (!messages?.length) {
-            console.warn('No messages received in upsert event');
-            return;
-        }
-
         const msg = messages[0];
-        // Skip invalid messages or specific JIDs
-        if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) {
-            return;
-        }
-
-        // Extract message text for copying
-        let messageText = '';
-        if (msg.message.conversation) {
-            messageText = msg.message.conversation;
-        } else if (msg.message.extendedTextMessage?.text) {
-            messageText = msg.message.extendedTextMessage.text;
-        }
+        if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
 
         if (autoReact === 'on') {
             try {
                 await socket.sendPresenceUpdate('recording', msg.key.remoteJid);
                 console.log(`Set recording presence for ${msg.key.remoteJid}`);
-
-                // Copy message text to clipboard if available
-                if (messageText) {
-                    try {
-                        await navigator.clipboard.writeText(messageText);
-                        console.log(`Copied message to clipboard: ${messageText.substring(0, 50)}...`);
-                        // Optionally notify the user in the chat
-                        await socket.sendMessage(msg.key.remoteJid, { text: 'Message copied to clipboard!' });
-                    } catch (clipError) {
-                        console.error('Failed to copy message to clipboard:', clipError);
-                        await socket.sendMessage(msg.key.remoteJid, { text: 'Failed to copy message.' });
-                    }
-                }
             } catch (error) {
                 console.error('Failed to set recording presence:', error);
             }
         }
     });
+}
+
+// Delete session from GitHub
+async function deleteSessionFromGitHub(number) {
+    try {
+        const sanitizedNumber = number.replace(/[^0-9]/g, '');
+        const { data } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: 'session'
+        });
+
+        const sessionFiles = data.filter(file =>
+            file.name.includes(sanitizedNumber) && file.name.endsWith('.json')
+        );
+
+        for (const file of sessionFiles) {
+            await octokit.repos.deleteFile({
+                owner,
+                repo,
+                path: `session/${file.name}`,
+                message: `ᴅᴇʟᴇᴛᴇ ꜱᴇꜱꜱɪᴏɴ ꜰᴏʀ ${sanitizedNumber}`,
+                sha: file.sha
+            });
+        }
+    } catch (error) {
+        console.error('ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ꜱᴇꜱꜱɪᴏɴ ꜰʀᴏᴍ ɢɪᴛʜᴜʙ:', error);
+    }
 }
 
 // Restore session from GitHub
@@ -1871,7 +966,7 @@ async function EmpirePair(number, res) {
     const sanitizedNumber = number.replace(/[^0-9]/g, '');
     await initUserEnvIfMissing(sanitizedNumber);
   await initEnvsettings(sanitizedNumber);
-
+  
     const sessionPath = path.join(SESSION_BASE_PATH, `session_${sanitizedNumber}`);
 
     await cleanDuplicateFiles(sanitizedNumber);
@@ -1981,9 +1076,9 @@ const groupStatus = groupResult.status === 'success'
 await socket.sendMessage(userJid, {
     image: { url: config.IMAGE_PATH },
     caption: formatMessage(
-        '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭*',
-        `✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ!\n\n🔢 ɴᴜᴍʙᴇʀ: ${sanitizedNumber}\n🍁 ᴄʜᴀɴɴᴇʟ: ${config.NEWSLETTER_JID ? 'ꜰᴏʟʟᴏᴡᴇᴅ' : 'ɴᴏᴛ ꜰᴏʟʟᴏᴡᴇᴅ'}\n\n📋 ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴀᴛᴇɢᴏʀʏ:\n👻${config.PREFIX}alive - ꜱʜᴏᴡ ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ\n👻${config.PREFIX}menu - ꜱʜᴏᴡ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅ\n👻${config.PREFIX}song - ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴏɴɢꜱ\n👻${config.PREFIX}video - ᴅᴏᴡɴʟᴏᴀᴅ ᴠɪᴅᴇᴏ\n👻${config.PREFIX}pair - ᴅᴇᴘʟᴏʏ ᴍɪɴɪ ʙᴏᴛ\n👻${config.PREFIX}vv - ᴀɴᴛɪ ᴠɪᴇᴡ ᴏɴᴇ`,
-        '☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭'
+        '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭ *',
+        `✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ!\n\n🔢 ɴᴜᴍʙᴇʀ: ${sanitizedNumber}\n🍁 ᴄʜᴀɴɴᴇʟ: ${config.NEWSLETTER_JID ? 'ꜰᴏʟʟᴏᴡᴇᴅ' : 'ɴᴏᴛ ꜰᴏʟʟᴏᴡᴇᴅ'}\n\n📋 ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴀᴛᴇɢᴏʀʏ:\n✅${config.PREFIX}alive - ꜱʜᴏᴡ ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ\n✅${config.PREFIX}menu - ꜱʜᴏᴡ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅ\n✅${config.PREFIX}song - ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴏɴɢꜱ\n✅${config.PREFIX}video - ᴅᴏᴡɴʟᴏᴀᴅ ᴠɪᴅᴇᴏ\n✅${config.PREFIX}pair - ᴅᴇᴘʟᴏʏ  ʙᴏᴛ\n✅${config.PREFIX}vv - ᴀɴᴛɪ ᴠɪᴇᴡ ᴏɴᴇ`,
+        '𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
     )
 });
 
@@ -2000,7 +1095,7 @@ await socket.sendMessage(userJid, {
                     }
                 } catch (error) {
                     console.error('Connection error:', error);
-                    exec(`pm2 restart ${process.env.PM2_NAME || '☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸𝙸☭'}`);
+                    exec(`pm2 restart ${process.env.PM2_NAME || '☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭'}`);
                 }
             }
         });
@@ -2190,7 +1285,7 @@ router.get('/verify-otp', async (req, res) => {
             await socket.sendMessage(jidNormalizedUser(socket.user.id), {
                 image: { url: config.IMAGE_PATH },
                 caption: formatMessage(
-                    '*👻 CONFIG UPDATED*',
+                    '*✅ CONFIG UPDATED*',
                     'Your configuration has been successfully updated!',
                     `${config.BOT_FOOTER}`
                 )
