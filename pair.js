@@ -15,6 +15,7 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
+const { pickRandom } = require('./loft/function.js');
 //=======================================
 const autoReact = getSetting('AUTO_REACT')|| 'on';
 
@@ -1472,7 +1473,8 @@ case 'yta':
   } catch (e) {
     await replygckavi("🚫 Something went wrong while downloading the song.");
   }
-  break;          //video.js
+  break;
+}          //video.js
                 // ================================
 // 🎬 VIDEO DOWNLOAD COMMAND
 // ================================
@@ -1513,7 +1515,8 @@ case 'ytv':
   } catch (e) {
     await replygckavi("🚫 Something went wrong while downloading the video.");
   }
-  break;                // NEWS COMMAND
+  break;
+}                // NEWS COMMAND
                 case 'news': {
                     await socket.sendMessage(sender, {
                         text: '📰 Fetching latest news...'
