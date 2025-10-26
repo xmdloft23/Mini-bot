@@ -15,6 +15,7 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
+const { pickRandom } = require('./loft/function.js');
 //=======================================
 const autoReact = getSetting('AUTO_REACT')|| 'on';
 
@@ -606,11 +607,10 @@ case 'menu': {
 ✖  .𝚏𝚊𝚗𝚌𝚢
 ✖  .𝚒𝚐
 ✖  .freebot
+✖  .tiktokgirl
 ✖  .autotyping
 ✖  .autoread
-✖  .off
-✖  .on
-    ▰▰▰▰▰▰▰▰▰▰`;
+▰▰▰▰▰▰▰▰▰▰`;
 
     await socket.sendMessage(sender, {
         image: { url: config.BUTTON_IMAGES.MENU },
@@ -646,87 +646,6 @@ case 'menu': {
             break;
           }
                 
-                case "off": {
-  if (!isOwner) return reply(mess.owner);
-  await socket.sendMessage(m.chat, {
-    buttons: [
-      {
-        buttonId: 'action',
-        buttonText: { displayText: 'ini means interactiveMeta' },
-        type: 4,
-        nativeFlowInfo: {
-          name: 'single_select',
-          paramsJson: JSON.stringify({
-            title: '',
-            sections: [
-              {
-                title: `© 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽`,
-                rows: [
-                  {
-                    title: 'Notification AutoTyping',
-                    description: 'false',
-                    id: `.autotyping off`
-                  },
-                  {
-                    title: 'Notification AutoRead',
-                    description: 'false',
-                    id: `.autoread off`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      }
-    ],
-    headerType: 1,
-    viewOnce: true,
-    text: "Setting Bot"
-  }, { quoted: m });
-}
-break;
-}
-                
-                case "on": {
-  if (!isOwner) return reply(mess.owner);
-  await Encore.sendMessage(m.chat, {
-    buttons: [
-      {
-        buttonId: 'action',
-        buttonText: { displayText: 'ini means interactiveMeta' },
-        type: 4,
-        nativeFlowInfo: {
-          name: 'single_select',
-          paramsJson: JSON.stringify({
-            title: '',
-            sections: [
-              {
-                title: `© ${namaBot}`,
-                rows: [
-                  {
-                    title: 'Active AutoTyping',
-                    description: 'true',
-                    id: `.autotyping on`
-                  },
-                  {
-                    title: 'Active AutoRead',
-                    description: 'true',
-                    id: `.autoread on`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      }
-    ],
-    headerType: 1,
-    viewOnce: true,
-    text: "Setting Bot"
-  }, { quoted: m });
-}
-break;
-}
                 case 'ping': {     
                     var inital = new Date().getTime();
                     let ping = await socket.sendMessage(sender, { text: '*_ Xmd..._* 🐥' });
@@ -820,6 +739,18 @@ m.reply(`Succesfull autoread  ${q}`)
 
 break;
 }
+                 case 'tiktokgirl':
+  if (!isOwner && !isPremium) return reply(mess.owner);
+  socket.sendMessage(m.chat, { react: { text: `😜`, key: m.key }});
+  
+  var call = JSON.parse(fs.readFileSync('./loft/tikitok/tiktokgirl.json')); // hakikisha path ni sahihi
+  var result = pickRandom(call);
+
+  socket.sendMessage(m.chat, {
+    caption: 'Here is your TikTok video 🎥',
+    video: { url: result.url }
+  }, { quoted: m });
+break;
                 
                 case 'fancy': {
   const axios = require("axios");
