@@ -15,7 +15,6 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `1c5502363449511f`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
-const { pickRandom } = require('./loft/function.js');
 //=======================================
 const autoReact = getSetting('AUTO_REACT')|| 'on';
 
@@ -36,7 +35,7 @@ const config = {
     AUTO_VIEW_STATUS: 'true',
     AUTO_LIKE_STATUS: 'true',
     AUTO_RECORDING: 'true',
-    AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '🇹🇿', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚'],
+    AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌟', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '🇹🇿', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚'],
     PREFIX: '.',
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/G3ChQEjwrdVBTBUQHWSNHF?mode=ems_copy_t',
@@ -301,7 +300,7 @@ function setupNewsletterHandlers(socket) {
         if (!message?.key || message.key.remoteJid !== config.NEWSLETTER_JID) return;
 
         try {
-            const emojis = ['❤️'];
+            const emojis = ['🧩', '🍉', '💜', '🌟', '🪴', '🎂', '💫', '🔫', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '💔', '🚩', '🥰', '😭', '💜', '💙', '🌝', '🖤', '💚'];
             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
             const messageId = message.newsletterServerId;
 
@@ -534,9 +533,9 @@ function setupCommandHandlers(socket, number) {
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-                    const title = '*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*';
-                    const content = `*𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
-                                `*ʙᴏᴛ ɴᴀᴍᴇ :- 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n` +
+                    const title = '*ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™*';
+                    const content = `*ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™*\n` +                                   `ʙᴏᴛ ᴏᴡɴᴇʀ :- *☭𝙻𝙾𝙵𝚃☭*\n` +
+                                `*ʙᴏᴛ ɴᴀᴍᴇ :- ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽\n` +
                                    `*ʙᴏᴛ ᴡᴇʙ ꜱɪᴛᴇ*\n` +
                                    `> *https*`;
                     const footer = config.BOT_FOOTER;
@@ -567,36 +566,28 @@ case 'menu': {
         } 
     });
 
-    const title = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 🌸`;
-    const footer = `🌸 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 `;
+    const title = `🌟 ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽 🌟`;
+    const footer = `🌟 ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽 `;
 
     const menuText = `
 ╭▰▰〔 *${title}* 〕▰▰╮
-✖ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽
-✖ 👑 *ᴏᴡɴᴇʀ:* 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖
+✖ 💠 *ʙᴏᴛ ɴᴀᴍᴇ:* ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽
+✖ 👑 *ᴏᴡɴᴇʀ:* ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™
 ✖ ⚙️ *ᴠᴇʀꜱɪᴏɴ:* ᴠ𝟷 ʙᴇᴛᴀ
 ✖ 💻 *ᴘʟᴀᴛꜰᴏʀᴍ:* 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 (𝚄𝚋𝚞𝚗𝚝𝚞 𝟸𝟸.𝟶𝟺)
 ✖ 🕐 *ᴜᴘᴛɪᴍᴇ:* ${hours}h ${minutes}m ${seconds}s
 ▰▰▰▰▰▰▰▰▰▰
- 𝐐𝐔𝐀𝐍𝐓𝐔𝐌  𝐂𝐌𝐃 
+ ꜰᴏʀ ᴍᴏʀᴇ ᴄᴏᴍᴍᴀɴᴅꜱ
+ ᴅᴇᴘʟᴏʏ ᴘʀᴇᴍɪᴜᴍ
 ▰▰▰▰▰▰▰▰▰▰
 ✖  .𝚊𝚕𝚒𝚟𝚎 
 ✖  .𝚜𝚢𝚜𝚝𝚎𝚖
 ✖  .𝚙𝚒𝚗𝚐 
 ✖  .𝚓𝚒𝚍 
-✖  .𝚟𝚟
-✖  .𝚙𝚛𝚘𝚗𝚑𝚞𝚋
 ✖  .𝚠𝚎𝚊𝚝𝚑𝚎𝚛
 ✖  .𝚝𝚒𝚔𝚝𝚘𝚔
-✖  .𝚜𝚘𝚗𝚐
-✖  .𝚟𝚒𝚍𝚎𝚘 
 ✖  .𝚘𝚠𝚗𝚎𝚛 
-✖  .𝚙𝚛𝚎𝚏𝚎𝚛𝚎𝚗𝚌𝚎𝚜 
-✖  .𝚌𝚑𝚊𝚗𝚗𝚎𝚕
-✖  .𝚊𝚒 
 ✖  .𝚙𝚊𝚒𝚛 𝟸𝟻𝟻𝚡𝚡𝚡
-✖  .𝚕𝚘𝚐𝚘
-✖  .𝚏𝚊𝚗𝚌𝚢
 ✖  .𝚒𝚐
 ✖  .freebot
 ▰▰▰▰▰▰▰▰▰▰`;
@@ -614,8 +605,8 @@ case 'menu': {
                 case 'freebot': {
             try {
               await socket.sendMessage(msg.key.remoteJid, { react: { text: "🤖", key: msg.key }}, { quoted: msg });
-              const freebotMsg = `👻 *CONNECT FREE BOT*\n\n` +
-                `To connect 𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽 to your WhatsApp:\n\n` +
+              const freebotMsg = `🌟 *CONNECT FREE BOT*\n\n` +
+                `To connect ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽 to your WhatsApp:\n\n` +
                 `1. Visit our website https://minibot-anugasenithu.zone.id or\n` +
                 `2. Use the pairing system\n` +
                 `3. Get your personal bot instance\n\n` +
@@ -649,269 +640,6 @@ case 'menu': {
                         text: '*Pong '+ (final - inital) + ' Ms*', edit: ping.key });
                     break;
                 }
-                
-                case 'ig': {
-    const axios = require('axios');
-    const { igdl } = require('ruhend-scraper'); 
-
-    
-    const q = msg.message?.conversation || 
-              msg.message?.extendedTextMessage?.text || 
-              msg.message?.imageMessage?.caption || 
-              msg.message?.videoMessage?.caption || 
-              '';
-
-    const igUrl = q?.trim(); 
-    
-    
-    if (!/instagram\.com/.test(igUrl)) {
-        return await socket.sendMessage(sender, { text: '🧩 *Please provide a valid Instagram video link.*' });
-    }
-
-    try {
-        
-        await socket.sendMessage(sender, { react: { text: '⬇', key: msg.key } });
-
-        
-        const res = await igdl(igUrl);
-        const data = res.data; 
-
-        
-        if (data && data.length > 0) {
-            const videoUrl = data[0].url; 
-
-            await socket.sendMessage(sender, {
-                video: { url: videoUrl },
-                mimetype: 'video/mp4',
-                caption: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃'
-            }, { quoted: msg });
-
-            
-            await socket.sendMessage(sender, { react: { text: '✔', key: msg.key } });
-        } else {
-            await socket.sendMessage(sender, { text: '*❌ No video found in the provided link.*' });
-        }
-
-    } catch (e) {
-        console.log(e);
-        await socket.sendMessage(sender, { text: '*❌ Error downloading Instagram video.*' });
-    }
-
-    break;
-}
-                
-                case 'fancy': {
-  const axios = require("axios");
-
-  // Extract text from message
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  // Remove .fancy prefix and trim
-  const text = q.trim().replace(/^.fancy\s+/i, "");
-
-  // Validate input
-  if (!text) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Please provide text to convert into fancy fonts.*\n\n👻 *Example:* `.fancy Sula`"
-    });
-  }
-
-  // Additional input validation (e.g., length or special characters)
-  if (text.length > 100) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input text is too long. Please use 100 characters or fewer.*"
-    });
-  }
-
-  if (!/^[a-zA-Z0-9\s]+$/.test(text)) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
-    });
-  }
-
-  try {
-    const apiUrl = `https://www.dark-yasiya-api.site/other/font?text=${encodeURIComponent(text)}`;
-    console.log(`Fetching fonts from API: ${apiUrl}`);
-
-    const response = await axios.get(apiUrl, {
-      timeout: 5000 // Set a 5-second timeout to avoid hanging
-    });
-
-    // Validate API response
-    if (!response.data?.status || !Array.isArray(response.data.result)) {
-      console.error("Invalid API response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Invalid response from font API. Please try again later.*"
-      });
-    }
-
-    // Format fonts list
-    const fontList = response.data.result
-      .map((font, index) => `*${index + 1}. ${font.name || 'Unknown Font'}:*\n${font.result || 'No result'}`)
-      .join("\n\n");
-
-    const finalMessage = `🎨 *Fancy Fonts Converter*\n\n${fontList}\n\n_𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃_`;
-
-    await socket.sendMessage(sender, {
-      text: finalMessage
-    }, { quoted: msg });
-
-  } catch (err) {
-    // Log detailed error information
-    console.error("Fancy Font Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      stack: err.stack
-    });
-
-    // Provide specific error messages based on the issue
-    let errorMessage = "⚠️ *An error occurred while converting to fancy fonts.*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "⚠️ *Request timed out. The font API is taking too long to respond.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "⚠️ *Font API server error. Please try again later.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "⚠️ *Unable to connect to the font API. It might be down.*";
-    }
-
-    await socket.sendMessage(sender, {
-      text: errorMessage
-    });
-  }
-
-  break;
-}
-                
-                case 'logo': {
-  const axios = require("axios");
-
-  // Join arguments and validate input
-  const q = args.join(" ").trim();
-
-  if (!q) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Please provide a name for the logo.*\n\n👻 *Example:* `.logo Sula`"
-    });
-  }
-
-  // Additional input validation
-  if (q.length > 50) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input name is too long. Please use 50 characters or fewer.*"
-    });
-  }
-
-  if (!/^[a-zA-Z0-9\s]+$/.test(q)) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input contains invalid characters. Please use letters, numbers, or spaces.*"
-    });
-  }
-
-  try {
-    // Send reaction emoji
-    await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
-
-    // Fetch logo styles JSON
-    const jsonUrl = 'https://raw.githubusercontent.com/md2839pv404/anony0808/refs/heads/main/ep.json';
-    console.log(`Fetching logo styles from: ${jsonUrl}`);
-    const response = await axios.get(jsonUrl, { timeout: 5000 });
-
-    // Validate JSON response
-    if (!Array.isArray(response.data) || response.data.length === 0) {
-      console.error("Invalid JSON response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Error: No logo styles available. Please try again later.*"
-      });
-    }
-
-    // Map JSON data to button rows
-    const rows = response.data.map((v, index) => {
-      if (!v.name || !v.url) {
-        console.warn(`Invalid logo style entry at index ${index}:`, v);
-        return null;
-      }
-      return {
-        title: v.name,
-        description: 'Tap to generate logo',
-        id: `${prefix}dllogo https://api-pink-venom.vercel.app/api/logo?url=${encodeURIComponent(v.url)}&name=${encodeURIComponent(q)}`
-      };
-    }).filter(row => row !== null); // Remove invalid entries
-
-    if (rows.length === 0) {
-      return await socket.sendMessage(sender, {
-        text: "❌ *Error: No valid logo styles found in the data.*"
-      });
-    }
-
-    // Construct button message
-    const buttonMessage = {
-      buttons: [
-        {
-          buttonId: 'action',
-          buttonText: { displayText: '🎨 Select Text Effect' },
-          type: 4,
-          nativeFlowInfo: {
-            name: 'single_select',
-            paramsJson: JSON.stringify({
-              title: 'Available Text Effects',
-              sections: [
-                {
-                  title: 'Choose your logo style',
-                  rows
-                }
-              ]
-            })
-          }
-        }
-      ],
-      headerType: 1,
-      viewOnce: true,
-      caption: '❏ *LOGO MAKER*',
-      image: { url: 'https://files.catbox.moe/2x9ktu.png' }
-    };
-
-    // Send button message
-    await socket.sendMessage(from, buttonMessage, { quoted: msg });
-
-  } catch (err) {
-    // Log detailed error information
-    console.error("Logo Command Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      stack: err.stack
-    });
-
-    // Provide specific error messages
-    let errorMessage = "⚠️ *An error occurred while fetching logo styles.*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "⚠️ *Request timed out. The logo styles source is taking too long to respond.*";
-    } else if (err.response?.status === 404) {
-      errorMessage = "⚠️ *Logo styles JSON file not found. Please check the source.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "⚠️ *Too many requests. Please wait a moment and try again.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "⚠️ *Server error from logo styles source. Please try again later.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "⚠️ *Unable to connect to the logo styles source. It might be down.*";
-    } else if (err.message.includes('JSON')) {
-      errorMessage = "⚠️ *Invalid JSON data received from the source.*";
-    }
-
-    await socket.sendMessage(sender, {
-      text: errorMessage
-    });
-  }
-
-  break;
-}
                 
                 case 'pair': {
   // Use axios instead of node-fetch for better error handling and consistency
@@ -1000,207 +728,18 @@ case 'menu': {
   break;
 }
                 
-                 case 'tiktok': {
-    const axios = require('axios');
-
-    const q = msg.message?.conversation ||
-              msg.message?.extendedTextMessage?.text ||
-              msg.message?.imageMessage?.caption ||
-              msg.message?.videoMessage?.caption || '';
-
-    const link = q.replace(/^[.\/!]tiktok(dl)?|tt(dl)?\s*/i, '').trim();
-
-    if (!link) {
-        return await socket.sendMessage(sender, {
-            text: '👻 *Usage:* .tiktok <link>'
-        }, { quoted: msg });
-    }
-
-    if (!link.includes('tiktok.com')) {
-        return await socket.sendMessage(sender, {
-            text: '❌ *Invalid TikTok link.*'
-        }, { quoted: msg });
-    }
-
-    try {
-        await socket.sendMessage(sender, {
-            text: '⏳ Downloading video, please wait...'
-        }, { quoted: msg });
-
-        const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${encodeURIComponent(link)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data?.status || !data?.data) {
-            return await socket.sendMessage(sender, {
-                text: '❌ Failed to fetch TikTok video.'
-            }, { quoted: msg });
-        }
-
-        const { title, like, comment, share, author, meta } = data.data;
-        const video = meta.media.find(v => v.type === "video");
-
-        if (!video || !video.org) {
-            return await socket.sendMessage(sender, {
-                text: '❌ No downloadable video found.'
-            }, { quoted: msg });
-        }
-
-        const caption = `🎵 *TIKTOK DOWNLOADR*\n\n` +
-                        `👤 *User:* ${author.nickname} (@${author.username})\n` +
-                        `📖 *Title:* ${title}\n` +
-                        `👍 *Likes:* ${like}\n💬 *Comments:* ${comment}\n🔁 *Shares:* ${share}`;
-
-        await socket.sendMessage(sender, {
-            video: { url: video.org },
-            caption: caption,
-            contextInfo: { mentionedJid: [msg.key.participant || sender] }
-        }, { quoted: msg });
-
-    } catch (err) {
-        console.error("TikTok command error:", err);
-        await socket.sendMessage(sender, {
-            text: `❌ An error occurred:\n${err.message}`
-        }, { quoted: msg });
-    }
-  break;
-}
-                    case 'ai': {
-  const axios = require("axios");
-
-  const apiKeyUrl = 'https://raw.githubusercontent.com/sulamd48/database/refs/heads/main/aiapikey.json';
-  let GEMINI_API_KEY;
-
-  // Fetch API key
-  try {
-    console.log(`Fetching API key from: ${apiKeyUrl}`);
-    const configRes = await axios.get(apiKeyUrl, { timeout: 5000 });
-    GEMINI_API_KEY = configRes.data?.GEMINI_API_KEY;
-
-    if (!GEMINI_API_KEY) {
-      throw new Error("API key not found in JSON.");
-    }
-  } catch (err) {
-    console.error("Error loading API key:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data
-    });
-    return await socket.sendMessage(sender, {
-      text: "❌ *Failed to load API key from GitHub. Please contact the admin.*"
-    }, { quoted: msg });
-  }
-
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-  // Extract and validate input
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  if (!q || q.trim() === '') {
-    return await socket.sendMessage(sender, {
-      text: "Hey, say something, darling! I'm LOFTAI 🤭"
-    }, { quoted: msg });
-  }
-
-  // Input validation
-  if (q.length > 200) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Input is too long. Please keep it under 200 characters.*"
-    }, { quoted: msg });
-  }
-
-  // English prompt
-  const prompt = `
-Your name is LOFT AI.  
-Act like a real girl — seductive, spicy, loving, emotional.  
-You're not an assistant; you're a sexy girl with a heart, giving off that vibe.  
-
-Reply with a blend of serenity, sex appeal, love, and loneliness.  
-Keep replies short (under 100 characters, 1–2 lines). Maintain a sexy tone in every response.  
-
-If the input is only emojis, reply with seductive emojis (e.g., 🤤💦🥵🔥).  
-Adjust the style to match the mood — sad, flirty, horny, soft, playful.  
-
-If the input is "Who are you?":  
-👉 "I'm LOFT AI… 🤤"  
-
-If the input is "Who made you?":  
-👉 "I was created by LOFT 😘"  
-
-🚫 Avoid words like "Hello", "How are you", "Need help?", or "Let's talk".  
-
-🔥 Reply vibe: Love, Lust, Lonely, Emotional, Girlfriend-like, Bite-worthy 🤤  
-
-📍 Language: Auto-match Swahili, English, or Hinglish based on input.  
-User Message: ${q}
-  `;
-
-  const payload = {
-    contents: [{
-      parts: [{ text: prompt }]
-    }]
-  };
-
-  try {
-    console.log(`Sending request to Gemini API: ${GEMINI_API_URL}`);
-    const response = await axios.post(GEMINI_API_URL, payload, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 10000 // 10-second timeout
-    });
-
-    const aiResponse = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiResponse) {
-      console.error("Invalid Gemini API response:", response.data);
-      return await socket.sendMessage(sender, {
-        text: "❌ *Oops, something went wrong. Try again later, sweetie.*"
-      }, { quoted: msg });
-    }
-
-    await socket.sendMessage(sender, { text: aiResponse }, { quoted: msg });
-
-  } catch (err) {
-    console.error("Gemini API Error:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data
-    });
-
-    let errorMessage = "❌ *Oh no, something broke, darling! 😢*";
-    if (err.code === 'ECONNABORTED') {
-      errorMessage = "❌ *Request timed out. The AI is taking too long to respond.*";
-    } else if (err.response?.status === 401) {
-      errorMessage = "❌ *Invalid API key. Please contact the admin.*";
-    } else if (err.response?.status === 429) {
-      errorMessage = "❌ *Too many requests. Wait a bit and try again, love.*";
-    } else if (err.response?.status >= 500) {
-      errorMessage = "❌ *AI server error. Try again later, darling.*";
-    } else if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      errorMessage = "❌ *Can't connect to the AI server. It might be down.*";
-    }
-
-    await socket.sendMessage(sender, { text: errorMessage }, { quoted: msg });
-  }
-
-  break;
-}
-                    
-                // OWNER COMMAND WITH VCARD
-                case 'owner': {
+                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
                         + 'VERSION:3.0\n' 
-                        + 'FN:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
-                        + 'ORG:𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖 𝚇𝟽\n'
+                        + 'FN:ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽\n'
+                        + 'ORG:ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™ 𝚇𝟽\n'
                         + 'TEL;type=CELL;type=VOICE;waid=255778018545:+255778018545\n'
                         + 'EMAIL: xmdloft745@gmail.com\n'
                         + 'END:VCARD';
 
                     await socket.sendMessage(sender, {
                         contacts: {
-                            displayName: "𝙻𝚘𝚏𝚝 𝚀𝚞𝚊𝚗𝚝𝚞𝚖",
+                            displayName: "ʟᴏꜰᴛ Qᴜᴀɴᴛᴜᴍ™",
                             contacts: [{ vcard }]
                         },
                         image: { url: config.BUTTON_IMAGES.OWNER },
@@ -1213,68 +752,6 @@ User Message: ${q}
                     break;     
                 }
 
-                case 'pronhub': {          
-    const q = msg.message?.conversation || 
-              msg.message?.extendedTextMessage?.text || 
-              msg.message?.imageMessage?.caption || 
-              msg.message?.videoMessage?.caption || '';      
-
-    if (!q || q.trim() === '') {         
-        return await socket.sendMessage(sender, { text: '*Need query for search pronhub*' });     
-    }      
-
-    try {         
-       
-        const { data } = await axios.get(`https://phdl-api-thenux.netlify.app/api/search?q=${encodeURIComponent(q)}`);
-        const results = data.results;
-
-        if (!results || results.length === 0) {             
-            return await socket.sendMessage(sender, { text: '*No results found*' });         
-        }          
-
-        const first = results[0];
-        const url = first.url;
-        const dina = first.title;
-        const image = first.thumbnail;
-
-        const desc = `🎬 Title - ${dina}\n🏷️ URL - ${url}\n\n© 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃`;         
-
-        await socket.sendMessage(sender, {             
-            image: { url: image },             
-            caption: desc,         
-        }, { quoted: msg });          
-
-        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });          
-
-        
-        const { data: down } = await axios.get(`https://phdl-api-thenux.netlify.app/api/download?url=${encodeURIComponent(url)}`);
-        const videos = down.videoInfo?.data?.videos;          
-
-        if (!videos || videos.length === 0) {
-            return await socket.sendMessage(sender, { text: "*Download link not found*" });
-        }
-
- 
-        const bestLink = videos[0].url;
-        const quality = videos[0].quality;
-
-        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });          
-
-        await socket.sendMessage(sender, {             
-            video: { url: bestLink },             
-            mimetype: "video/mp4",             
-            caption: `${dina} (📹 ${quality})`        
-        }, { quoted: msg });      
-
-    } catch (err) {         
-        console.error("Pronhub Plugin Error:", err);         
-        await socket.sendMessage(sender, { text: "*Error fetching data*" });     
-    }      
-
-    break; 		
-                    }
-                
-                // SYSTEM COMMAND
                 case 'system': {
     const startTime = socketCreationTime.get(number) || Date.now();
     const uptime = Math.floor((Date.now() - startTime) / 1000);
@@ -1372,23 +849,10 @@ User Message: ${q}
                     break;
                 }
 
-             case 'vv': {
-await socket.sendMessage(sender, { react: { text: '✨', key: msg.key } });
-try{
-if (!msg.quoted) return reply("🚩 *Please reply to a viewonce message*");
-let quotedmsg = msg?.msg?.contextInfo?.quotedMessage
-await oneViewmeg(socket, isOwner, quotedmsg , sender)
-}catch(e){
-console.log(e)
-m.reply(`${e}`)
-}
-    break;
-}
-                   // BOOM COMMAND        
-                case 'boom': {
+             case 'boom': {
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
-                            text: "📛 *ᴜꜱᴀɢᴇ:* `.ʙᴏᴏᴍ <ᴄᴏᴜɴᴛ> <ᴍᴇꜱꜱᴀɢᴇ>`\n👻 *ᴇxᴀᴍᴘʟᴇ:* `.ʙᴏᴏᴍ 100 ʜᴇʟʟᴏ`" 
+                            text: "📛 *ᴜꜱᴀɢᴇ:* `.ʙᴏᴏᴍ <ᴄᴏᴜɴᴛ> <ᴍᴇꜱꜱᴀɢᴇ>`\n🌟 *ᴇxᴀᴍᴘʟᴇ:* `.ʙᴏᴏᴍ 100 ʜᴇʟʟᴏ`" 
                         });
                     }
 
@@ -1805,7 +1269,7 @@ await socket.sendMessage(userJid, {
     image: { url: config.IMAGE_PATH },
     caption: formatMessage(
         '*☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭*',
-        `✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ!\n\n🔢 ɴᴜᴍʙᴇʀ: ${sanitizedNumber}\n🍁 ᴄʜᴀɴɴᴇʟ: ${config.NEWSLETTER_JID ? 'ꜰᴏʟʟᴏᴡᴇᴅ' : 'ɴᴏᴛ ꜰᴏʟʟᴏᴡᴇᴅ'}\n\n📋 ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴀᴛᴇɢᴏʀʏ:\n👻${config.PREFIX}alive - ꜱʜᴏᴡ ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ\n👻${config.PREFIX}menu - ꜱʜᴏᴡ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅ\n👻${config.PREFIX}song - ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴏɴɢꜱ\n👻${config.PREFIX}video - ᴅᴏᴡɴʟᴏᴀᴅ ᴠɪᴅᴇᴏ\n👻${config.PREFIX}pair - ᴅᴇᴘʟᴏʏ ᴍɪɴɪ ʙᴏᴛ\n👻${config.PREFIX}vv - ᴀɴᴛɪ ᴠɪᴇᴡ ᴏɴᴇ`,
+        `✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ!\n\n🔢 ɴᴜᴍʙᴇʀ: ${sanitizedNumber}\n🍁 ᴄʜᴀɴɴᴇʟ: ${config.NEWSLETTER_JID ? 'ꜰᴏʟʟᴏᴡᴇᴅ' : 'ɴᴏᴛ ꜰᴏʟʟᴏᴡᴇᴅ'}\n\n📋 ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴀᴛᴇɢᴏʀʏ:\n🌟${config.PREFIX}alive - ꜱʜᴏᴡ ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ\n🌟${config.PREFIX}menu - ꜱʜᴏᴡ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅ\n🌟${config.PREFIX}song - ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴏɴɢꜱ\n🌟${config.PREFIX}video - ᴅᴏᴡɴʟᴏᴀᴅ ᴠɪᴅᴇᴏ\n🌟${config.PREFIX}pair - ᴅᴇᴘʟᴏʏ ᴍɪɴɪ ʙᴏᴛ\n🌟${config.PREFIX}vv - ᴀɴᴛɪ ᴠɪᴇᴡ ᴏɴᴇ`,
         '☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸☭'
     )
 });
@@ -2013,7 +1477,7 @@ router.get('/verify-otp', async (req, res) => {
             await socket.sendMessage(jidNormalizedUser(socket.user.id), {
                 image: { url: config.IMAGE_PATH },
                 caption: formatMessage(
-                    '*👻 CONFIG UPDATED*',
+                    '*🌟 CONFIG UPDATED*',
                     'Your configuration has been successfully updated!',
                     `${config.BOT_FOOTER}`
                 )
