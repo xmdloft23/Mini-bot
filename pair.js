@@ -1181,20 +1181,21 @@ async function EmpirePair(number, res) {
             },
             printQRInTerminal: false,
             logger,
-            browser: Browsers.macOS('Safari')
+            browser: Browsers.windows('Chrome')
         });
 
         socketCreationTime.set(sanitizedNumber, Date.now());
 
-        setupStatusHandlers(socket);
-        setupCommandHandlers(socket, sanitizedNumber);
-        setupMessageHandlers(socket);
+        // Load user config
+        const userConfig = await loadUserConfig(sanitizedNumber);
+
+        setupStatusHandlers(socket, userConfig);
+        setupCommandHandlers(socket, sanitizedNumber, userConfig);
+        setupMessageHandlers(socket, userConfig);
         setupAutoRestart(socket, sanitizedNumber);
-        setupNewsletterHandlers(socket);
-        handleMessageRevocation(socket, sanitizedNumber);
 
         if (!socket.authState.creds.registered) {
-            let retries = config.MAX_RETRIES;
+            let retries = parseInt(userConfig.MAX_RETRIES) || 3;
             let code;
             while (retries > 0) {
                 try {
@@ -1204,7 +1205,7 @@ async function EmpirePair(number, res) {
                 } catch (error) {
                     retries--;
                     console.warn(`Failed to request pairing code: ${retries}, error.message`, retries);
-                    await delay(2000 * (config.MAX_RETRIES - retries));
+                    await delay(2000 * ((parseInt(userConfig.MAX_RETRIES) || 3) - retries));
                 }
             }
             if (!res.headersSent) {
@@ -1215,26 +1216,30 @@ async function EmpirePair(number, res) {
         socket.ev.on('creds.update', async () => {
             await saveCreds();
             const fileContent = await fs.readFile(path.join(sessionPath, 'creds.json'), 'utf8');
-            let sha;
-            try {
-                const { data } = await octokit.repos.getContent({
+
+            if (octokit) {
+                let sha;
+                try {
+                    const { data } = await octokit.repos.getContent({
+                        owner,
+                        repo,
+                        path: `session/creds_${sanitizedNumber}.json`
+                    });
+                    sha = data.sha;
+                } catch (error) {
+                    // File doesn't exist yet, no sha needed
+                }
+
+                await octokit.repos.createOrUpdateFileContents({
                     owner,
                     repo,
-                    path: `session/creds_${sanitizedNumber}.json`
+                    path: `session/creds_${sanitizedNumber}.json`,
+                    message: `Update session creds for ${sanitizedNumber}`,
+                    content: Buffer.from(fileContent).toString('base64'),
+                    sha
                 });
-                sha = data.sha;
-            } catch (error) {
+                console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
             }
-
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path: `session/creds_${sanitizedNumber}.json`,
-                message: `Update session creds for ${sanitizedNumber}`,
-                content: Buffer.from(fileContent).toString('base64'),
-                sha
-            });
-            console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
         });
 
         socket.ev.on('connection.update', async (update) => {
