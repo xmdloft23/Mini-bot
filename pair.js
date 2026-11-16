@@ -17,10 +17,6 @@ const FormData = require('form-data');
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting } = require('./settings');
 
-// Kabla (labda ulikuwa unatumia hivi)
-// const { default: makeWASocket, ... } = require('@whiskeysockets/baileys');
-
-// Baada ya kubadilisha (tumia package yako)
 const {
     default: makeWASocket,
     useMultiFileAuthState,
@@ -31,9 +27,9 @@ const {
     proto,
     prepareWAMessageMedia,
     generateWAMessageFromContent,
-    downloadContentFromMessage,
-    AIRich  // ← AIRich sasa inapatikana moja kwa moja hapa
-} = require('@loftxmd/loft-bailey');
+    downloadContentFromMessage
+    // AIRich imeondolewa hapa kwa sababu baileys ya kawaida haina hii
+} = require('@whiskeysockets/baileys');
 
 // ═══════════════════════════════════════════════
 // CONFIG
