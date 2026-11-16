@@ -1,14 +1,14 @@
 {
   "name": "loft",
   "version": "1.0.0",
-  "description": " WhatsApp Bot with Multi-Number Support",
+  "description": "WhatsApp Bot with Multi-Number Support",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:@loftxmd/loft-bailey@1.0.1",
+    "@loftxmd/loft-bailey": "^1.0.1",
     "express": "^4.18.2",
     "fs-extra": "^11.2.0",
     "node-fetch": "^2.6.1",
@@ -16,15 +16,15 @@
     "pino": "^8.17.0",
     "jimp": "^0.16.1",
     "@octokit/rest": "^20.0.2",
-    "child_process": "^1.0.2",
-    "denethdev-ytmp3":"1.0.3",
+    "denethdev-ytmp3": "1.0.3",
     "yt-search": "2.12.1",
-    "path": "^0.12.7",
     "axios": "^1.2.5",
-    "moment-timezone": "^0.6.0"
+    "moment-timezone": "^0.6.0",
+    "form-data": "^4.0.0",
+    "wa-sticker-formatter": "^4.3.5"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": "20.x"
   },
   "keywords": [
     "whatsapp",
