@@ -3,430 +3,452 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☭ 𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸 ☭</title>
+  <title>LOFT XMD — PRE RELEASE</title>
 
-  <!-- 🌸 Tailwind + Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    /* 🌸 UNICORN QUANTUM ANIMATIONS */
-    @keyframes unicornGallop {
-      0%, 100% { transform: translateX(0) rotate(0deg); }
-      25% { transform: translateX(10px) rotate(5deg); }
-      50% { transform: translateX(20px) rotate(10deg); }
-      75% { transform: translateX(10px) rotate(5deg); }
-    }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
-    @keyframes unicornTwinkle {
-      0% { opacity: 0.1; transform: scale(0.5) rotate(0deg); }
-      25% { opacity: 0.8; transform: scale(1.2) rotate(90deg); }
-      50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
-      75% { opacity: 0.8; transform: scale(1.2) rotate(270deg); }
-      100% { opacity: 0.1; transform: scale(0.5) rotate(360deg); }
-    }
-
-    @keyframes unicornHornSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes unicornMagicWave {
-      0% { box-shadow: 0 0 10px #ffd700; }
-      50% { box-shadow: 0 0 30px #ff69b4, 0 0 50px #ffd700; }
-      100% { box-shadow: 0 0 10px #ffd700; }
-    }
-
-    @keyframes unicornPulse {
-      0%, 100% { filter: brightness(1) hue-rotate(0deg); }
-      50% { filter: brightness(1.5) hue-rotate(120deg); }
-    }
-
-    /* 🌸 UNICORN BACKGROUND */
     body {
-      font-family: 'Orbitron', monospace;
-      overflow: hidden;
-      background: radial-gradient(ellipse at center, #1a0b2e 0%, #16213e 50%, #0f0f23 100%);
+      font-family: 'Inter', sans-serif;
+      background: #06030a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* 🌸 UNICORN VIDEO BACKGROUND - REMOVED RAIN */
-    video#bg-video {
+    body::before {
+      content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100%;
-      min-height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      filter: brightness(0.3) contrast(1.2) saturate(1.8);
-    }
-
-    /* 🌸 UNICORN STARS */
-    .unicorn-star {
-      position: absolute;
-      background: radial-gradient(circle, #ffd700 0%, #ff69b4 50%, transparent 70%);
-      border-radius: 50%;
-      animation: unicornTwinkle 3s infinite;
-      filter: drop-shadow(0 0 8px #ffd700);
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(109, 40, 217, 0.18), transparent 45%),
+        radial-gradient(circle at 85% 90%, rgba(168, 85, 247, 0.12), transparent 45%);
+      z-index: 0;
       pointer-events: none;
     }
 
-    /* 🌸 UNICORN SPARKLES */
-    .unicorn-sparkle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: #ff69b4;
-      border-radius: 50%;
-      animation: unicornHornSpin 1.5s linear infinite;
-      box-shadow: 0 0 8px #ff69b4;
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 380px;
+      background: #0d0716;
+      border: 1px solid rgba(139, 92, 246, 0.22);
+      border-radius: 20px;
+      padding: 28px 22px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
 
-    /* 🌸 UNICORN NEON EFFECTS */
-    .unicorn-gradient {
-      background: linear-gradient(90deg, #ffd700, #ff69b4, #98fb98, #dda0dd);
-      background-size: 400% 400%;
+    .gradient-text {
+      background: linear-gradient(135deg, #a78bfa, #d946ef);
       -webkit-background-clip: text;
+      background-clip: text;
       color: transparent;
-      animation: unicornPulse 4s ease-in-out infinite;
     }
 
-    .unicorn-neon {
-      text-shadow: 
-        0 0 5px #ffd700,
-        0 0 15px #ff69b4,
-        0 0 25px #ffd700,
-        0 0 40px #ff69b4;
-      animation: unicornMagicWave 2s ease-in-out infinite;
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c4b5fd;
     }
 
-    .unicorn-border {
-      box-shadow: 
-        0 0 15px #ffd700,
-        0 0 30px #ff69b4,
-        inset 0 0 15px rgba(255,215,0,0.2);
-      animation: unicornMagicWave 3s ease-in-out infinite;
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #a78bfa;
     }
 
-    .unicorn-button {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 
-        0 0 15px #ff69b4,
-        0 0 25px #ffd700,
-        0 0 40px #ff69b4;
+    .input-field {
+      width: 100%;
+      background: #140b22;
+      border: 1.5px solid rgba(139, 92, 246, 0.22);
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input-field::placeholder { color: rgba(196, 181, 253, 0.3); }
+    .input-field:focus {
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #6d28d9, #a855f7);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .copy-box {
+      cursor: pointer;
+      background: #140b22;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 14px;
+      padding: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .copy-box:hover {
+      border-color: rgba(168, 85, 247, 0.5);
+      background: #1a0f2e;
+    }
+
+    /* ═══════════════════════════════════════
+       LOADING ANIMATION
+    ═══════════════════════════════════════ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 3, 10, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .loading-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .loading-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 32px 40px;
+      background: #0d0716;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Triple ring spinner */
+    .spinner {
       position: relative;
-      overflow: hidden;
+      width: 60px;
+      height: 60px;
     }
 
-    .unicorn-button::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .unicorn-button:hover::before {
-      left: 100%;
-    }
-
-    .unicorn-button:hover {
-      transform: scale(1.05) rotate(2deg);
-      box-shadow: 
-        0 0 25px #ff69b4,
-        0 0 50px #ffd700,
-        0 0 75px #ff69b4;
-    }
-
-    /* 🌸 UNICORN BOX */
-    .unicorn-box {
-      position: relative;
-      background: rgba(26, 11, 46, 0.85);
-      backdrop-filter: blur(25px);
-      overflow: hidden;
-    }
-
-    .unicorn-box::before {
-      content: '';
+    .spinner-ring {
       position: absolute;
       inset: 0;
-      border-radius: 1.5rem;
-      padding: 3px;
-      background: linear-gradient(45deg, #ffd700, #ff69b4, #98fb98, #dda0dd);
-      background-size: 400% 400%;
-      animation: unicornPulse 6s ease-in-out infinite;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      z-index: -1;
-    }
-
-    .unicorn-gallop { animation: unicornGallop 0.6s; }
-
-    /* 🌸 UNICORN INPUT */
-    .unicorn-input {
-      background: rgba(255,255,255,0.08);
-      border: 2px solid rgba(255,215,0,0.4);
-      backdrop-filter: blur(15px);
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .unicorn-input:focus {
-      border-color: #ff69b4;
-      box-shadow: 0 0 25px rgba(255,105,180,0.5);
-      background: rgba(255,255,255,0.15);
-      transform: scale(1.02);
-    }
-
-    /* 🌸 UNICORN LOADING */
-    .unicorn-loader {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,215,0,0.3);
       border-radius: 50%;
-      border-top-color: #ff69b4;
-      animation: unicornHornSpin 1s linear infinite;
+      border: 3px solid transparent;
     }
 
-    /* 🌸 UNICORN RUN ANIMATION */
-    .unicorn-run {
-      position: absolute;
-      width: 40px;
-      height: 30px;
-      background: #ff69b4;
-      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-      animation: unicornGallop 2s ease-in-out infinite;
-      z-index: 5;
+    .spinner-ring:nth-child(1) {
+      border-top-color: #a78bfa;
+      animation: spin 1.2s linear infinite;
+    }
+    .spinner-ring:nth-child(2) {
+      inset: 8px;
+      border-right-color: #d946ef;
+      animation: spin 1.6s linear infinite reverse;
+    }
+    .spinner-ring:nth-child(3) {
+      inset: 16px;
+      border-bottom-color: #7c3aed;
+      animation: spin 2s linear infinite;
     }
 
-    .unicorn-run::before {
-      content: '';
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Center pulse dot */
+    .spinner-core {
       position: absolute;
-      top: -5px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-bottom: 12px solid #ffd700;
+      width: 8px;
+      height: 8px;
+      margin: -4px 0 0 -4px;
+      border-radius: 50%;
+      background: #c4b5fd;
+      animation: corePulse 1.2s ease-in-out infinite;
     }
 
-    .unicorn-run::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 10px;
-      width: 6px;
-      height: 12px;
-      background: #ffd700;
-      border-radius: 3px;
-      animation: unicornGallop 2s ease-in-out infinite reverse;
+    @keyframes corePulse {
+      0%, 100% { transform: scale(0.8); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 1; }
+    }
+
+    .loading-text {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c4b5fd;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .loading-dots span {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #a78bfa;
+      margin: 0 2px;
+      animation: dotBounce 1.4s infinite ease-in-out;
+    }
+    .loading-dots span:nth-child(1) { animation-delay: 0s; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .loading-sub {
+      font-size: 9px;
+      color: rgba(196, 181, 253, 0.4);
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* small inline loader (on button) */
+    .btn-loader {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center bg-black overflow-hidden relative">
-  <!-- 🌸 UNICORN VIDEO BACKGROUND - NO RAIN -->
-  <video id="bg-video" autoplay muted loop playsinline>
-    <source src="https://files.catbox.moe/9fww2j.mp4" type="video/mp4">
-  </video>
+<body>
 
-  <!-- 🌸 UNICORN STARFIELD -->
-  <div id="unicorn-stars" class="fixed inset-0 pointer-events-none z-0"></div>
+  <div class="card">
 
-  <!-- 🌸 UNICORN SPARKLES -->
-  <div id="sparkles-container" class="fixed inset-0 pointer-events-none z-0"></div>
-
-  <!-- 🌸 UNICORN RUNNING ANIMATIONS -->
-  <div id="unicorn-runner" class="fixed bottom-10 left-0 pointer-events-none z-5"></div>
-
-  <!-- 🌸 MAIN UNICORN BOX -->
-  <div class="container mx-auto px-4 relative z-10">
-    <div class="max-w-md mx-auto p-8 unicorn-box rounded-3xl unicorn-border relative overflow-hidden">
-      <div class="absolute -inset-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 rounded-3xl opacity-30 blur-xl animate-pulse"></div>
-
-      <div class="relative z-10 text-center">
-        <!-- 🌸 UNICORN ICON -->
-        <div class="flex justify-center mb-6 relative">
-          <i class="fas fa-magic text-7xl unicorn-gradient animate-pulse"></i>
-          <div class="unicorn-sparkle absolute -top-2 -right-2"></div>
-          <div class="unicorn-sparkle absolute -bottom-2 -left-2"></div>
-        </div>
-
-        <!-- 🌸 UNICORN TITLES -->
-        <h3 class="text-3xl font-black mb-3 unicorn-gradient unicorn-neon tracking-widest">
-          𝗠𝗜𝗡𝗜 𝗕𝗢𝗧
-        </h3>
-        <h4 class="text-2xl font-extrabold uppercase tracking-widest mb-6 unicorn-gradient">
-          ☭𝙻𝙾𝙵𝚃-𝚀𝚄𝙰𝙽𝚃𝚄𝙼-𝚅𝙸𝙸𝙸☭
-        </h4>
-
-        <!-- 🌸 UNICORN DIVIDER -->
-        <div class="flex items-center justify-center mb-8">
-          <div class="flex-grow border-t border-yellow-500 border-opacity-30"></div>
-          <span class="mx-3 text-yellow-300 text-xs tracking-widest font-bold">⟐ 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃 ⟐</span>
-          <div class="flex-grow border-t border-pink-500 border-opacity-30"></div>
-        </div>
-
-        <!-- 📱 UNICORN INPUT & BUTTON -->
-        <div class="space-y-4">
-          <input
-            id="number"
-            type="number"
-            placeholder="+255xxxxxxxxx"
-            class="unicorn-input w-full px-5 py-4 rounded-xl text-white placeholder-yellow-300 placeholder-opacity-60 focus:outline-none focus:ring-0 text-lg font-mono"
-          />
-          <button
-            id="submit"
-            class="unicorn-button w-full px-6 py-4 bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-600 rounded-xl text-white font-black uppercase tracking-widest text-lg"
-          >
-            ⟐ code ⟐
-          </button>
-        </div>
-
-        <!-- 💬 UNICORN STATUS -->
-        <div id="waiting-message" class="text-center unicorn-gradient text-xl hidden mt-6 flex items-center justify-center space-x-2">
-          <span class="unicorn-loader"></span>
-          <span>𝚂𝚙𝚛𝚎𝚊𝚍𝚒𝚗𝚐 𝙼𝚊𝚐𝚒𝚌𝚊𝚕 𝙳𝚞𝚜𝚝...</span>
-        </div>
-        <main id="pair" class="text-center mt-6"></main>
+    <!-- ICON + BADGE -->
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="width:64px;height:64px;margin:0 auto 14px;border-radius:16px;background:linear-gradient(135deg,rgba(109,40,217,0.25),rgba(168,85,247,0.15));border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-bolt gradient-text" style="font-size:26px;"></i>
       </div>
+      <div class="badge">
+        <span class="dot"></span> PRE RELEASE
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <h1 style="text-align:center;font-size:32px;font-weight:900;margin:14px 0 6px;letter-spacing:-0.02em;" class="gradient-text">
+      LOFT XMD
+    </h1>
+    <p style="text-align:center;font-size:10px;color:rgba(196,181,253,0.35);letter-spacing:0.25em;text-transform:uppercase;font-weight:600;margin:0 0 22px;">
+      Quantum Series · 2026
+    </p>
+
+    <!-- DIVIDER -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div style="flex:1;height:1px;background:rgba(139,92,246,0.15);"></div>
+      <span style="font-size:9px;color:rgba(196,181,253,0.35);letter-spacing:0.2em;text-transform:uppercase;font-weight:700;">Secure Pairing</span>
+      <div style="flex:1;height:1px;background:rgba(139,92,246,0.15);"></div>
+    </div>
+
+    <!-- FORM -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <input
+        id="number"
+        type="number"
+        placeholder="+255xxxxxxxxx"
+        class="input-field"
+      />
+      <button id="submit" class="btn-primary">
+        <span id="btn-text">GENERATE CODE</span>
+      </button>
+    </div>
+
+    <!-- OUTPUT -->
+    <main id="pair" style="margin-top:4px;"></main>
+
+    <!-- FOOTER -->
+    <p style="text-align:center;font-size:9px;color:rgba(196,181,253,0.2);letter-spacing:0.2em;text-transform:uppercase;margin:22px 0 0;font-weight:600;">
+      Powered by Sir LOFT · v7.0.0
+    </p>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FULLSCREEN LOADING OVERLAY
+  ═══════════════════════════════════════ -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-core"></div>
+      </div>
+      <div class="loading-text">
+        PROCESSING
+        <span class="loading-dots">
+          <span></span><span></span><span></span>
+        </span>
+      </div>
+      <div class="loading-sub">Securing connection</div>
     </div>
   </div>
 
-  <!-- ⚙️ UNICORN SCRIPTS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
   <script>
-    // 🌟 UNICORN STARFIELD
-    function createUnicornStars() {
-      const container = document.getElementById('unicorn-stars');
-      const starCount = 80;
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.classList.add('unicorn-star');
-        const size = Math.random() * 3 + 1;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 6}s`;
-        star.style.animationDuration = `${Math.random() * 4 + 2}s`;
-        container.appendChild(star);
-      }
-    }
-
-    // ✨ UNICORN SPARKLES
-    function createSparkles() {
-      const container = document.getElementById('sparkles-container');
-      for (let i = 0; i < 20; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'unicorn-sparkle';
-        sparkle.style.left = `${Math.random() * 100}%`;
-        sparkle.style.top = `${Math.random() * 100}%`;
-        sparkle.style.animationDuration = `${Math.random() * 3 + 1}s`;
-        sparkle.style.animationDelay = `${Math.random() * 2}s`;
-        container.appendChild(sparkle);
-      }
-    }
-
-    // 🦄 UNICORN RUNNER
-    function createUnicornRunner() {
-      const container = document.getElementById('unicorn-runner');
-      for (let i = 0; i < 3; i++) {
-        const unicorn = document.createElement('div');
-        unicorn.className = 'unicorn-run';
-        unicorn.style.left = `${i * 33}%`;
-        unicorn.style.animationDelay = `${i * 0.5}s`;
-        container.appendChild(unicorn);
-      }
-    }
-
-    // 🧬 ELEMENTS
     const pairOutput = document.getElementById("pair");
     const submitBtn = document.getElementById("submit");
+    const btnText = document.getElementById("btn-text");
     const inputNum = document.getElementById("number");
-    const box = document.querySelector(".unicorn-box");
-    const waitingMessage = document.getElementById("waiting-message");
+    const loadingOverlay = document.getElementById("loading-overlay");
 
-    // 📋 UNICORN COPY FUNCTION
-    async function Copy() {
-      const obj = document.getElementById("copy");
-      const originalText = obj.innerText;
-      const code = originalText.replace('CODE: ', '');
-
-      await navigator.clipboard.writeText(code);
-      obj.innerHTML = `<i class="fas fa-check-circle mr-2"></i> 𝙲𝙾𝙿𝙸𝙴𝙳 ⟐`;
-      obj.classList.add('bg-green-600', 'bg-opacity-30', 'border-green-500');
-      obj.classList.remove('bg-opacity-10', 'border-opacity-20');
-
-      setTimeout(() => {
-        obj.innerHTML = originalText;
-        obj.classList.remove('bg-green-600', 'bg-opacity-30', 'border-green-500');
-        obj.classList.add('bg-opacity-10', 'border-opacity-20');
-      }, 2000);
+    function showLoading() {
+      loadingOverlay.classList.add('active');
+    }
+    function hideLoading() {
+      loadingOverlay.classList.remove('active');
     }
 
-    // 🚀 UNICORN SUBMIT
-    submitBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      box.classList.add('unicorn-gallop');
-      setTimeout(() => box.classList.remove('unicorn-gallop'), 600);
+    async function Copy() {
+      const obj = document.getElementById("copy");
+      if (!obj) return;
+      const original = obj.innerHTML;
+      const code = obj.querySelector('.copy-code')?.textContent || '';
 
-      const numVal = inputNum.value;
-      if (!numVal) {
-        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">⚠️ 𝙸𝙽𝙿𝚄𝚃 𝚈𝙾𝚄𝚁 𝙼𝙰𝙶𝙸𝙲𝙰𝙻 𝙸𝙳</div>`;
-        return;
+      try {
+        await navigator.clipboard.writeText(code);
+        obj.innerHTML = `<span style="color:#4ade80;font-weight:800;font-size:13px;"><i class="fas fa-check"></i> COPIED</span>`;
+        setTimeout(() => { obj.innerHTML = original; }, 1500);
+      } catch {
+        obj.innerHTML = `<span style="color:#f87171;font-size:12px;">Copy failed</span>`;
+        setTimeout(() => { obj.innerHTML = original; }, 1500);
       }
-      if (numVal.replace(/[^0-9]/g, "").length < 11) {
-        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">❌ 𝙸𝙽𝚅𝙰𝙻𝙸𝙳 𝙸𝙳</div>`;
+    }
+
+    submitBtn.addEventListener("click", async () => {
+      const numVal = inputNum.value.trim();
+
+      if (!numVal) {
+        pairOutput.innerHTML = `<div class="fade-in" style="margin-top:14px;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:12px;font-weight:600;text-align:center;">Enter your phone number</div>`;
         return;
       }
 
       const cleanNum = numVal.replace(/[^0-9]/g, "");
+
+      if (cleanNum.length < 11) {
+        pairOutput.innerHTML = `<div class="fade-in" style="margin-top:14px;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:12px;font-weight:600;text-align:center;">Invalid number format</div>`;
+        return;
+      }
+
       inputNum.type = "text";
       inputNum.value = "+" + cleanNum;
-      inputNum.classList.add('text-white', 'text-xl', 'font-mono');
-      waitingMessage.classList.remove('hidden');
       pairOutput.innerHTML = '';
+      submitBtn.disabled = true;
+      btnText.innerHTML = '<span class="btn-loader"></span>';
+
+      // Show fullscreen loading overlay
+      showLoading();
 
       try {
         const { data } = await axios(`/code?number=${cleanNum}`);
         const code = data.code || `U${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-        waitingMessage.classList.add('hidden');
+
+        // Keep loading visible for a minimum time so it doesn't flash
+        await new Promise(r => setTimeout(r, 800));
+
+        hideLoading();
+        submitBtn.disabled = false;
+        btnText.textContent = 'GENERATE CODE';
 
         pairOutput.innerHTML = `
-          <div class="mt-8">
-            <div class="text-6xl unicorn-gradient mb-4">⟐</div>
-            <div class="text-yellow-300 text-lg font-bold mb-4">𝙼𝙰𝙶𝙸𝙲𝙰𝙻 𝙴𝙽𝚃𝙰𝙽𝙶𝙻𝙴𝙼𝙴𝙽𝚃 𝙲𝙾𝙼𝙿𝙻𝙴𝚃𝙴</div>
-            <div id="copy" onclick="Copy()" class="inline-block px-8 py-4 bg-black bg-opacity-10 rounded-xl border border-white border-opacity-20 cursor-pointer hover:bg-opacity-25 transition-all duration-300 unicorn-border">
-              <span class="font-black text-white text-lg">𝙲𝙾𝙳𝙴: </span>
-              <span class="font-black unicorn-gradient text-2xl">${code}</span>
+          <div class="fade-in" style="margin-top:18px;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-check" style="font-size:10px;color:#4ade80;"></i>
+              </div>
+              <span style="color:#4ade80;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;">Pairing Complete</span>
             </div>
-            <div class="text-yellow-300 text-sm mt-3 font-mono">⟐ 𝙲𝙻𝙸𝙲𝙺 𝚃𝙾 𝙲𝙾𝙿𝚈 𝙲𝙾𝙳𝙴 ⟐</div>
+
+            <div id="copy" onclick="Copy()" class="copy-box">
+              <div style="font-size:9px;color:rgba(196,181,253,0.4);letter-spacing:0.2em;text-transform:uppercase;font-weight:700;margin-bottom:6px;">Your Code</div>
+              <div class="copy-code gradient-text" style="font-size:22px;font-weight:900;letter-spacing:0.08em;">${code}</div>
+            </div>
+
+            <div style="text-align:center;font-size:10px;color:rgba(196,181,253,0.3);margin-top:10px;letter-spacing:0.1em;">
+              <i class="fas fa-copy"></i> Tap to copy
+            </div>
           </div>
         `;
       } catch {
-        waitingMessage.classList.add('hidden');
-        pairOutput.innerHTML = `<div class="text-red-400 font-black mt-6 animate-pulse">❌ 𝙻𝙾𝚂𝚃. 𝚁𝙴𝚃𝚁𝚈 ⟐</div>`;
+        await new Promise(r => setTimeout(r, 500));
+        hideLoading();
+        submitBtn.disabled = false;
+        btnText.textContent = 'GENERATE CODE';
+        pairOutput.innerHTML = `<div class="fade-in" style="margin-top:14px;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:12px;font-weight:600;text-align:center;">Connection failed · Retry</div>`;
       }
     });
 
-    // 🌟 INITIALIZE UNICORN EFFECTS
-    createUnicornStars();
-    createSparkles();
-    createUnicornRunner();
-
-    // 🎵 UNICORN INPUT FOCUS EFFECT
-    inputNum.addEventListener('focus', () => {
-      inputNum.parentElement.style.transform = 'scale(1.02)';
-    });
-    inputNum.addEventListener('blur', () => {
-      inputNum.parentElement.style.transform = 'scale(1)';
+    inputNum.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitBtn.click();
     });
   </script>
 </body>
