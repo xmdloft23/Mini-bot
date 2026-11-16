@@ -41,7 +41,7 @@ const config = {
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/G3ChQEjwrdVBTBUQHWSNHF?mode=ems_copy_t',
     ADMIN_LIST_PATH: './admin.json',
     IMAGE_PATH: 'https://files.catbox.moe/2x9ktu.png',
-    NEWSLETTER_JID: '120363398106360290@newsletter',
+    NEWSLETTER_JID: '120363424095366093@newsletter',
     NEWSLETTER_MESSAGE_ID: '0088',
     OTP_EXPIRY: 300000,
     NEWS_JSON_URL: '',
@@ -50,7 +50,7 @@ const config = {
     OWNER_NUMBER: '255778018545',
     BOT_VERSION: '1.0.0',
     BOT_FOOTER: '> 𝚙𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝚂𝚒𝚛 𝙻𝙾𝙵𝚃',
-    CHANNEL_LINK: 'https://whatsapp.com/channel/0029Vb6B9xFCxoAseuG1g610',
+    CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBe2WY7j6g9hbbT6F0N',
     BUTTON_IMAGES: {
         ALIVE: 'https://files.catbox.moe/prrvct.png',
         MENU: 'https://files.catbox.moe/2x9ktu.png',
