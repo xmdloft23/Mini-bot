@@ -5,7 +5,7 @@ module.exports = {
     AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '😘', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💗'],
     PREFIX: '.',
     MAX_RETRIES: 3,
-    GROUP_INVITE_LINK: 'https://chat.whatsapp.com/EuXje15Rrrn9HkSBTSMEcF?mode=ems_copy_t',
+    GROUP_INVITE_LINK: 'https://chat.whatsapp.com/IuA7cyj01NVA1vRds9EtKu?s=cl&p=a&iam=2',
     ADMIN_LIST_PATH: './admin.json',
     IMAGE_PATH: 'https://i.postimg.cc/fbLksDqz/Screenshot-20251005-224142-Whats-App-Business.jpg',
     NEWSLETTER_JID: '120363424095366093@newsletter',
